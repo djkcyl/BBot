@@ -1,3 +1,4 @@
+import asyncio
 import contextlib
 
 from pathlib import Path
@@ -45,7 +46,7 @@ console = Console(
     prompt=HTML("<bbot> BBot </bbot>> "),
     style=Style(
         [
-            ("bbot", "fg:#ffffff bold"),
+            ("bbot", "fg:#ffffff"),
         ]
     ),
 )
@@ -62,7 +63,6 @@ saya.install_behaviours(
 
 
 with saya.module_context():
-
     saya.require("function.command.video_resolve")
     saya.require("function.command.vive_dynamic")
 
@@ -91,12 +91,14 @@ with saya.module_context():
     saya.require("function.event.join_group")
     saya.require("function.event.kick_from_group")
     saya.require("function.event.mute")
+    saya.require("function.event.new_friend")
+    saya.require("function.event.prem_change")
 
-    saya.require("function.scheduled.init")
-    saya.require("function.scheduled.dynamic")
-    saya.require("function.scheduled.live")
+    saya.require("function.pusher.init")
+    saya.require("function.pusher.dynamic")
+    saya.require("function.pusher.live")
 
 
-with contextlib.suppress(KeyboardInterrupt):
+with contextlib.suppress(KeyboardInterrupt, asyncio.exceptions.CancelledError):
     app.launch_blocking()
 logger.info("BBot is shutting down...")

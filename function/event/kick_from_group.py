@@ -17,7 +17,7 @@ channel = Channel.current()
 async def main(app: Ariadne, group: Group):
     GroupPermission(group).remove_from_whitelist()
     remove_list = []
-    for subid in get_group_sublist(group.id):
+    for subid, _, _ in get_group_sublist(group.id):
         unsubscribe_uid(subid, group.id)
         remove_list.append(subid)
     logger.info(

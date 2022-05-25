@@ -13,13 +13,13 @@ from graia.scheduler.timers import every_custom_seconds
 from core import BOT_Status
 from core.bot_config import BotConfig
 from library.grpc import grpc_uplist_get
-from library import get_group_sublist, get_subid_list, unsubscribe_uid
+from library import get_group_sublist, get_subid_list, set_name, unsubscribe_uid
 from library.bilibili_request import get_status_info_by_uids, relation_modify
 
 channel = Channel.current()
 
 
-@channel.use(SchedulerSchema(every_custom_seconds(1)))
+@channel.use(SchedulerSchema(every_custom_seconds(2)))
 async def main(app: Ariadne):
 
     if not BOT_Status["init"]:
@@ -34,11 +34,12 @@ async def main(app: Ariadne):
     # 由于叔叔的 api 太烂了，会把同一个 up 开播和未开播的状态放在同一个列表里，所以这里需要去重
     # 不过好消息是，这个列表可以按照开播和未开播的顺序排列
     lives = []
-    for up in live_statu["items"]:
+    for up in live_statu.get("items", []):
         up_id = up["uid"]
         up_name = up["name"]
         # 检测订阅配置里是否有该 up
         if up_id in sub_list:
+            set_name(up_id, up_name)
             # 如果已经在被检测过的列表里，则跳过
             if up_id in lives:
                 continue
@@ -69,7 +70,7 @@ async def main(app: Ariadne):
                             else f"{up_name}（{up_id}）"
                         )
                         msg = [
-                            f"本群订阅的 UP {nick}在 {room_area} 区开播啦 ！\n{title}\n",
+                            f"本群订阅的 UP {nick}在 {room_area} 区开播啦 ！\n标题：{title}\n",
                             Image(url=cover_from_user),
                             f"\nhttps://live.bilibili.com/{room_id}",
                         ]
@@ -90,7 +91,7 @@ async def main(app: Ariadne):
                             await asyncio.sleep(1)
                         except UnknownTarget:
                             remove_list = []
-                            for subid in get_group_sublist(groupid):
+                            for subid, _, _ in get_group_sublist(groupid):
                                 await unsubscribe_uid(subid, groupid)
                                 remove_list.append(subid)
                             logger.info(
@@ -101,7 +102,7 @@ async def main(app: Ariadne):
             elif up_id in BOT_Status["liveing"]:
                 BOT_Status["liveing"].remove(up_id)
                 logger.info(f"[BiliBili推送] {up_name} 已下播")
-                for groupid in sub_list[up_id]:
+                for groupid, data in sub_list[up_id].items():
                     if BotConfig.Debug.enable and groupid not in BotConfig.Debug.groups:
                         continue
                     if data["send"]["live"]:
@@ -118,7 +119,7 @@ async def main(app: Ariadne):
 
                         except UnknownTarget:
                             remove_list = []
-                            for subid in get_group_sublist(groupid):
+                            for subid, _, _ in get_group_sublist(groupid):
                                 await unsubscribe_uid(subid, groupid)
                                 remove_list.append(subid)
                             logger.info(

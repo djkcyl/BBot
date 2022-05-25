@@ -1,0 +1,35 @@
+from typing import Optional
+from graia.saya import Channel
+from graia.ariadne.app import Ariadne
+from graia.ariadne.message.chain import MessageChain
+from graia.ariadne.event.mirai import NewFriendRequestEvent
+from graia.saya.builtins.broadcast.schema import ListenerSchema
+
+from core.bot_config import BotConfig
+
+channel = Channel.current()
+
+
+@channel.use(ListenerSchema(listening_events=[NewFriendRequestEvent]))
+async def main(app: Ariadne, event: NewFriendRequestEvent):
+    """
+    收到新好友事件
+    """
+    sourceGroup: Optional[int] = event.sourceGroup
+    if sourceGroup:
+        groupname = await app.getGroup(sourceGroup)
+        groupname = groupname.name if groupname else "未知"
+    for qq in BotConfig.admins:
+        await app.sendFriendMessage(
+            qq,
+            MessageChain.create(
+                "收到添加好友事件",
+                f"\nQQ：{event.supplicant}",
+                f"\n昵称：{event.nickname}",
+                f"\n来自群：{groupname}({sourceGroup})" if sourceGroup else "\n来自好友搜索",
+                "\n状态：已通过申请\n",
+                event.message or "无附加信息",
+            ),
+        )
+
+    await event.accept()

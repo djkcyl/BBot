@@ -16,7 +16,7 @@ channel = Channel.current()
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[Twilight(RegexMatch(r"(查看)?(本群)?(订阅|关注)列表"))],
-        decorators=[Permission.require(Permission.GROUP_ADMIN), Interval.require()],
+        decorators=[Permission.require(), Interval.require()],
     )
 )
 async def sub_list(app: Ariadne, group: Group):
@@ -26,7 +26,8 @@ async def sub_list(app: Ariadne, group: Group):
     if sublist_count == 0:
         await app.sendGroupMessage(group, MessageChain.create("本群未订阅任何 UP"))
     else:
-        await app.sendGroupMessage(
-            group,
-            MessageChain.create(f"本群共订阅 {sublist_count} 个 UP\n", "\n".join(sublist)),
-        )
+        msg = [f"本群共订阅 {sublist_count} 个 UP"]
+        for i, data in enumerate(sublist, 1):
+            uid, name, nick = data
+            msg.append(f"\n{i}. {nick or name}（{uid}）")
+        await app.sendGroupMessage(group, MessageChain.create(msg))

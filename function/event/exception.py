@@ -31,7 +31,7 @@ async def make_msg_for_unknow_exception(event: ExceptionThrowed):
 
 
 @channel.use(ListenerSchema(listening_events=[ExceptionThrowed]))
-async def except_handle(event: ExceptionThrowed):
+async def main(event: ExceptionThrowed):
     if isinstance(event.event, ExceptionThrowed):
         return
     app = get_running(Ariadne)

@@ -1,4 +1,5 @@
 import json
+import asyncio
 
 from pathlib import Path
 
@@ -38,14 +39,13 @@ class SubList:
 sub = SubList()
 
 
-def get_group_subsum(groupid):
-    """获取某个群订阅的合计"""
-    return sum(groupid in sub.get_data()[subuid] for subuid in sub.get_data())
-
-
 def get_group_sublist(groupid):
     """获取某个群订阅的 up 列表"""
-    return [subuid for subuid in sub.get_data() if groupid in sub.get_data()[subuid]]
+    return [
+        (subuid, data[str(groupid)]["name"], data[str(groupid)]["nick"])
+        for subuid, data in sub.get_data().items()
+        if str(groupid) in data
+    ]
 
 
 def get_subid_list():
@@ -62,7 +62,7 @@ async def subscribe_uid(uid, groupid) -> str:
     uid_sub_group = sub.get_data().get(uid, {})
     if str(groupid) in uid_sub_group:
         return f"本群已订阅 UP {up_name}（{uid}），请勿重复订阅"
-    if get_group_subsum(str(groupid)) == 12:
+    if len(get_group_sublist(groupid)) >= 12:
         return "每个群聊最多仅可订阅 12 个 UP"
     if uid not in sub.get_data():
         resp = await relation_modify(uid, 1)
@@ -71,13 +71,19 @@ async def subscribe_uid(uid, groupid) -> str:
         else:
             return f"订阅失败 {resp['message']}"
     sub.get_data()[uid][str(groupid)] = {
+        "name": up_name,
         "nick": None,
         "atall": False,
         "send": {"dynamic": True, "live": True},
     }
     sub.save()
-    dynall = await grpc_dynall_get()
-    BOT_Status["offset"] = int(dynall[-1].extend.dyn_id_str)
+    for _ in range(5):
+        if dynall := await grpc_dynall_get():
+            BOT_Status["offset"] = int(dynall[-1].extend.dyn_id_str)
+            break
+        else:
+            await asyncio.sleep(0.5)
+            continue
     return f"成功在本群订阅 UP {up_name}（{uid}）"
 
 
@@ -86,22 +92,38 @@ async def unsubscribe_uid(uid, groupid):
     uid_sub_group = sub.get_data().get(uid, {})
     if str(groupid) not in uid_sub_group:
         return f"本群未订阅该 UP（{uid}）"
+    up_name = uid_sub_group[str(groupid)]["name"]
+    up_nick = uid_sub_group[str(groupid)]["nick"]
     del sub.get_data()[uid][str(groupid)]
     if not sub.get_data()[uid]:
         await delete_uid(uid)
     sub.save()
-    dynall = await grpc_dynall_get()
-    BOT_Status["offset"] = int(dynall[-1].extend.dyn_id_str)
-    return f"退订成功（{uid}）"
+    for _ in range(5):
+        if dynall := await grpc_dynall_get():
+            BOT_Status["offset"] = int(dynall[-1].extend.dyn_id_str)
+            break
+        else:
+            await asyncio.sleep(0.5)
+            BOT_Status["offset"] = 0
+            continue
+    return f"{up_nick or up_name}（{uid}）退订成功"
 
 
 async def delete_uid(uid):
     """直接删除订阅的某个 up"""
     await relation_modify(uid, 2)
     del sub.get_data()[uid]
-    dynall = await grpc_dynall_get()
-    BOT_Status["offset"] = int(dynall[-1].extend.dyn_id_str)
     sub.save()
+
+
+def set_name(uid, name):
+    if sub.get_data()[uid]:
+        for group in sub.get_data()[uid].keys():
+            sub.get_data()[uid][group]["name"] = name
+        sub.save()
+        return True
+    else:
+        return False
 
 
 def set_nick(uid, group, nick):

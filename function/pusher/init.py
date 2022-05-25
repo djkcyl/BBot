@@ -39,7 +39,8 @@ async def init(app: Ariadne):
     sub_num = len(subid_list)
     if sub_num == 0:
         await asyncio.sleep(1)
-        logger.info("[BiliBili推送] 由于未订阅任何账号，本次初始化结束")
+        logger.info("[BiliBili推送] 未订阅任何账号，初始化结束")
+        BOT_Status["init"] = True
         return
     await asyncio.sleep(1)
     logger.info(f"[BiliBili推送] 将对 {sub_num} 个账号进行监控")
@@ -50,6 +51,7 @@ async def init(app: Ariadne):
         if "live_info" in uid:
             logger.info(f"[BiliBili推送] {uid['name']} 已开播")
             BOT_Status["liveing"].append(uid["uid"])
+    logger.info(f"[BiliBili推送] 直播初始化完成，当前 {len(BOT_Status['liveing'])} 个 UP 正在直播")
 
     # 动态初始化
     resp = await grpc_dynall_get()

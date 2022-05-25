@@ -16,7 +16,7 @@ from library.grpc import grpc_dynall_get
 from library.text2image import text2image
 from library.bilibili_request import relation_modify
 from library.dynamic_shot import get_dynamic_screenshot
-from library import get_subid_list, get_group_sublist, unsubscribe_uid
+from library import get_subid_list, get_group_sublist, set_name, unsubscribe_uid
 from library.grpc.bilibili.app.dynamic.v2.dynamic_pb2 import DynamicType
 
 channel = Channel.current()
@@ -41,6 +41,8 @@ async def main(app: Ariadne):
         try:
             if int(dyn.extend.dyn_id_str) <= BOT_Status["offset"]:
                 continue
+            elif not BOT_Status["offset"]:
+                break
         except ValueError:
             continue
         up_id = str(dyn.modules[0].module_author.author.mid)
@@ -61,6 +63,7 @@ async def main(app: Ariadne):
             )
             break
         if up_id in sub_list:
+            set_name(up_id, up_name)
 
             if dyn.card_type == DynamicType.forward:
                 type_text = "转发了一条动态！"
@@ -107,7 +110,7 @@ async def main(app: Ariadne):
                         await asyncio.sleep(1)
                     except UnknownTarget:
                         remove_list = []
-                        for subid in get_group_sublist(groupid):
+                        for subid, _, _ in get_group_sublist(groupid):
                             await unsubscribe_uid(subid, groupid)
                             remove_list.append(subid)
                         logger.warning(
