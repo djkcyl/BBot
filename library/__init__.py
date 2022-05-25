@@ -81,10 +81,9 @@ async def subscribe_uid(uid, groupid) -> str:
             continue
     if need_sub:
         resp = await relation_modify(uid, 1)
-        if resp["code"] == 0:
-            sub.get_data()[uid] = {}
-        else:
-            return f"订阅失败 {resp['message']}"
+        if resp["code"] != 0:
+            await unsubscribe_uid(uid, groupid)
+            return f"订阅失败：{resp['code']}, {resp['message']}"
     return f"成功在本群订阅 UP {up_name}（{uid}）"
 
 
@@ -95,9 +94,7 @@ async def unsubscribe_uid(uid, groupid):
         return f"本群未订阅该 UP（{uid}）"
     up_name = uid_sub_group[str(groupid)]["name"]
     up_nick = uid_sub_group[str(groupid)]["nick"]
-    sub_copy = sub.get_data().copy()[uid][str(groupid)]
-    del sub_copy[uid][str(groupid)]
-    if not sub_copy[uid]:
+    if not len(sub.get_data()[uid]) - 1:
         await delete_uid(uid)
     del sub.get_data()[uid][str(groupid)]
     sub.save()
