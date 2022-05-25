@@ -7,3 +7,4 @@ data/white_list.json
 data/bot_config.yaml
 data/subscription_list copy.json
 logs/
+test.py

@@ -87,7 +87,7 @@ async def unsubscribe_uid(uid, groupid):
     if str(groupid) not in uid_sub_group:
         return f"本群未订阅该 UP（{uid}）"
     del sub.get_data()[uid][str(groupid)]
-    if sub.get_data()[uid] == {}:
+    if not sub.get_data()[uid]:
         await delete_uid(uid)
     sub.save()
     dynall = await grpc_dynall_get()
@@ -102,3 +102,23 @@ async def delete_uid(uid):
     dynall = await grpc_dynall_get()
     BOT_Status["offset"] = int(dynall[-1].extend.dyn_id_str)
     sub.save()
+
+
+def set_nick(uid, group, nick):
+    """设置某个 up 在某个群的昵称"""
+    if sub.get_data()[uid].get(str(group)):
+        sub.get_data()[uid][str(group)]["nick"] = nick or None
+        sub.save()
+        return True
+    else:
+        return False
+
+
+def set_atall(uid, group, atall):
+    """设置某个 up 在某个群的 @全体"""
+    if sub.get_data()[uid].get(str(group)):
+        sub.get_data()[uid][str(group)]["atall"] = atall
+        sub.save()
+        return True
+    else:
+        return False

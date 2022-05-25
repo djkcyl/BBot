@@ -69,6 +69,11 @@ with saya.module_context():
     saya.require("function.command.admin.add")
     saya.require("function.command.admin.remove")
 
+    saya.require("function.command.configure.atall")
+    saya.require("function.command.configure.nick")
+
+    saya.require("function.command.menu")
+
     saya.require("function.command.up.get_subscribe")
     saya.require("function.command.up.subscribe")
     saya.require("function.command.up.unsubscribe")

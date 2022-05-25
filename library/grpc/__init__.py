@@ -84,7 +84,12 @@ async def grpc_dynall_get():
             status = rpc_status.from_call(e)
             logger.error(status)
 
-        exclude_list = [DynamicType.ad, DynamicType.live, DynamicType.live_rcmd]
+        exclude_list = [
+            DynamicType.ad,
+            DynamicType.live,
+            DynamicType.live_rcmd,
+            DynamicType.banner,
+        ]
         dynamic_list = [
             dyn for dyn in resp.dynamic_list.list if dyn.card_type not in exclude_list
         ]

@@ -38,7 +38,10 @@ async def main(app: Ariadne):
     if not dynall:
         return
     for dyn in dynall:
-        if int(dyn.extend.dyn_id_str) <= BOT_Status["offset"]:
+        try:
+            if int(dyn.extend.dyn_id_str) <= BOT_Status["offset"]:
+                continue
+        except ValueError:
             continue
         up_id = str(dyn.modules[0].module_author.author.mid)
         up_name = dyn.modules[0].module_author.author.name
