@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "bbot-graia"
+version = "0.0.1"
+description = "一个用于 QQ 群内高效推送哔哩哔哩 UP 动态及直播的机器人"
+authors = ["djkcyl <cyl@cyllive.cn>"]
+license = "AGPL3.0"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+graia-ariadne = {extras = ["graia"], version = "^0.6.16"}
+grpcio = "^1.46.3"
+grpcio-status = "^1.46.3"
+httpx = "^0.22.0"
+peewee = "^3.14.10"
+prompt-toolkit = "^3.0.29"
+playwright = "^1.22.0"
+pyyaml = "^6.0"
+qrcode = "^7.3.1"
+pillow = "^9.1.1"
+pycryptodome = "^3.14.1"
+
+[tool.poetry.dev-dependencies]
+flake8 = "^4.0.1"
+black = {version = "^22.3.0", allow-prereleases = true}
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[[tool.poetry.source]]
+default = true
+name = "tsinghua"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"

@@ -1,0 +1,9 @@
+__pycache__/
+library/browser/data
+
+data/login_cache.json
+data/subscription_list.json
+data/white_list.json
+data/bot_config.yaml
+data/subscription_list copy.json
+logs/

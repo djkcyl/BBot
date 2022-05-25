@@ -1,0 +1,19 @@
+mirai:
+  mirai_host: http://xxxxxxx:xxxx
+  verify_key: xxxxxxx
+  account: xxxxxxx
+debug:
+  enable: false
+  groups:
+    - xxxxxxx
+bilibili:
+  username: xxxxxxx
+  password: xxxxxxx
+event:
+  mute: true
+  permchange: true
+name: xxxxxxx
+access_control: true
+master: xxxxxxx
+admins:
+  - xxxxxxx

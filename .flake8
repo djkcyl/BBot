@@ -1,0 +1,8 @@
+[flake8]
+exclude = 
+    test.py
+max-line-length = 120
+statistics = True
+ignore =
+    W503,
+    E203
