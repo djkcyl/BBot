@@ -64,13 +64,8 @@ async def subscribe_uid(uid, groupid) -> str:
         return f"本群已订阅 UP {up_name}（{uid}），请勿重复订阅"
     if len(get_group_sublist(groupid)) >= 12:
         return "每个群聊最多仅可订阅 12 个 UP"
-    if uid not in sub.get_data():
-        resp = await relation_modify(uid, 1)
-        if resp["code"] == 0:
-            sub.get_data()[uid] = {}
-        else:
-            return f"订阅失败 {resp['message']}"
-    sub.get_data()[uid][str(groupid)] = {
+    need_sub = uid not in sub.get_data()
+    sub.get_data().get(uid, {})[str(groupid)] = {
         "name": up_name,
         "nick": None,
         "atall": False,
@@ -84,6 +79,12 @@ async def subscribe_uid(uid, groupid) -> str:
         else:
             await asyncio.sleep(0.5)
             continue
+    if need_sub:
+        resp = await relation_modify(uid, 1)
+        if resp["code"] == 0:
+            sub.get_data()[uid] = {}
+        else:
+            return f"订阅失败 {resp['message']}"
     return f"成功在本群订阅 UP {up_name}（{uid}）"
 
 
@@ -94,9 +95,11 @@ async def unsubscribe_uid(uid, groupid):
         return f"本群未订阅该 UP（{uid}）"
     up_name = uid_sub_group[str(groupid)]["name"]
     up_nick = uid_sub_group[str(groupid)]["nick"]
-    del sub.get_data()[uid][str(groupid)]
-    if not sub.get_data()[uid]:
+    sub_copy = sub.get_data().copy()[uid][str(groupid)]
+    del sub_copy[uid][str(groupid)]
+    if not sub_copy[uid]:
         await delete_uid(uid)
+    del sub.get_data()[uid][str(groupid)]
     sub.save()
     for _ in range(5):
         if dynall := await grpc_dynall_get():
