@@ -97,10 +97,10 @@ async def main(app: Ariadne):
                         else:
                             msg = ["@全体成员 "] + msg
                     try:
-                        # await app.sendGroupMessage(
-                        #     groupid,
-                        #     MessageChain.create(msg),
-                        # )
+                        await app.sendGroupMessage(
+                            groupid,
+                            MessageChain.create(msg),
+                        )
                         await asyncio.sleep(1)
                     except UnknownTarget:
                         remove_list = []

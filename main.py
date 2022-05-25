@@ -66,11 +66,16 @@ with saya.module_context():
     saya.require("function.command.video_resolve")
     saya.require("function.command.vive_dynamic")
 
+    saya.require("function.command.admin.add")
+    saya.require("function.command.admin.remove")
+
     saya.require("function.command.up.get_subscribe")
     saya.require("function.command.up.subscribe")
     saya.require("function.command.up.unsubscribe")
 
     saya.require("function.command.whitelist.add")
+    saya.require("function.command.whitelist.close")
+    saya.require("function.command.whitelist.open")
     saya.require("function.command.whitelist.remove")
 
     saya.require("function.console.stop")

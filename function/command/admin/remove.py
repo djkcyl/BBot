@@ -1,0 +1,42 @@
+from graia.saya import Channel
+from graia.ariadne.app import Ariadne
+from graia.ariadne.model import Friend
+from graia.ariadne.message.chain import MessageChain
+from graia.ariadne.event.message import FriendMessage
+from graia.saya.builtins.broadcast.schema import ListenerSchema
+from graia.ariadne.message.parser.twilight import (
+    Twilight,
+    FullMatch,
+    RegexResult,
+    WildcardMatch,
+)
+
+from core.control import Permission
+from core.bot_config import remove_admin
+
+channel = Channel.current()
+
+
+@channel.use(
+    ListenerSchema(
+        listening_events=[FriendMessage],
+        inline_dispatchers=[
+            Twilight(
+                [FullMatch("移除管理员"), "adminid" @ WildcardMatch(optional=True)],
+            )
+        ],
+    )
+)
+async def main(app: Ariadne, friend: Friend, adminid: RegexResult):
+    Permission.manual(friend, Permission.MASTER)
+    if adminid.matched:
+        say = adminid.result.asDisplay()
+        if say.isdigit():
+            if remove_admin(int(say)):
+                await app.sendFriendMessage(friend, MessageChain.create("成功取消该账号的管理员"))
+            else:
+                await app.sendFriendMessage(friend, MessageChain.create("该账号不是管理员"))
+        else:
+            await app.sendFriendMessage(friend, MessageChain.create("管理员账号仅可为数字"))
+    else:
+        await app.sendFriendMessage(friend, MessageChain.create("未输入管理员账号"))
