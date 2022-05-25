@@ -1,11 +1,10 @@
 import json
-import asyncio
 
 from pathlib import Path
 
 from core import BOT_Status
+from library.grpc import grpc_dyn_get
 from library.bilibili_request import relation_modify
-from library.grpc import grpc_dyn_get, grpc_dynall_get
 
 
 class SubList:
@@ -64,21 +63,19 @@ async def subscribe_uid(uid, groupid) -> str:
         return f"本群已订阅 UP {up_name}（{uid}），请勿重复订阅"
     if len(get_group_sublist(groupid)) >= 12:
         return "每个群聊最多仅可订阅 12 个 UP"
-    need_sub = uid not in sub.get_data()
-    sub.get_data().get(uid, {})[str(groupid)] = {
+    if uid not in sub.get_data():
+        need_sub = True
+        sub.get_data()[uid] = {}
+    else:
+        need_sub = False
+    sub.get_data()[uid][str(groupid)] = {
         "name": up_name,
         "nick": None,
         "atall": False,
         "send": {"dynamic": True, "live": True},
     }
     sub.save()
-    for _ in range(5):
-        if dynall := await grpc_dynall_get():
-            BOT_Status["offset"] = int(dynall[-1].extend.dyn_id_str)
-            break
-        else:
-            await asyncio.sleep(0.5)
-            continue
+    BOT_Status["offset"] = 0
     if need_sub:
         resp = await relation_modify(uid, 1)
         if resp["code"] != 0:
@@ -98,14 +95,7 @@ async def unsubscribe_uid(uid, groupid):
         await delete_uid(uid)
     del sub.get_data()[uid][str(groupid)]
     sub.save()
-    for _ in range(5):
-        if dynall := await grpc_dynall_get():
-            BOT_Status["offset"] = int(dynall[-1].extend.dyn_id_str)
-            break
-        else:
-            await asyncio.sleep(0.5)
-            BOT_Status["offset"] = 0
-            continue
+    BOT_Status["offset"] = 0
     return f"{up_nick or up_name}（{uid}）退订成功"
 
 
