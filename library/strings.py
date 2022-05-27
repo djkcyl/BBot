@@ -1,5 +1,6 @@
 import re
 import string
+import random
 
 
 def numf(num: int):
@@ -73,3 +74,7 @@ def getCutStr(str, cut):
             cutStr = str
 
     return cutStr
+
+
+def generate_verify_code():
+    return str(random.randint(100000, 999999))

@@ -63,6 +63,8 @@ saya.install_behaviours(
 
 
 with saya.module_context():
+
+    saya.require("function.command.quit_group")
     saya.require("function.command.video_resolve")
     saya.require("function.command.vive_dynamic")
 
