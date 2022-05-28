@@ -15,8 +15,8 @@ from core.bot_config import BotConfig
 from library.grpc import grpc_dynall_get
 from library.text2image import text2image
 from data import insert_dynamic_push, is_dyn_pushed
-from library.bilibili_request import relation_modify
 from library.dynamic_shot import get_dynamic_screenshot
+from library.bilibili_request import relation_modify, dynamic_like
 from library import get_subid_list, get_group_sublist, set_name, unsubscribe_uid
 from library.grpc.bilibili.app.dynamic.v2.dynamic_pb2 import DynamicType, DynModuleType
 
@@ -65,13 +65,13 @@ async def main(app: Ariadne):
 
         if up_id in sub_list:
             logger.info(
-                f"[BiliBili推送] {up_name} 更新了动态 {dynid}，共有 {len(sub_list[up_id])} 个群订阅了该 UP"
+                f"[BiliBili推送] {dynid} | {up_name} 更新了动态，共有 {len(sub_list[up_id])} 个群订阅了该 UP"
             )
             try:
                 shot_image = await get_dynamic_screenshot(dynid)
                 dyn_img = await app.uploadImage(shot_image, UploadMethod.Group)
             except Exception as e:
-                err_msg = f"[BiliBili推送] {up_name} 更新了动态 {dynid}，截图失败"
+                err_msg = f"[BiliBili推送] {dynid} | {up_name} 更新了动态，截图失败"
                 logger.error(err_msg)
                 logger.exception(e)
                 await app.sendFriendMessage(
@@ -139,11 +139,16 @@ async def main(app: Ariadne):
                             await unsubscribe_uid(subid, groupid)
                             remove_list.append(subid)
                         logger.warning(
-                            f"[BiliBili推送] 推送失败，找不到该群 {groupid}，已删除该群订阅的 {len(remove_list)} 个 UP"
+                            f"[BiliBili推送] {dynid} | 推送失败，找不到该群 {groupid}，已删除该群订阅的 {len(remove_list)} 个 UP"
                         )
                     except Exception as e:
-                        logger.error("[BiliBili推送] 推送失败，未知错误")
+                        logger.error(f"[BiliBili推送] {dynid} | 推送失败，未知错误")
                         logger.exception(e)
+            like = await dynamic_like(dynid)
+            if like["code"] == 0:
+                logger.info(f"[BiliBili推送] {dynid} | 动态点赞成功")
+            else:
+                logger.error(f"[BiliBili推送] {dynid} | 动态点赞失败：{like}")
             insert_dynamic_push(
                 up_id,
                 up_name,
@@ -153,18 +158,18 @@ async def main(app: Ariadne):
                 len(sub_list[up_id]),
             )
         else:
-            logger.warning(f"[BiliBili推送] 没有找到订阅 UP {up_name}（{up_id}）的群，已退订！")
+            logger.warning(f"[BiliBili推送] {dynid} | 没有找到订阅 UP {up_name}（{up_id}）的群，已退订！")
             resp = await relation_modify(up_id, 2)
             if resp["code"] == 0:
                 logger.info("[BiliBili推送] 退订成功！")
                 msg = "已被退订！"
             else:
-                logger.error(f"[BiliBili推送] 退订失败：{resp}")
+                logger.error(f"[BiliBili推送] {dynid} | 退订失败：{resp}")
                 msg = f"退订失败：{resp}"
             await app.sendFriendMessage(
                 BotConfig.master,
                 MessageChain.create(
-                    f"[BiliBili推送] 未找到订阅 {up_name}（{up_id}）的群，{msg}",
+                    f"[BiliBili推送] {dynid} | 未找到订阅 {up_name}（{up_id}）的群，{msg}",
                 ),
             )
 

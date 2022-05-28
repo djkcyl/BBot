@@ -101,3 +101,37 @@ async def relation_modify(uid, act: int):
             return response.json()
         except httpx.HTTPError as e:
             logger.error(f"[BiliBili推送] API 访问失败，正在第 {retry + 1} 重试 {e}")
+
+
+async def dynamic_like(dynid):
+    for retry in range(3):
+        try:
+            data = {
+                "access_key": get_token(),
+                "appkey": "783bbb7264451d82",
+                "build": "6700300",
+                "channel": "yingyongbao",
+                "c_locale": "zh_CN",
+                "s_locale": "zh_CN",
+                "disable_rcmd": "0",
+                "dynamic_id": str(dynid),
+                "mobi_app": "android",
+                "platform": "android",
+                "up": 1,
+                "uid": str(token_json["data"]["token_info"]["mid"]),
+                "statistics": '{"appId":1,"platform":3,"version":"6.70.0","abtest":""}',
+                "ts": str(int(time.time())),
+            }
+            keys = sorted(data.keys())
+            data_sorted = {key: data[key] for key in keys}
+            data = data_sorted
+            sign = bilibili_client.calcSign(data)
+            data["sign"] = sign
+            response = await bilibili_client.session.post(
+                "https://api.vc.bilibili.com/dynamic_like/v1/dynamic_like/thumb",
+                data=data,
+                headers=bilibili_client.headers,
+            )
+            return response.json()
+        except httpx.HTTPError as e:
+            logger.error(f"[BiliBili推送] API 访问失败，正在第 {retry + 1} 重试 {e}")
