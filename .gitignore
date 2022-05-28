@@ -8,3 +8,4 @@ data/bot_config.yaml
 data/subscription_list copy.json
 logs/
 test.py
+data/history.db

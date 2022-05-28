@@ -5,6 +5,7 @@ from grpc import RpcError
 from grpc_status import rpc_status
 from google.protobuf.json_format import MessageToDict
 
+from ..bilibili_request import get_token, bilibili_client
 
 from .bilibili.metadata.metadata_pb2 import Metadata
 from .bilibili.metadata.device.device_pb2 import Device
@@ -19,8 +20,6 @@ from .bilibili.app.dynamic.v2.dynamic_pb2 import (
     DynSpaceReq,
     DynMixUpListViewMoreReq,
 )
-
-from library.bilibili_request import get_token, bilibili_client
 
 server = "grpc.biliapi.net"
 

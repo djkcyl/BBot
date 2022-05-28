@@ -1,6 +1,6 @@
 import re
 
-from library.b23_extract import b23_extract
+from .b23_extract import b23_extract
 
 
 async def uid_extract(text) -> str:

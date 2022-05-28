@@ -15,7 +15,7 @@ from graia.broadcast.exceptions import ExecutionStop
 from graia.ariadne.event.message import GroupMessage
 from graia.broadcast.builtin.decorators import Depend
 
-from core.bot_config import BotConfig
+from .bot_config import BotConfig
 
 channel = Channel.current()
 
@@ -83,7 +83,7 @@ class Permission:
         return Depend(perm_check)
 
     @classmethod
-    def manual(cls, member: Member, level: int = DEFAULT) -> Depend:
+    def manual(cls, member: Member, level: int = DEFAULT):
 
         member_level = cls.get(member.id)
 

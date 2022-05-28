@@ -1,10 +1,12 @@
+import asyncio
 import json
 
 from pathlib import Path
 
 from core import BOT_Status
-from library.grpc import grpc_dyn_get
-from library.bilibili_request import relation_modify
+
+from .grpc import grpc_dyn_get
+from .bilibili_request import relation_modify
 
 
 class SubList:
@@ -54,12 +56,18 @@ def get_subid_list():
 
 async def subscribe_uid(uid, groupid) -> str:
     """在某个群订阅某个 up"""
+    while BOT_Status["updateing"]:
+        await asyncio.sleep(0.1)
+    BOT_Status["init"] = False
+    uid = str(uid)
+    groupid = str(groupid)
+
     r = await grpc_dyn_get(uid)
     if not r:
         return f"该 UP（{uid}）状态异常，订阅失败"
     up_name = r["list"][0]["modules"][0]["module_author"]["author"]["name"]
     uid_sub_group = sub.get_data().get(uid, {})
-    if str(groupid) in uid_sub_group:
+    if groupid in uid_sub_group:
         return f"本群已订阅 UP {up_name}（{uid}），请勿重复订阅"
     if len(get_group_sublist(groupid)) >= 12:
         return "每个群聊最多仅可订阅 12 个 UP"
@@ -68,32 +76,40 @@ async def subscribe_uid(uid, groupid) -> str:
         sub.get_data()[uid] = {}
     else:
         need_sub = False
-    sub.get_data()[uid][str(groupid)] = {
+    sub.get_data()[uid][groupid] = {
         "name": up_name,
         "nick": None,
         "atall": False,
         "send": {"dynamic": True, "live": True},
     }
     sub.save()
-    BOT_Status["offset"] = 0
     if need_sub:
         resp = await relation_modify(uid, 1)
         if resp["code"] != 0:
             await unsubscribe_uid(uid, groupid)
             return f"订阅失败：{resp['code']}, {resp['message']}"
+
+    # 做一些小处理，用来避免出现奇怪的bug
+    BOT_Status["skip_uid"].append(uid)
+    BOT_Status["init"] = True
+
     return f"成功在本群订阅 UP {up_name}（{uid}）"
 
 
 async def unsubscribe_uid(uid, groupid):
     """在某个群退订某个 up"""
+    uid = str(uid)
+    groupid = str(groupid)
+
     uid_sub_group = sub.get_data().get(uid, {})
-    if str(groupid) not in uid_sub_group:
+    if groupid not in uid_sub_group:
         return f"本群未订阅该 UP（{uid}）"
-    up_name = uid_sub_group[str(groupid)]["name"]
-    up_nick = uid_sub_group[str(groupid)]["nick"]
+    up_name = uid_sub_group[groupid]["name"]
+    up_nick = uid_sub_group[groupid]["nick"]
     if not len(sub.get_data()[uid]) - 1:
         await delete_uid(uid)
-    del sub.get_data()[uid][str(groupid)]
+    else:
+        del sub.get_data()[uid][groupid]
     sub.save()
     BOT_Status["offset"] = 0
     return f"{up_nick or up_name}（{uid}）退订成功"
@@ -101,12 +117,16 @@ async def unsubscribe_uid(uid, groupid):
 
 async def delete_uid(uid):
     """直接删除订阅的某个 up"""
+    uid = str(uid)
+
     await relation_modify(uid, 2)
     del sub.get_data()[uid]
     sub.save()
 
 
 def set_name(uid, name):
+    uid = str(uid)
+
     if sub.get_data()[uid]:
         for group in sub.get_data()[uid].keys():
             sub.get_data()[uid][group]["name"] = name
@@ -116,20 +136,26 @@ def set_name(uid, name):
         return False
 
 
-def set_nick(uid, group, nick):
+def set_nick(uid, groupid, nick):
     """设置某个 up 在某个群的昵称"""
-    if sub.get_data()[uid].get(str(group)):
-        sub.get_data()[uid][str(group)]["nick"] = nick or None
+    uid = str(uid)
+    groupid = str(groupid)
+
+    if sub.get_data()[uid].get(groupid):
+        sub.get_data()[uid][groupid]["nick"] = nick or None
         sub.save()
         return True
     else:
         return False
 
 
-def set_atall(uid, group, atall):
+def set_atall(uid, groupid, atall):
     """设置某个 up 在某个群的 @全体"""
-    if sub.get_data()[uid].get(str(group)):
-        sub.get_data()[uid][str(group)]["atall"] = atall
+    uid = str(uid)
+    groupid = str(groupid)
+
+    if sub.get_data()[uid].get(groupid):
+        sub.get_data()[uid][groupid]["atall"] = atall
         sub.save()
         return True
     else:

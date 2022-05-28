@@ -12,6 +12,7 @@ from graia.ariadne.message.parser.twilight import (
 )
 
 from library import unsubscribe_uid
+from core.bot_config import BotConfig
 from library.uid_extract import uid_extract
 from core.control import Interval, Permission
 
@@ -39,6 +40,10 @@ async def main(app: Ariadne, group: Group, anything: RegexResult):
 
         if uid := await uid_extract(message):
             msg = await unsubscribe_uid(uid, group.id)
+            await app.sendFriendMessage(
+                BotConfig.master,
+                MessageChain.create(f"群 {group.name}（{group.id}）正在退订 UP：{uid}\n{msg}"),
+            )
         else:
             msg = "请输入正确的 UP UID 或 UP 首页链接"
 

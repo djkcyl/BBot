@@ -3,14 +3,15 @@ import asyncio
 from loguru import logger
 from graia.saya import Channel
 from graia.ariadne.app import Ariadne
-from graia.ariadne.model import MemberPerm
 from graia.ariadne.exception import UnknownTarget
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.message.element import Image, AtAll
 from graia.scheduler.saya.schema import SchedulerSchema
 from graia.scheduler.timers import every_custom_seconds
+from graia.ariadne.model import MemberPerm, UploadMethod
 
 from core import BOT_Status
+from data import insert_live_push
 from core.bot_config import BotConfig
 from library.grpc import grpc_uplist_get
 from library import get_group_sublist, get_subid_list, set_name, unsubscribe_uid
@@ -51,13 +52,14 @@ async def main(app: Ariadne):
                     continue
                 room_id = up["live_info"]["room_id"]
                 resp = await get_status_info_by_uids({"uids": [up_id]})
-                room_area = (
-                    resp["data"][up_id]["area_v2_parent_name"]
-                    + " / "
-                    + resp["data"][up_id]["area_v2_name"]
-                )
-                cover_from_user = resp["data"][up_id]["cover_from_user"]
                 title = resp["data"][up_id]["title"]
+                area_parent = resp["data"][up_id]["area_v2_parent_name"]
+                area = resp["data"][up_id]["area_v2_name"]
+                room_area = f"{area_parent} / {area}"
+                cover_from_user = resp["data"][up_id]["cover_from_user"]
+                cover_img = await app.uploadImage(
+                    await Image(url=cover_from_user).get_bytes(), UploadMethod.Group
+                )
                 logger.info(f"[BiliBili推送] {up_name} 开播了 - {room_area} - {title}")
 
                 for groupid, data in sub_list[up_id].items():
@@ -71,7 +73,7 @@ async def main(app: Ariadne):
                         )
                         msg = [
                             f"本群订阅的 UP {nick}在 {room_area} 区开播啦 ！\n标题：{title}\n",
-                            Image(url=cover_from_user),
+                            cover_img,
                             f"\nhttps://live.bilibili.com/{room_id}",
                         ]
                         if data["atall"]:
@@ -99,6 +101,9 @@ async def main(app: Ariadne):
                             )
 
                 BOT_Status["liveing"].append(up_id)
+                insert_live_push(
+                    up_id, True, len(sub_list[up_id]), title, area_parent, area
+                )
             elif up_id in BOT_Status["liveing"]:
                 BOT_Status["liveing"].remove(up_id)
                 logger.info(f"[BiliBili推送] {up_name} 已下播")
@@ -126,7 +131,7 @@ async def main(app: Ariadne):
                                 f"[BiliBili推送] 推送失败，找不到该群 {groupid}，已删除该群订阅的 {len(remove_list)} 个 UP"
                             )
                         await asyncio.sleep(1)
-
+                insert_live_push(up_id, False, len(sub_list[up_id]))
         else:
             logger.warning(f"[BiliBili推送] 没有找到订阅 UP {up_name}（{up_id}）的群，已退订！")
             resp = await relation_modify(up_id, 2)

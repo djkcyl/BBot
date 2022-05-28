@@ -64,6 +64,6 @@ async def init(app: Ariadne):
     await app.sendFriendMessage(
         BotConfig.master,
         MessageChain.create(
-            f"[BiliBili推送] 将对 {sub_num} 个账号进行监控，当前最后一条动态id为 {BOT_Status['offset']}，初始化完成"
+            f"[BiliBili推送] 将对 {sub_num} 个账号进行监控，初始化完成"
         ),
     )
