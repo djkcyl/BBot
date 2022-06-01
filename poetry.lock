@@ -227,17 +227,17 @@ reference = "tsinghua"
 
 [[package]]
 name = "googleapis-common-protos"
-version = "1.56.1"
+version = "1.56.2"
 description = "Common protobufs used in Google APIs"
 category = "main"
 optional = false
 python-versions = ">=3.6"
 
 [package.dependencies]
-protobuf = ">=3.15.0"
+protobuf = ">=3.15.0,<4.0.0dev"
 
 [package.extras]
-grpc = ["grpcio (>=1.0.0)"]
+grpc = ["grpcio (>=1.0.0,<2.0.0dev)"]
 
 [package.source]
 type = "legacy"
@@ -579,7 +579,6 @@ python-versions = ">=3.7"
 [package.dependencies]
 greenlet = "1.1.2"
 pyee = "8.1.0"
-typing-extensions = {version = "*", markers = "python_version <= \"3.8\""}
 websockets = "10.1"
 
 [package.source]
@@ -872,8 +871,8 @@ reference = "tsinghua"
 
 [metadata]
 lock-version = "1.1"
-python-versions = "^3.8"
-content-hash = "95642d93f580b3b8410b6fcae5094a0504134c39cac768ac7f3169959a1bb641"
+python-versions = "^3.9"
+content-hash = "b31d80c6ead41305cabbcadc43166eae61d14335ed161d953f2ad90c1bd96f7b"
 
 [metadata.files]
 aiohttp = [
@@ -1077,8 +1076,8 @@ frozenlist = [
     {file = "frozenlist-1.3.0.tar.gz", hash = "sha256:ce6f2ba0edb7b0c1d8976565298ad2deba6f8064d2bebb6ffce2ca896eb35b0b"},
 ]
 googleapis-common-protos = [
-    {file = "googleapis-common-protos-1.56.1.tar.gz", hash = "sha256:6b5ee59dc646eb61a8eb65ee1db186d3df6687c8804830024f32573298bca19b"},
-    {file = "googleapis_common_protos-1.56.1-py2.py3-none-any.whl", hash = "sha256:ddcd955b5bb6589368f659fa475373faa1ed7d09cde5ba25e88513d87007e174"},
+    {file = "googleapis-common-protos-1.56.2.tar.gz", hash = "sha256:b09b56f5463070c2153753ef123f07d2e49235e89148e9b2459ec8ed2f68d7d3"},
+    {file = "googleapis_common_protos-1.56.2-py2.py3-none-any.whl", hash = "sha256:023eaea9d8c1cceccd9587c6af6c20f33eeeb05d4148670f2b0322dc1511700c"},
 ]
 graia-ariadne = [
     {file = "graia-ariadne-0.6.16.tar.gz", hash = "sha256:c5b54818b47cd1f828d2846905ebef004d293193d25ae0d160e0833023a98759"},

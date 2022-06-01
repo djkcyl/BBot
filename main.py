@@ -49,7 +49,6 @@ console = Console(
             ("bbot", "fg:#ffffff"),
         ]
     ),
-    replace_logger=False,
 )
 
 

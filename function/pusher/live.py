@@ -128,12 +128,12 @@ async def main(app: Ariadne):
                                 await unsubscribe_uid(subid, groupid)
                                 remove_list.append(subid)
                             logger.info(
-                                f"[BiliBili推送] 推送失败，找不到该群 {groupid}，已删除该群订阅的 {len(remove_list)} 个 UP"
+                                f"[BiliBili推送] 发送失败，找不到该群 {groupid}，已删除该群订阅的 {len(remove_list)} 个 UP"
                             )
                         await asyncio.sleep(1)
                 insert_live_push(up_id, False, len(sub_list[up_id]))
-        else:
-            logger.warning(f"[BiliBili推送] 没有找到订阅 UP {up_name}（{up_id}）的群，已退订！")
+        elif up_id not in BOT_Status["skip_uid"]:
+            logger.warning(f"[BiliBili推送] 未找到订阅 UP {up_name}（{up_id}）的群，已退订！")
             resp = await relation_modify(up_id, 2)
             if resp["code"] == 0:
                 logger.info(f"[BiliBili推送] {up_name}（{up_id}）退订成功！")
