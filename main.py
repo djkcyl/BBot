@@ -29,7 +29,21 @@ logger.add(
     retention="3 years",
     compression="tar.xz",
     colorize=False,
+    level="INFO",
 )
+
+logger.add(
+    LOGPATH.joinpath("debug.log"),
+    encoding="utf-8",
+    backtrace=True,
+    diagnose=True,
+    rotation="00:00",
+    retention="3 days",
+    compression="tar.xz",
+    colorize=False,
+    level="DEBUG",
+)
+
 logger.info("BBot is starting...")
 
 

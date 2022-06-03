@@ -1,3 +1,5 @@
+import httpx
+
 from graia.saya import Channel
 from graia.ariadne.app import Ariadne
 from graia.ariadne.model import Group
@@ -11,6 +13,7 @@ from graia.ariadne.message.parser.twilight import (
     WildcardMatch,
 )
 
+from core import BOT_Status
 from library import subscribe_uid
 from core.bot_config import BotConfig
 from library.uid_extract import uid_extract
@@ -35,19 +38,46 @@ channel = Channel.current()
 )
 async def main(app: Ariadne, group: Group, anything: RegexResult):
 
-    if anything.matched:
-        message = anything.result.asDisplay()
-
-        if uid := await uid_extract(message):
-            msg = await subscribe_uid(uid, group.id)
-            await app.sendFriendMessage(
-                BotConfig.master,
-                MessageChain.create(f"群 {group.name}（{group.id}）正在订阅 UP：{uid}\n{msg}"),
+    if not anything.matched:
+        return
+    message = anything.result.asDisplay()
+    uid = await uid_extract(message)
+    if uid:
+        uid = uid
+    else:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(
+                "https://api.bilibili.com/x/web-interface/search/type",
+                params={"keyword": message, "search_type": "bili_user"},
             )
-        else:
-            msg = "请输入正确的 UP UID 或 UP 首页链接"
 
+        data = resp.json()["data"]
+        if data["numResults"]:
+            if data["result"][0]["uname"] == message:
+                uid = data["result"][0]["mid"]
+            else:
+                return await app.sendGroupMessage(
+                    group,
+                    MessageChain.create("请输入正确的 UP 名、UP UID 或 UP 首页链接"),
+                )
+        else:
+            return await app.sendGroupMessage(
+                group,
+                MessageChain.create("未搜索到该 UP"),
+            )
+
+    if BOT_Status["updating"]:
+        await app.sendGroupMessage(
+            group,
+            MessageChain.create("正在订阅，请稍后..."),
+        )
+
+    msg = await subscribe_uid(uid, group.id)
     await app.sendGroupMessage(
         group,
         MessageChain.create(msg),
+    )
+    await app.sendFriendMessage(
+        BotConfig.master,
+        MessageChain.create(f"群 {group.name}（{group.id}）正在订阅 UP：{uid}\n{msg}"),
     )

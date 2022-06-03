@@ -56,20 +56,25 @@ def get_subid_list():
 
 async def subscribe_uid(uid, groupid) -> str:
     """在某个群订阅某个 up"""
+    uid = str(uid)
+    groupid = str(groupid)
+    # 做一些小处理，用来避免出现奇怪的bug
     while BOT_Status["updateing"]:
         await asyncio.sleep(0.1)
     BOT_Status["init"] = False
-    uid = str(uid)
-    groupid = str(groupid)
+    BOT_Status["skip_uid"].append(uid)
 
     r = await grpc_dyn_get(uid)
     if not r:
+        BOT_Status["init"] = True
         return f"该 UP（{uid}）状态异常，订阅失败"
     up_name = r["list"][0]["modules"][0]["module_author"]["author"]["name"]
     uid_sub_group = sub.get_data().get(uid, {})
     if groupid in uid_sub_group:
+        BOT_Status["init"] = True
         return f"本群已订阅 UP {up_name}（{uid}），请勿重复订阅"
     if len(get_group_sublist(groupid)) >= 12:
+        BOT_Status["init"] = True
         return "每个群聊最多仅可订阅 12 个 UP"
     if uid not in sub.get_data():
         need_sub = True
@@ -87,10 +92,9 @@ async def subscribe_uid(uid, groupid) -> str:
         resp = await relation_modify(uid, 1)
         if resp["code"] != 0:
             await unsubscribe_uid(uid, groupid)
+            BOT_Status["init"] = True
             return f"订阅失败：{resp['code']}, {resp['message']}"
 
-    # 做一些小处理，用来避免出现奇怪的bug
-    BOT_Status["skip_uid"].append(uid)
     BOT_Status["init"] = True
 
     return f"成功在本群订阅 UP {up_name}（{uid}）"
@@ -100,9 +104,14 @@ async def unsubscribe_uid(uid, groupid):
     """在某个群退订某个 up"""
     uid = str(uid)
     groupid = str(groupid)
+    while BOT_Status["updateing"]:
+        await asyncio.sleep(0.1)
+    BOT_Status["init"] = False
+    BOT_Status["skip_uid"].append(uid)
 
     uid_sub_group = sub.get_data().get(uid, {})
     if groupid not in uid_sub_group:
+        BOT_Status["init"] = True
         return f"本群未订阅该 UP（{uid}）"
     up_name = uid_sub_group[groupid]["name"]
     up_nick = uid_sub_group[groupid]["nick"]
@@ -111,7 +120,7 @@ async def unsubscribe_uid(uid, groupid):
     else:
         del sub.get_data()[uid][groupid]
     sub.save()
-    BOT_Status["offset"] = 0
+    BOT_Status["init"] = True
     return f"{up_nick or up_name}（{uid}）退订成功"
 
 

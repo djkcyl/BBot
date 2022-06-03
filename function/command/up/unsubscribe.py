@@ -12,6 +12,7 @@ from graia.ariadne.message.parser.twilight import (
 )
 
 from library import unsubscribe_uid
+from library import get_group_sublist
 from core.bot_config import BotConfig
 from library.uid_extract import uid_extract
 from core.control import Interval, Permission
@@ -35,19 +36,39 @@ channel = Channel.current()
 )
 async def main(app: Ariadne, group: Group, anything: RegexResult):
 
-    if anything.matched:
-        message = anything.result.asDisplay()
-
-        if uid := await uid_extract(message):
-            msg = await unsubscribe_uid(uid, group.id)
-            await app.sendFriendMessage(
-                BotConfig.master,
-                MessageChain.create(f"群 {group.name}（{group.id}）正在退订 UP：{uid}\n{msg}"),
+    if not anything.matched:
+        return
+    message = anything.result.asDisplay()
+    uid = await uid_extract(message)
+    if uid:
+        uid = uid
+    else:
+        if not (up_list := get_group_sublist(group.id)):
+            return await app.sendGroupMessage(
+                group, MessageChain.create(f"本群未订阅该 UP（{message}）")
             )
-        else:
-            msg = "请输入正确的 UP UID 或 UP 首页链接"
 
-    await app.sendGroupMessage(
-        group,
-        MessageChain.create(msg),
-    )
+        for up_uid, up_name, up_nick in up_list:
+            if up_nick == message or up_name == message:
+                uid = up_uid
+                break
+        else:
+            return await app.sendGroupMessage(
+                group, MessageChain.create(f"本群未订阅该 UP（{message}）")
+            )
+
+    if uid:
+        msg = await unsubscribe_uid(uid, group.id)
+        await app.sendFriendMessage(
+            BotConfig.master,
+            MessageChain.create(f"群 {group.name}（{group.id}）正在退订 UP：{uid}\n{msg}"),
+        )
+        await app.sendGroupMessage(
+            group,
+            MessageChain.create(msg),
+        )
+    else:
+        await app.sendGroupMessage(
+            group,
+            MessageChain.create("请输入正确的 UP 名、UP UID 或 UP 首页链接"),
+        )

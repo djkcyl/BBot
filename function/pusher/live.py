@@ -20,7 +20,7 @@ from library.bilibili_request import get_status_info_by_uids, relation_modify
 channel = Channel.current()
 
 
-@channel.use(SchedulerSchema(every_custom_seconds(2)))
+@channel.use(SchedulerSchema(every_custom_seconds(5)))
 async def main(app: Ariadne):
 
     if not BOT_Status["init"]:
@@ -38,6 +38,8 @@ async def main(app: Ariadne):
     for up in live_statu.get("items", []):
         up_id = up["uid"]
         up_name = up["name"]
+        if up_id in BOT_Status["skip_uid"]:
+            continue
         # 检测订阅配置里是否有该 up
         if up_id in sub_list:
             set_name(up_id, up_name)
@@ -132,7 +134,7 @@ async def main(app: Ariadne):
                             )
                         await asyncio.sleep(1)
                 insert_live_push(up_id, False, len(sub_list[up_id]))
-        elif up_id not in BOT_Status["skip_uid"]:
+        else:
             logger.warning(f"[BiliBili推送] 未找到订阅 UP {up_name}（{up_id}）的群，已退订！")
             resp = await relation_modify(up_id, 2)
             if resp["code"] == 0:
