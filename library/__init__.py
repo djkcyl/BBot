@@ -62,6 +62,7 @@ async def subscribe_uid(uid, groupid) -> str:
     while BOT_Status["updateing"]:
         await asyncio.sleep(0.1)
     BOT_Status["init"] = False
+    BOT_Status["skip"] += 2
     BOT_Status["skip_uid"].append(uid)
 
     r = await grpc_dyn_get(uid)

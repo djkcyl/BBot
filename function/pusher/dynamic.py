@@ -175,7 +175,11 @@ async def main(app: Ariadne):
                     ),
                 )
 
-        BOT_Status["skip_uid"] = []
+        if BOT_Status["skip"]:
+            BOT_Status["skip"] -= 1
+            if not BOT_Status["skip"]:
+                BOT_Status["skip_uid"] = []
+
         # 将当前检测到的第一条动态 id 设置为最新的动态 id
         if BOT_Status["offset"] > int(dynall[-1].extend.dyn_id_str):
             logger.info("[BiliBili推送] 有 UP 删除了动态")
