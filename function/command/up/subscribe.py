@@ -66,7 +66,7 @@ async def main(app: Ariadne, group: Group, anything: RegexResult):
                 MessageChain.create("未搜索到该 UP"),
             )
 
-    if BOT_Status["updating"]:
+    if BOT_Status["updateing"]:
         await app.sendGroupMessage(
             group,
             MessageChain.create("正在订阅，请稍后..."),

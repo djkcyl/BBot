@@ -33,7 +33,7 @@ async def main(app: Ariadne):
     elif len(get_subid_list()) == 0:
         return
 
-    BOT_Status["updating"] = True
+    BOT_Status["updateing"] = True
     sub_list = get_subid_list().copy()
 
     # 动态更新检测
@@ -186,4 +186,4 @@ async def main(app: Ariadne):
         BOT_Status["offset"] = int(dynall[-1].extend.dyn_id_str)
     else:
         logger.debug(dynall)
-    BOT_Status["updating"] = False
+    BOT_Status["updateing"] = False
