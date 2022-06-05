@@ -37,7 +37,7 @@ async def main(app: Ariadne):
     except Exception:
         return
     for up in live_list:
-        up_id = up.uid
+        up_id = str(up.uid)
         up_name = up.name
         # 检测订阅配置里是否有该 up
         if up_id in sub_list:
@@ -48,7 +48,7 @@ async def main(app: Ariadne):
             if up_id in BOT_Status["skip_uid"]:
                 continue
             # 如果存在直播信息则为已开播
-            if "live_info" in up:
+            if up.live_info.status:
                 if up_id in BOT_Status["liveing"]:
                     continue
                 room_id = up.live_info.room_id

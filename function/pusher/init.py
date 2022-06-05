@@ -13,7 +13,6 @@ from core.bot_config import BotConfig
 from library.bilibili_request import bilibili_login
 from library.grpc import grpc_dynall_get, grpc_uplist_get
 
-
 channel = Channel.current()
 
 
@@ -48,9 +47,9 @@ async def init(app: Ariadne):
     # 直播状态初始化
     resp = await grpc_uplist_get()
     for uid in resp.items:
-        if "live_info" in uid:
+        if uid.live_info.status:
             logger.info(f"[BiliBili推送] {uid.name} 已开播")
-            BOT_Status["liveing"].append(uid.uid)
+            BOT_Status["liveing"].append(str(uid.uid))
     logger.info(f"[BiliBili推送] 直播初始化完成，当前 {len(BOT_Status['liveing'])} 个 UP 正在直播")
 
     # 动态初始化

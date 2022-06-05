@@ -78,6 +78,7 @@ saya.install_behaviours(
 
 with saya.module_context():
 
+    saya.require("function.command.announcement")
     saya.require("function.command.quit_group")
     saya.require("function.command.status")
     saya.require("function.command.video_resolve")
