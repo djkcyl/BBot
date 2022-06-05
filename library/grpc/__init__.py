@@ -2,11 +2,10 @@ import grpc.aio
 
 from loguru import logger
 from grpc import RpcError
-from grpc_status import rpc_status
-from google.protobuf.json_format import MessageToDict
 
 from ..bilibili_request import get_token, bilibili_client
 
+from .bilibili.rpc.status_pb2 import Status
 from .bilibili.metadata.metadata_pb2 import Metadata
 from .bilibili.metadata.device.device_pb2 import Device
 from .bilibili.metadata.locale.locale_pb2 import Locale
@@ -67,9 +66,10 @@ async def grpc_dyn_get(uid):
         try:
             resp = await stub.DynSpace(req, metadata=meta)
         except RpcError as e:
-            status = rpc_status.from_call(e)
-            logger.error(status)
-        return MessageToDict(resp, preserving_proto_field_name=True)
+            for key, value in e.trailing_metadata():
+                if key == 'grpc-status-details-bin':
+                    logger.error(Status.FromString(value))
+        return resp
 
 
 async def grpc_dynall_get():
@@ -80,8 +80,9 @@ async def grpc_dynall_get():
         try:
             resp = await stub.DynAll(req, metadata=meta)
         except RpcError as e:
-            status = rpc_status.from_call(e)
-            logger.error(status)
+            for key, value in e.trailing_metadata():
+                if key == 'grpc-status-details-bin':
+                    logger.error(Status.FromString(value))
 
         exclude_list = [
             DynamicType.ad,
@@ -104,9 +105,10 @@ async def grpc_uplist_get():
         try:
             resp = await stub.DynMixUpListViewMore(req, metadata=meta)
         except RpcError as e:
-            status = rpc_status.from_call(e)
-            logger.error(status)
-        return MessageToDict(resp, preserving_proto_field_name=True)
+            for key, value in e.trailing_metadata():
+                if key == 'grpc-status-details-bin':
+                    logger.error(Status.FromString(value))
+        return resp
 
 
 async def grpc_studio_get(room_id):
@@ -117,6 +119,7 @@ async def grpc_studio_get(room_id):
         try:
             resp = await stub.GetStudioList(req, metadata=meta)
         except RpcError as e:
-            status = rpc_status.from_call(e)
-            logger.error(status)
+            for key, value in e.trailing_metadata():
+                if key == 'grpc-status-details-bin':
+                    logger.error(Status.FromString(value))
         return resp

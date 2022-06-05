@@ -79,6 +79,7 @@ saya.install_behaviours(
 with saya.module_context():
 
     saya.require("function.command.quit_group")
+    saya.require("function.command.status")
     saya.require("function.command.video_resolve")
     saya.require("function.command.vive_dynamic")
 
@@ -93,6 +94,9 @@ with saya.module_context():
     saya.require("function.command.up.get_subscribe")
     saya.require("function.command.up.subscribe")
     saya.require("function.command.up.unsubscribe")
+
+    saya.require("function.command.vip.add")
+    saya.require("function.command.vip.remove")
 
     saya.require("function.command.whitelist.add")
     saya.require("function.command.whitelist.close")

@@ -35,7 +35,7 @@ async def main(app: Ariadne, group: Group, anything: RegexResult):
         )
 
     if res := await grpc_dyn_get(uid):
-        shot_image = await get_dynamic_screenshot(res["list"][0]["extend"]["dyn_id_str"])
+        shot_image = await get_dynamic_screenshot(res.list[0].extend.dyn_id_str)
         await app.sendGroupMessage(
             group, MessageChain.create(Image(data_bytes=shot_image))
         )

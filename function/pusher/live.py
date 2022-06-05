@@ -20,14 +20,11 @@ from library.bilibili_request import get_status_info_by_uids, relation_modify
 channel = Channel.current()
 
 
-@channel.use(SchedulerSchema(every_custom_seconds(5)))
+@channel.use(SchedulerSchema(every_custom_seconds(3)))
 async def main(app: Ariadne):
 
-    if not BOT_Status["init"]:
+    if not BOT_Status["init"] or BOT_Status["init"] and len(get_subid_list()) == 0:
         return
-    elif len(get_subid_list()) == 0:
-        return
-
     sub_list = get_subid_list().copy()
 
     # 直播状态更新检测
@@ -35,24 +32,26 @@ async def main(app: Ariadne):
     # 由于叔叔的 api 太烂了，会把同一个 up 开播和未开播的状态放在同一个列表里，所以这里需要去重
     # 不过好消息是，这个列表可以按照开播和未开播的顺序排列
     lives = []
-    for up in live_statu.get("items", []):
-        up_id = up["uid"]
-        up_name = up["name"]
-        if up_id in BOT_Status["skip_uid"]:
-            continue
+    try:
+        live_list = live_statu.items
+    except Exception:
+        return
+    for up in live_list:
+        up_id = up.uid
+        up_name = up.name
         # 检测订阅配置里是否有该 up
         if up_id in sub_list:
             set_name(up_id, up_name)
-            # 如果已经在被检测过的列表里，则跳过
             if up_id in lives:
                 continue
-            else:
-                lives.append(up_id)
+            lives.append(up_id)
+            if up_id in BOT_Status["skip_uid"]:
+                continue
             # 如果存在直播信息则为已开播
             if "live_info" in up:
                 if up_id in BOT_Status["liveing"]:
                     continue
-                room_id = up["live_info"]["room_id"]
+                room_id = up.live_info.room_id
                 resp = await get_status_info_by_uids({"uids": [up_id]})
                 title = resp["data"][up_id]["title"]
                 area_parent = resp["data"][up_id]["area_v2_parent_name"]
@@ -69,7 +68,7 @@ async def main(app: Ariadne):
                         continue
                     if data["send"]["live"]:
                         nick = (
-                            f"{up_nick} "
+                            f"*{up_nick} "
                             if (up_nick := data["nick"])
                             else f"{up_name}（{up_id}）"
                         )

@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from core import BOT_Status
+from core.group_config import GroupPermission
 
 from .grpc import grpc_dyn_get
 from .bilibili_request import relation_modify
@@ -58,6 +59,7 @@ async def subscribe_uid(uid, groupid) -> str:
     """在某个群订阅某个 up"""
     uid = str(uid)
     groupid = str(groupid)
+    gp = GroupPermission(int(groupid))
     # 做一些小处理，用来避免出现奇怪的bug
     while BOT_Status["updateing"]:
         await asyncio.sleep(0.1)
@@ -69,12 +71,12 @@ async def subscribe_uid(uid, groupid) -> str:
     if not r:
         BOT_Status["init"] = True
         return f"该 UP（{uid}）状态异常，订阅失败"
-    up_name = r["list"][0]["modules"][0]["module_author"]["author"]["name"]
+    up_name = r.list[0].modules[0].module_author.author.name
     uid_sub_group = sub.get_data().get(uid, {})
     if groupid in uid_sub_group:
         BOT_Status["init"] = True
         return f"本群已订阅 UP {up_name}（{uid}），请勿重复订阅"
-    if len(get_group_sublist(groupid)) >= 12:
+    if len(get_group_sublist(groupid)) >= 12 and not gp.is_vip():
         BOT_Status["init"] = True
         return "每个群聊最多仅可订阅 12 个 UP"
     if uid not in sub.get_data():
@@ -108,6 +110,7 @@ async def unsubscribe_uid(uid, groupid):
     while BOT_Status["updateing"]:
         await asyncio.sleep(0.1)
     BOT_Status["init"] = False
+    BOT_Status["skip"] += 2
     BOT_Status["skip_uid"].append(uid)
 
     uid_sub_group = sub.get_data().get(uid, {})
@@ -115,14 +118,13 @@ async def unsubscribe_uid(uid, groupid):
         BOT_Status["init"] = True
         return f"本群未订阅该 UP（{uid}）"
     up_name = uid_sub_group[groupid]["name"]
-    up_nick = uid_sub_group[groupid]["nick"]
     if not len(sub.get_data()[uid]) - 1:
         await delete_uid(uid)
     else:
         del sub.get_data()[uid][groupid]
     sub.save()
     BOT_Status["init"] = True
-    return f"{up_nick or up_name}（{uid}）退订成功"
+    return f"{up_name}（{uid}）退订成功"
 
 
 async def delete_uid(uid):

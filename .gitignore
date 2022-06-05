@@ -9,3 +9,4 @@ data/subscription_list copy.json
 logs/
 test.py
 data/history.db
+data/group_list.json

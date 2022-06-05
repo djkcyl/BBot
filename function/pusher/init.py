@@ -47,10 +47,10 @@ async def init(app: Ariadne):
 
     # 直播状态初始化
     resp = await grpc_uplist_get()
-    for uid in resp["items"]:
+    for uid in resp.items:
         if "live_info" in uid:
-            logger.info(f"[BiliBili推送] {uid['name']} 已开播")
-            BOT_Status["liveing"].append(uid["uid"])
+            logger.info(f"[BiliBili推送] {uid.name} 已开播")
+            BOT_Status["liveing"].append(uid.uid)
     logger.info(f"[BiliBili推送] 直播初始化完成，当前 {len(BOT_Status['liveing'])} 个 UP 正在直播")
 
     # 动态初始化

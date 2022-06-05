@@ -23,10 +23,8 @@ from library.grpc.bilibili.app.dynamic.v2.dynamic_pb2 import DynamicType, DynMod
 channel = Channel.current()
 
 
-@channel.use(SchedulerSchema(every_custom_seconds(5)))
+@channel.use(SchedulerSchema(every_custom_seconds(3)))
 async def main(app: Ariadne):
-
-    logger.debug(BOT_Status)
 
     if not BOT_Status["init"]:
         return
@@ -38,9 +36,11 @@ async def main(app: Ariadne):
 
     # 动态更新检测
     # 获取当前登录账号的动态列表
+    logger.debug("[Dynamic] Start to get dynamic list")
     dynall = await grpc_dynall_get()
-    logger.debug(f"dynall: 共 {len(dynall)} 个")
+    logger.debug(f"[Dynamic] Get {len(dynall)} dynamics")
     if dynall:
+        logger.debug("[Dynamic] Start to check dynamic")
         for dyn in dynall:
             up_id = str(dyn.modules[0].module_author.author.mid)
             up_name = dyn.modules[0].module_author.author.name
@@ -53,6 +53,8 @@ async def main(app: Ariadne):
                 ]
             )
 
+            logger.debug(f"[Dynamic] Check dynamic {dynid}, {up_name}({up_id})")
+
             try:
                 if (
                     int(dynid) <= BOT_Status["offset"]
@@ -63,6 +65,7 @@ async def main(app: Ariadne):
             except ValueError:
                 continue
 
+            logger.debug(f"[Dynamic] Start to push dynamic {dynid}")
             if up_id in sub_list:
                 logger.info(
                     f"[BiliBili推送] {dynid} | {up_name} 更新了动态，共有 {len(sub_list[up_id])} 个群订阅了该 UP"
@@ -79,7 +82,10 @@ async def main(app: Ariadne):
                         MessageChain.create(Image(data_bytes=await text2image(err_msg))),
                     )
                     break
-                set_name(up_id, up_name)
+                if set_name(up_id, up_name):
+                    logger.debug(f"[Dynamic] Set {up_id} name to {up_name}")
+                else:
+                    logger.debug(f"[Dynamic] Can't set {up_id} name to {up_name}")
 
                 if dyn.card_type == DynamicType.forward:
                     type_text = "转发了一条动态！"
@@ -108,7 +114,7 @@ async def main(app: Ariadne):
                         continue
                     if data["send"]["dynamic"]:
                         nick = (
-                            f"{up_nick} "
+                            f"*{up_nick} "
                             if (up_nick := data["nick"])
                             else f"{up_name}（{up_id}）"
                         )
@@ -135,12 +141,12 @@ async def main(app: Ariadne):
                             await asyncio.sleep(1)
                         except UnknownTarget:
                             remove_list = []
-                            for subid, _, _ in get_group_sublist(groupid):
-                                await unsubscribe_uid(subid, groupid)
-                                remove_list.append(subid)
                             logger.warning(
                                 f"[BiliBili推送] {dynid} | 推送失败，找不到该群 {groupid}，已删除该群订阅的 {len(remove_list)} 个 UP"
                             )
+                            for subid, _, _ in get_group_sublist(groupid):
+                                await unsubscribe_uid(subid, groupid)
+                                remove_list.append(subid)
                         except Exception as e:
                             logger.error(f"[BiliBili推送] {dynid} | 推送失败，未知错误")
                             logger.exception(e)
@@ -187,3 +193,8 @@ async def main(app: Ariadne):
     else:
         logger.debug(dynall)
     BOT_Status["updateing"] = False
+
+
+@channel.use(SchedulerSchema(every_custom_seconds(2)))
+async def debug():
+    logger.debug(BOT_Status)

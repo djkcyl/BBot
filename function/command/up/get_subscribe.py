@@ -31,7 +31,7 @@ async def sub_list(app: Ariadne, group: Group):
         msg = [f"本群共订阅 {sublist_count} 个 UP"]
         for i, data in enumerate(sublist, 1):
             uid, name, nick = data
-            msg.append(f"\n{i}. {nick or name}（{uid}）")
+            msg.append(f"\n{i}. {f'*{nick}' if nick else name}（{uid}）")
         await app.sendGroupMessage(group, MessageChain.create(msg))
 
     raise PropagationCancelled
