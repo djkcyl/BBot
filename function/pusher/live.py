@@ -28,7 +28,10 @@ async def main(app: Ariadne):
     sub_list = get_subid_list().copy()
 
     # 直播状态更新检测
-    live_statu = await grpc_uplist_get()
+    try:
+        live_statu = await asyncio.wait_for(grpc_uplist_get(), timeout=10)
+    except asyncio.TimeoutError:
+        logger.debug("[Live] Get live status failed")
     # 由于叔叔的 api 太烂了，会把同一个 up 开播和未开播的状态放在同一个列表里，所以这里需要去重
     # 不过好消息是，这个列表可以按照开播和未开播的顺序排列
     lives = []
@@ -70,10 +73,10 @@ async def main(app: Ariadne):
                         nick = (
                             f"*{up_nick} "
                             if (up_nick := data["nick"])
-                            else f"{up_name}（{up_id}）"
+                            else f"UP {up_name}（{up_id}）"
                         )
                         msg = [
-                            f"本群订阅的 UP {nick}在 {room_area} 区开播啦 ！\n标题：{title}\n",
+                            f"本群订阅的 {nick}在 {room_area} 区开播啦 ！\n标题：{title}\n",
                             cover_img,
                             f"\nhttps://live.bilibili.com/{room_id}",
                         ]
@@ -116,11 +119,11 @@ async def main(app: Ariadne):
                             nick = (
                                 f"{up_nick} "
                                 if (up_nick := data["nick"])
-                                else f"{up_name}（{up_id}）"
+                                else f"UP {up_name}（{up_id}）"
                             )
                             await app.sendGroupMessage(
                                 groupid,
-                                MessageChain.create(f"本群订阅的 UP {nick}已下播！"),
+                                MessageChain.create(f"本群订阅的 {nick}已下播！"),
                             )
 
                         except UnknownTarget:

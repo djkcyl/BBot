@@ -37,7 +37,17 @@ async def main(app: Ariadne):
     # 动态更新检测
     # 获取当前登录账号的动态列表
     logger.debug("[Dynamic] Start to get dynamic list")
-    dynall = await grpc_dynall_get()
+    for _ in range(3):
+        try:
+            dynall = await asyncio.wait_for(grpc_dynall_get(), timeout=10)
+            break
+        except asyncio.TimeoutError:
+            logger.debug("[Dynamic] Get dynamic list failed, retry")
+            continue
+    else:
+        logger.debug("[Dynamic] Get dynamic list failed")
+        BOT_Status["updateing"] = False
+
     logger.debug(f"[Dynamic] Get {len(dynall)} dynamics")
     if dynall:
         logger.debug("[Dynamic] Start to check dynamic")
@@ -116,10 +126,10 @@ async def main(app: Ariadne):
                         nick = (
                             f"*{up_nick} "
                             if (up_nick := data["nick"])
-                            else f"{up_name}（{up_id}）"
+                            else f"UP {up_name}（{up_id}）"
                         )
                         msg = [
-                            f"本群订阅的 UP {nick}{type_text}\n",
+                            f"本群订阅的 {nick}{type_text}\n",
                             dyn_img,
                             f"\nhttps://t.bilibili.com/{dynid}",
                         ]
@@ -193,6 +203,7 @@ async def main(app: Ariadne):
     else:
         logger.debug(dynall)
     BOT_Status["updateing"] = False
+    logger.debug("[Dynamic] Updateing finished")
 
 
 @channel.use(SchedulerSchema(every_custom_seconds(2)))

@@ -40,6 +40,8 @@ async def main(
         uids = uid.result.asDisplay()
         if uids.isdigit():
             nicks = nick.result.asDisplay()
+            if len(nicks) > 24:
+                msg = "昵称过长，设定失败"
             acts = act.result.asDisplay()
             if acts == "设定":
                 msg = "昵称设定成功" if set_nick(uids, group.id, nicks) else "该群未关注此 UP"

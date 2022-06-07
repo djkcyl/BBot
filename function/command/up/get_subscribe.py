@@ -28,7 +28,7 @@ async def sub_list(app: Ariadne, group: Group):
     if sublist_count == 0:
         await app.sendGroupMessage(group, MessageChain.create("本群未订阅任何 UP"))
     else:
-        msg = [f"本群共订阅 {sublist_count} 个 UP"]
+        msg = [f"本群共订阅 {sublist_count} 个 UP\n注：带*号的表示该 UP 已被设定自定义昵称"]
         for i, data in enumerate(sublist, 1):
             uid, name, nick = data
             msg.append(f"\n{i}. {f'*{nick}' if nick else name}（{uid}）")
