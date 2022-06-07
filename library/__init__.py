@@ -71,7 +71,11 @@ async def subscribe_uid(uid, groupid) -> str:
     if not r:
         BOT_Status["init"] = True
         return f"该 UP（{uid}）状态异常，订阅失败"
-    up_name = r.list[0].modules[0].module_author.author.name
+    try:
+        up_name = r.list[0].modules[0].module_author.author.name
+    except IndexError:
+        BOT_Status["init"] = True
+        return f"该 UP（{uid}）未发送任何动态，订阅失败"
     uid_sub_group = sub.get_data().get(uid, {})
     if groupid in uid_sub_group:
         BOT_Status["init"] = True

@@ -87,11 +87,14 @@ async def main(app: Ariadne):
                     err_msg = f"[BiliBili推送] {dynid} | {up_name} 更新了动态，截图失败"
                     logger.error(err_msg)
                     logger.exception(e)
-                    await app.sendFriendMessage(
+                    BOT_Status["updateing"] = False
+                    return await app.sendFriendMessage(
                         BotConfig.master,
-                        MessageChain.create(Image(data_bytes=await text2image(err_msg))),
+                        MessageChain.create(
+                            Image(data_bytes=await text2image(f"{err_msg}\n{e}"))
+                        ),
                     )
-                    break
+
                 if set_name(up_id, up_name):
                     logger.debug(f"[Dynamic] Set {up_id} name to {up_name}")
                 else:
