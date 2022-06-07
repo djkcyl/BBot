@@ -71,12 +71,11 @@ class Permission:
             member_level = cls.get(event.sender)
 
             if (
-                member_level < cls.GROUP_ADMIN
-                and member_level >= level
-                and BotConfig.Debug.enable
-                and event.sender.group.id not in BotConfig.Debug.groups
-                or member_level < cls.GROUP_ADMIN
-                and member_level < level
+                    cls.GROUP_ADMIN > member_level >= level
+                    and BotConfig.Debug.enable
+                    and event.sender.group.id not in BotConfig.Debug.groups
+                    or member_level < cls.GROUP_ADMIN
+                    and member_level < level
             ):
                 raise ExecutionStop()
 
@@ -88,12 +87,11 @@ class Permission:
         member_level = cls.get(member.id)
 
         if (
-            member_level < cls.GROUP_ADMIN
-            and member_level >= level
-            and BotConfig.Debug.enable
-            and member.group.id not in BotConfig.Debug.groups
-            or member_level < cls.GROUP_ADMIN
-            and member_level < level
+                cls.GROUP_ADMIN > member_level >= level
+                and BotConfig.Debug.enable
+                and member.group.id not in BotConfig.Debug.groups
+                or member_level < cls.GROUP_ADMIN
+                and member_level < level
         ):
             raise ExecutionStop()
 
@@ -115,10 +113,10 @@ class Interval:
 
     @classmethod
     def require(
-        cls,
-        suspend_time: float = 10,
-        max_exec: int = 1,
-        override_level: int = Permission.MASTER,
+            cls,
+            suspend_time: float = 10,
+            max_exec: int = 1,
+            override_level: int = Permission.MASTER,
     ):
         """
         指示用户每执行 `max_exec` 次后需要至少相隔 `suspend_time` 秒才能再次触发功能
@@ -154,11 +152,11 @@ class Interval:
 
     @classmethod
     async def manual(
-        cls,
-        member: Union[Member, int],
-        suspend_time: float = 10,
-        max_exec: int = 1,
-        override_level: int = Permission.MASTER,
+            cls,
+            member: Union[Member, int],
+            suspend_time: float = 10,
+            max_exec: int = 1,
+            override_level: int = Permission.MASTER,
     ):
         if Permission.get(member) >= override_level:
             return
