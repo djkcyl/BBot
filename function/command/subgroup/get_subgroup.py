@@ -21,6 +21,7 @@ channel = Channel.current()
                 RegexMatch(r"(查看)?订阅组列表")
             )
         ],
+        priority=10
     )
 )
 async def sub_list(app: Ariadne, friend: Friend):
