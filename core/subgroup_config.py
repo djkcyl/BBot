@@ -35,7 +35,7 @@ def write_to_json():
     )
 
 
-class SubGroupPermission:
+class SubGroup:
     groupName: str
 
     def __init__(self, groupName: str):

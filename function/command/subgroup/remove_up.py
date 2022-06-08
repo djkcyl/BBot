@@ -14,7 +14,7 @@ from graia.ariadne.message.parser.twilight import (
 )
 
 from core.control import Permission
-from core.subgroup_config import SubGroupPermission
+from core.subgroup_config import SubGroup
 
 channel = Channel.current()
 
@@ -57,7 +57,7 @@ async def main(app: Ariadne, friend: Friend, groupName: RegexResult, uid: RegexR
         if len(uid_list) == 0:
             await app.sendFriendMessage(friend, MessageChain.create(REMOVE_ERROR_MSG))
             return
-        sg = SubGroupPermission(group_name)
+        sg = SubGroup(group_name)
         if sg.is_in_groupNames():
             uid = uid_list[0]
             if sg.remove_from_subGroup_ups(uid):

@@ -12,7 +12,7 @@ from graia.ariadne.message.parser.twilight import (
 )
 
 from core.control import Permission
-from core.subgroup_config import SubGroupPermission
+from core.subgroup_config import SubGroup
 
 channel = Channel.current()
 
@@ -37,7 +37,7 @@ async def main(app: Ariadne, friend: Friend, groupName: RegexResult):
     Permission.manual(friend, Permission.MASTER)
     if groupName.matched:
         say = groupName.result.asDisplay()
-        sg = SubGroupPermission(say)
+        sg = SubGroup(say)
         if sg.add_to_groupNames():
             await app.sendFriendMessage(friend, MessageChain.create(f"成功将名称 [{say}] 加入订阅组"))
         else:

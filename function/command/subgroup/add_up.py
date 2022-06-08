@@ -14,7 +14,7 @@ from graia.ariadne.message.parser.twilight import (
 )
 
 from core.control import Permission
-from core.subgroup_config import SubGroupPermission
+from core.subgroup_config import SubGroup
 
 channel = Channel.current()
 
@@ -64,7 +64,7 @@ async def main(app: Ariadne, friend: Friend, groupName: RegexResult, sublist: Re
         if len(uid_list) == 0:
             await app.sendFriendMessage(friend, MessageChain.create(ADD_ERROR_MSG))
             return
-        sg = SubGroupPermission(group_name)
+        sg = SubGroup(group_name)
         if sg.is_in_groupNames():
             if sg.add_to_subGroups(uid_list):
                 await app.sendFriendMessage(friend, MessageChain.create(f"添加到订阅组 [{group_name}] 成功"))
