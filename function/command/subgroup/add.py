@@ -28,13 +28,19 @@ channel = Channel.current()
     )
 )
 async def main(app: Ariadne, friend: Friend, groupName: RegexResult):
+    """
+        添加订阅组指令
+
+        Attributes:
+            groupName: 订阅组名称, 用于添加组
+    """
     Permission.manual(friend, Permission.MASTER)
     if groupName.matched:
         say = groupName.result.asDisplay()
         sg = SubGroupPermission(say)
         if sg.add_to_groupNames():
-            await app.sendFriendMessage(friend, MessageChain.create("成功将该名称加入订阅组"))
+            await app.sendFriendMessage(friend, MessageChain.create(f"成功将名称 [{say}] 加入订阅组"))
         else:
-            await app.sendFriendMessage(friend, MessageChain.create("该名称已在订阅组中"))
+            await app.sendFriendMessage(friend, MessageChain.create(f"该名称 [{say}] 已在订阅组中"))
     else:
         await app.sendFriendMessage(friend, MessageChain.create("未输入订阅组名称"))
