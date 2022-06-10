@@ -20,7 +20,9 @@ inc = InterruptControl(saya.broadcast)
 
 
 class ConfirmWaiter(Waiter.create([GroupMessage], block_propagation=True)):
-    def __init__(self, group: Union[Group, int], member: Union[Member, int], verify: str):
+    def __init__(
+        self, group: Union[Group, int], member: Union[Member, int], verify: str
+    ):
         self.group = group if isinstance(group, int) else group.id
         self.member = member if isinstance(member, int) else member.id
         self.verify = verify

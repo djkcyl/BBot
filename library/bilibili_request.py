@@ -21,7 +21,9 @@ head = {
 }
 
 login_cache_file = Path("data/login_cache.json")
-bilibili_client = bilibiliMobile(BotConfig.Bilibili.username, BotConfig.Bilibili.password)
+bilibili_client = bilibiliMobile(
+    BotConfig.Bilibili.username, BotConfig.Bilibili.password
+)
 bilibili_token = None
 token_json = None
 

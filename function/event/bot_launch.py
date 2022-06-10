@@ -1,4 +1,3 @@
-
 from loguru import logger
 from graia.saya import Channel
 from graia.ariadne.app import Ariadne

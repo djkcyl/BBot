@@ -39,12 +39,8 @@ async def main(app: Ariadne, friend: Friend, group_name: RegexResult):
         say = group_name.result.display
         sg = SubGroup(say)
         if sg.add_to_group_names():
-            await app.send_friend_message(
-                friend, MessageChain(f"成功将名称 [{say}] 加入订阅组")
-            )
+            await app.send_friend_message(friend, MessageChain(f"成功将名称 [{say}] 加入订阅组"))
         else:
-            await app.send_friend_message(
-                friend, MessageChain(f"该名称 [{say}] 已在订阅组中")
-            )
+            await app.send_friend_message(friend, MessageChain(f"该名称 [{say}] 已在订阅组中"))
     else:
         await app.send_friend_message(friend, MessageChain("未输入订阅组名称"))

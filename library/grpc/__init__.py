@@ -59,7 +59,9 @@ def make_metadata():
 
 
 async def grpc_dyn_get(uid):
-    async with grpc.aio.secure_channel(server, grpc.ssl_channel_credentials()) as channel:
+    async with grpc.aio.secure_channel(
+        server, grpc.ssl_channel_credentials()
+    ) as channel:
         stub = DynamicStub(channel)
         req = DynSpaceReq(host_uid=int(uid))
         meta = make_metadata()
@@ -67,13 +69,15 @@ async def grpc_dyn_get(uid):
             resp = await stub.DynSpace(req, metadata=meta)
         except RpcError as e:
             for key, value in e.trailing_metadata():
-                if key == 'grpc-status-details-bin':
+                if key == "grpc-status-details-bin":
                     logger.error(Status.FromString(value))
         return resp
 
 
 async def grpc_dynall_get():
-    async with grpc.aio.secure_channel(server, grpc.ssl_channel_credentials()) as channel:
+    async with grpc.aio.secure_channel(
+        server, grpc.ssl_channel_credentials()
+    ) as channel:
         stub = DynamicStub(channel)
         req = DynAllReq()
         meta = make_metadata()
@@ -81,7 +85,7 @@ async def grpc_dynall_get():
             resp = await stub.DynAll(req, metadata=meta)
         except RpcError as e:
             for key, value in e.trailing_metadata():
-                if key == 'grpc-status-details-bin':
+                if key == "grpc-status-details-bin":
                     logger.error(Status.FromString(value))
 
         exclude_list = [
@@ -98,7 +102,9 @@ async def grpc_dynall_get():
 
 
 async def grpc_uplist_get():
-    async with grpc.aio.secure_channel(server, grpc.ssl_channel_credentials()) as channel:
+    async with grpc.aio.secure_channel(
+        server, grpc.ssl_channel_credentials()
+    ) as channel:
         stub = DynamicStub(channel)
         req = DynMixUpListViewMoreReq(sort_type=1)
         meta = make_metadata()
@@ -106,13 +112,15 @@ async def grpc_uplist_get():
             resp = await stub.DynMixUpListViewMore(req, metadata=meta)
         except RpcError as e:
             for key, value in e.trailing_metadata():
-                if key == 'grpc-status-details-bin':
+                if key == "grpc-status-details-bin":
                     logger.error(Status.FromString(value))
         return resp
 
 
 async def grpc_studio_get(room_id):
-    async with grpc.aio.secure_channel(server, grpc.ssl_channel_credentials()) as channel:
+    async with grpc.aio.secure_channel(
+        server, grpc.ssl_channel_credentials()
+    ) as channel:
         stub = StudioListStub(channel)
         req = GetStudioListReq(room_id=int(room_id))
         meta = make_metadata()
@@ -120,6 +128,6 @@ async def grpc_studio_get(room_id):
             resp = await stub.GetStudioList(req, metadata=meta)
         except RpcError as e:
             for key, value in e.trailing_metadata():
-                if key == 'grpc-status-details-bin':
+                if key == "grpc-status-details-bin":
                     logger.error(Status.FromString(value))
         return resp

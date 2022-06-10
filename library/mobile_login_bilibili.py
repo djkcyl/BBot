@@ -183,7 +183,9 @@ class bilibiliMobile:
         data = data_sorted
         sign = self.calcSign(data)
         data["sign"] = sign
-        response = await self.session.post(self.send_url, headers=self.headers, data=data)
+        response = await self.session.post(
+            self.send_url, headers=self.headers, data=data
+        )
         # 验证登录
         if response.json()["code"] == 0:
             captcha_key = response.json()["data"]["captcha_key"]

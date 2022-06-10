@@ -23,21 +23,19 @@ channel = Channel.current()
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight([FullMatch("查看动态"), "anything" @ WildcardMatch()])],
+        inline_dispatchers=[
+            Twilight([FullMatch("查看动态"), "anything" @ WildcardMatch()])
+        ],
         decorators=[Permission.require(), Interval.require(20)],
     )
 )
 async def main(app: Ariadne, group: Group, anything: RegexResult):
 
     if not (uid := await uid_extract(anything.result.display)):
-        return await app.send_group_message(
-            group, MessageChain("请输入正确的 UP UID 或 首页链接")
-        )
+        return await app.send_group_message(group, MessageChain("请输入正确的 UP UID 或 首页链接"))
 
     if res := await grpc_dyn_get(uid):
         shot_image = await get_dynamic_screenshot(res.list[0].extend.dyn_id_str)
-        await app.send_group_message(
-            group, MessageChain(Image(data_bytes=shot_image))
-        )
+        await app.send_group_message(group, MessageChain(Image(data_bytes=shot_image)))
     else:
         await app.send_group_message(group, MessageChain("该 UP 未发布任何动态"))

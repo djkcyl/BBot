@@ -33,7 +33,9 @@ class SubList:
         else:
             self.subscription_list_json.write_text(
                 json.dumps(
-                    {"subscription": self.subscription_list}, indent=2, ensure_ascii=False
+                    {"subscription": self.subscription_list},
+                    indent=2,
+                    ensure_ascii=False,
                 )
             )
 
