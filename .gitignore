@@ -10,3 +10,4 @@ logs/
 test.py
 data/history.db
 data/group_list.json
+data/subgroup_list.json

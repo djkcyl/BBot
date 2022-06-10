@@ -6,8 +6,8 @@ from graia.ariadne.event.message import FriendMessage
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import (
     Twilight,
+    ArgResult,
     RegexMatch,
-    RegexResult,
     ArgumentMatch,
 )
 
@@ -47,26 +47,18 @@ REMOVE_ERROR_MSG = """删除失败, 请正确输入!
         ],
     )
 )
-async def main(app: Ariadne, friend: Friend, groupName: RegexResult, uid: RegexResult):
+async def main(app: Ariadne, friend: Friend, groupName: ArgResult, uid: ArgResult):
     Permission.manual(friend, Permission.MASTER)
 
     if groupName.matched and uid.matched:
-        group_name = (
-            " ".join(groupName.result)
-            if len(groupName.result) > 1
-            else groupName.result[0]
-        )
-        uid_list: list = uid.result is list  # 已经是list
-        if not uid_list:
-            await app.sendFriendMessage(friend, MessageChain.create(REMOVE_ERROR_MSG))
-            return
+        group_name = groupName.result[0]
+        uid_ = uid.result[0]
         sg = SubGroup(group_name)
         if sg.is_in_groupNames():
-            uid = uid_list[0]
-            if sg.remove_from_subGroup_ups(uid):
+            if sg.remove_from_subGroup_ups(uid_):
                 await app.sendFriendMessage(
                     friend,
-                    MessageChain.create(f"从 [{group_name}] 订阅组中删除 [uid: {uid}] 成功"),
+                    MessageChain.create(f"从 [{group_name}] 订阅组中删除 [uid: {uid_}] 成功"),
                 )
             else:
                 await app.sendFriendMessage(

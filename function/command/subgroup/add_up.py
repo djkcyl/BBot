@@ -6,8 +6,8 @@ from graia.ariadne.event.message import FriendMessage
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import (
     Twilight,
+    ArgResult,
     RegexMatch,
-    RegexResult,
     ArgumentMatch,
 )
 
@@ -48,9 +48,7 @@ ADD_ERROR_MSG = """增加失败, 请正确输入!
         ],
     )
 )
-async def main(
-    app: Ariadne, friend: Friend, groupName: RegexResult, sublist: RegexResult
-):
+async def main(app: Ariadne, friend: Friend, groupName: ArgResult, sublist: ArgResult):
     """
     通过指定的命令进行添加up主到对应的订阅组中
 
@@ -61,15 +59,8 @@ async def main(
     Permission.manual(friend, Permission.MASTER)
 
     if groupName.matched and sublist.matched:
-        group_name = (
-            " ".join(groupName.result)
-            if len(groupName.result) > 1
-            else groupName.result[0]
-        )
-        uid_list: list = sublist.result is list  # 已经是list
-        if not uid_list:
-            await app.sendFriendMessage(friend, MessageChain.create(ADD_ERROR_MSG))
-            return
+        group_name = groupName.result[0]
+        uid_list: list = sublist.result
         sg = SubGroup(group_name)
         if sg.is_in_groupNames():
             if sg.add_to_subGroups(uid_list):
