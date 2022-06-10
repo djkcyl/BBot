@@ -71,7 +71,8 @@ class Permission:
             member_level = cls.get(event.sender)
 
             if (
-                cls.GROUP_ADMIN > member_level >= level
+                member_level < cls.GROUP_ADMIN
+                and member_level >= level
                 and BotConfig.Debug.enable
                 and event.sender.group.id not in BotConfig.Debug.groups
                 or member_level < cls.GROUP_ADMIN
@@ -87,7 +88,8 @@ class Permission:
         member_level = cls.get(member.id)
 
         if (
-            cls.GROUP_ADMIN > member_level >= level
+            member_level < cls.GROUP_ADMIN
+            and member_level >= level
             and BotConfig.Debug.enable
             and member.group.id not in BotConfig.Debug.groups
             or member_level < cls.GROUP_ADMIN
