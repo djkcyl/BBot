@@ -92,6 +92,12 @@ with saya.module_context():
 
     saya.require("function.command.menu")
 
+    saya.require("function.command.subgroup.get_subgroup")
+    saya.require("function.command.subgroup.add")
+    saya.require("function.command.subgroup.add_up")
+    saya.require("function.command.subgroup.remove")
+    saya.require("function.command.subgroup.remove_up")
+
     saya.require("function.command.up.get_subscribe")
     saya.require("function.command.up.subscribe")
     saya.require("function.command.up.unsubscribe")
