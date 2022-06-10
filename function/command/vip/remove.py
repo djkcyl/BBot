@@ -30,14 +30,14 @@ channel = Channel.current()
 async def main(app: Ariadne, friend: Friend, groupid: RegexResult):
     Permission.manual(friend, Permission.MASTER)
     if groupid.matched:
-        say = groupid.result.asDisplay()
+        say = groupid.result.display
         if say.isdigit():
             gp = GroupPermission(int(say))
             if gp.remove_from_vips:
-                await app.sendFriendMessage(friend, MessageChain.create("成功取消该群的 vip"))
+                await app.send_friend_message(friend, MessageChain("成功取消该群的 vip"))
             else:
-                await app.sendFriendMessage(friend, MessageChain.create("该群不是 vip 群"))
+                await app.send_friend_message(friend, MessageChain("该群不是 vip 群"))
         else:
-            await app.sendFriendMessage(friend, MessageChain.create("群号仅可为数字"))
+            await app.send_friend_message(friend, MessageChain("群号仅可为数字"))
     else:
-        await app.sendFriendMessage(friend, MessageChain.create("未输入群号"))
+        await app.send_friend_message(friend, MessageChain("未输入群号"))

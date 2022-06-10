@@ -15,17 +15,17 @@ async def main(app: Ariadne, event: BotInvitedJoinGroupRequestEvent):
     """
     收到入群事件
     """
-    gp = GroupPermission(event.sourceGroup)
+    gp = GroupPermission(event.source_group)
     msg = [
-        f"收到入群邀请事件：{event.groupName}（{event.sourceGroup}）\n",
+        f"收到入群邀请事件：{event.group_name}（{event.source_group}）\n",
         f"邀请来源：{event.nickname}（{event.supplicant}）\n",
     ]
     if gp.can_join():
         await event.accept()
         for admin in BotConfig.admins:
-            await app.sendFriendMessage(
+            await app.send_friend_message(
                 admin,
-                MessageChain.create(
+                MessageChain(
                     msg,
                     "已自动同意加入",
                 ),
@@ -33,9 +33,9 @@ async def main(app: Ariadne, event: BotInvitedJoinGroupRequestEvent):
     else:
         await event.reject()
         for admin in BotConfig.admins:
-            await app.sendFriendMessage(
+            await app.send_friend_message(
                 admin,
-                MessageChain.create(
+                MessageChain(
                     msg,
                     "该群不在白名单中，已拒绝加入",
                 ),

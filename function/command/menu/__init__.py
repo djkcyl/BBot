@@ -46,7 +46,7 @@ async def main(app: Ariadne, group: Group):
         "BBot 采用 gRPC 接口进行动态检查，关注后目标 UP 将粉丝数 +1，收到动态更新后 BBot 将会对动态点赞。"
     )
 
-    await app.sendGroupMessage(
+    await app.send_group_message(
         group,
-        MessageChain.create(Image(data_bytes=await text2image(help))),
+        MessageChain(Image(data_bytes=await text2image(help))),
     )

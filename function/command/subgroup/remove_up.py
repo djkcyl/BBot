@@ -39,7 +39,7 @@ REMOVE_ERROR_MSG = """删除失败, 请正确输入!
             Twilight(
                 [
                     RegexMatch(r"从订阅组(删除|移除)(主播|[uU][pP])"),
-                    "groupName"
+                    "group_name"
                     @ ArgumentMatch("--name", optional=True, nargs="*", type=str),
                     "uid" @ ArgumentMatch("--uid", optional=True, nargs="*", type=int),
                 ],
@@ -47,24 +47,24 @@ REMOVE_ERROR_MSG = """删除失败, 请正确输入!
         ],
     )
 )
-async def main(app: Ariadne, friend: Friend, groupName: ArgResult, uid: ArgResult):
+async def main(app: Ariadne, friend: Friend, group_name: ArgResult, uid: ArgResult):
     Permission.manual(friend, Permission.MASTER)
 
-    if groupName.matched and uid.matched:
-        group_name = groupName.result[0]
+    if group_name.matched and uid.matched:
+        group_name = group_name.result[0]
         uid_ = uid.result[0]
         sg = SubGroup(group_name)
-        if sg.is_in_groupNames():
+        if sg.is_in_group_names():
             if sg.remove_from_subGroup_ups(uid_):
-                await app.sendFriendMessage(
+                await app.send_friend_message(
                     friend,
-                    MessageChain.create(f"从 [{group_name}] 订阅组中删除 [uid: {uid_}] 成功"),
+                    MessageChain(f"从 [{group_name}] 订阅组中删除 [uid: {uid_}] 成功"),
                 )
             else:
-                await app.sendFriendMessage(
-                    friend, MessageChain.create(f"删除失败, 订阅组 [{group_name}] 中并无订阅的up主!")
+                await app.send_friend_message(
+                    friend, MessageChain(f"删除失败, 订阅组 [{group_name}] 中并无订阅的up主!")
                 )
         else:
-            await app.sendFriendMessage(friend, MessageChain.create("删除的订阅组名称不存在!"))
+            await app.send_friend_message(friend, MessageChain("删除的订阅组名称不存在!"))
     else:
-        await app.sendFriendMessage(friend, MessageChain.create(REMOVE_ERROR_MSG))
+        await app.send_friend_message(friend, MessageChain(REMOVE_ERROR_MSG))

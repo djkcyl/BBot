@@ -24,9 +24,9 @@ async def main(app: Ariadne, group: Group):
         f"[BiliBili推送] 检测到退群事件 > {group.name}({group.id})，已删除该群订阅的 {len(remove_list)} 个 UP"
     )
     for qq in BotConfig.admins:
-        await app.sendFriendMessage(
+        await app.send_friend_message(
             qq,
-            MessageChain.create(
+            MessageChain(
                 "收到被踢出群聊事件",
                 f"\n群号：{group.id}",
                 f"\n群名：{group.name}",

@@ -22,6 +22,6 @@ channel = Channel.current()
     )
 )
 async def main(app: Ariadne, group: Group):
-    await app.sendGroupMessage(
-        group, MessageChain.create(json.dumps(BOT_Status, indent=2, ensure_ascii=False))
+    await app.send_group_message(
+        group, MessageChain(json.dumps(BOT_Status, indent=2, ensure_ascii=False))
     )

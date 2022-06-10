@@ -18,9 +18,9 @@ async def main(app: Ariadne, group: Group, mute: BotMuteEvent):
     GroupPermission(group).remove_from_whitelist()
     if BotConfig.Event.mute:
         for qq in BotConfig.admins:
-            await app.sendFriendMessage(
+            await app.send_friend_message(
                 qq,
-                MessageChain.create(
+                MessageChain(
                     "收到禁言事件，已退出该群",
                     f"\n群号：{group.id}",
                     f"\n群名：{group.name}",
@@ -29,4 +29,4 @@ async def main(app: Ariadne, group: Group, mute: BotMuteEvent):
             )
             await asyncio.sleep(1)
 
-    await app.quitGroup(group)
+    await app.quit_group(group)

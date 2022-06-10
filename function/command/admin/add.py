@@ -30,13 +30,13 @@ channel = Channel.current()
 async def main(app: Ariadne, friend: Friend, adminid: RegexResult):
     Permission.manual(friend, Permission.MASTER)
     if adminid.matched:
-        say = adminid.result.asDisplay()
+        say = adminid.result.display
         if say.isdigit():
             if add_admin(int(say)):
-                await app.sendFriendMessage(friend, MessageChain.create("成功将该账号设定为管理员"))
+                await app.send_friend_message(friend, MessageChain("成功将该账号设定为管理员"))
             else:
-                await app.sendFriendMessage(friend, MessageChain.create("该账号已是管理员"))
+                await app.send_friend_message(friend, MessageChain("该账号已是管理员"))
         else:
-            await app.sendFriendMessage(friend, MessageChain.create("管理员账号仅可为数字"))
+            await app.send_friend_message(friend, MessageChain("管理员账号仅可为数字"))
     else:
-        await app.sendFriendMessage(friend, MessageChain.create("未输入管理员账号"))
+        await app.send_friend_message(friend, MessageChain("未输入管理员账号"))

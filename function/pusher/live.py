@@ -1,3 +1,4 @@
+from graia.ariadne.connection.util import UploadMethod
 import asyncio
 
 from loguru import logger
@@ -8,7 +9,7 @@ from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.message.element import Image, AtAll
 from graia.scheduler.saya.schema import SchedulerSchema
 from graia.scheduler.timers import every_custom_seconds
-from graia.ariadne.model import MemberPerm, UploadMethod
+from graia.ariadne.model import MemberPerm
 
 from core import BOT_Status
 from data import insert_live_push
@@ -61,7 +62,7 @@ async def main(app: Ariadne):
                 area = resp["data"][up_id]["area_v2_name"]
                 room_area = f"{area_parent} / {area}"
                 cover_from_user = resp["data"][up_id]["cover_from_user"]
-                cover_img = await app.uploadImage(
+                cover_img = await app.upload_image(
                     await Image(url=cover_from_user).get_bytes(), UploadMethod.Group
                 )
                 logger.info(f"[BiliBili推送] {up_name} 开播了 - {room_area} - {title}")
@@ -81,7 +82,7 @@ async def main(app: Ariadne):
                             f"\nhttps://live.bilibili.com/{room_id}",
                         ]
                         if data["atall"]:
-                            bot_perm = (await app.getGroup(int(groupid))).accountPerm
+                            bot_perm = (await app.get_group(int(groupid))).account_perm
                             if bot_perm in [
                                 MemberPerm.Administrator,
                                 MemberPerm.Owner,
@@ -90,9 +91,9 @@ async def main(app: Ariadne):
                             else:
                                 msg = ["@全体成员 "] + msg
                         try:
-                            await app.sendGroupMessage(
+                            await app.send_group_message(
                                 groupid,
-                                MessageChain.create(msg),
+                                MessageChain(msg),
                             )
                             await asyncio.sleep(1)
                         except UnknownTarget:
@@ -121,9 +122,9 @@ async def main(app: Ariadne):
                                 if (up_nick := data["nick"])
                                 else f"UP {up_name}（{up_id}）"
                             )
-                            await app.sendGroupMessage(
+                            await app.send_group_message(
                                 groupid,
-                                MessageChain.create(f"本群订阅的 {nick}已下播！"),
+                                MessageChain(f"本群订阅的 {nick}已下播！"),
                             )
 
                         except UnknownTarget:
@@ -141,9 +142,9 @@ async def main(app: Ariadne):
             resp = await relation_modify(up_id, 2)
             if resp["code"] == 0:
                 logger.info(f"[BiliBili推送] {up_name}（{up_id}）退订成功！")
-                await app.sendFriendMessage(
+                await app.send_friend_message(
                     BotConfig.master,
-                    MessageChain.create(
+                    MessageChain(
                         f"[BiliBili推送] 未找到订阅 {up_name}（{up_id}）的群，已被退订！",
                     ),
                 )

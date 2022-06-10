@@ -33,9 +33,9 @@ channel = Channel.current()
 )
 async def main(app: Ariadne, group: Group, act: RegexResult, uid: RegexResult):
     if uid.matched:
-        uids = uid.result.asDisplay()
+        uids = uid.result.display
         if uids.isdigit():
-            acts = act.result.asDisplay()
+            acts = act.result.display
             if acts == "开启":
                 msg = "开启成功" if set_atall(uids, group.id, True) else "该群未关注此 UP"
             elif acts == "关闭":
@@ -45,4 +45,4 @@ async def main(app: Ariadne, group: Group, act: RegexResult, uid: RegexResult):
     else:
         msg = "请输入正确的 UID"
 
-    await app.sendGroupMessage(group, MessageChain.create(msg))
+    await app.send_group_message(group, MessageChain(msg))

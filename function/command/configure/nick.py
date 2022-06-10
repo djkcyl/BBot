@@ -37,12 +37,12 @@ async def main(
     app: Ariadne, group: Group, act: RegexResult, uid: RegexResult, nick: RegexResult
 ):
     if uid.matched:
-        uids = uid.result.asDisplay()
+        uids = uid.result.display
         if uids.isdigit():
-            nicks = nick.result.asDisplay()
+            nicks = nick.result.display
             if len(nicks) > 24:
                 msg = "昵称过长，设定失败"
-            acts = act.result.asDisplay()
+            acts = act.result.display
             if acts == "设定":
                 msg = "昵称设定成功" if set_nick(uids, group.id, nicks) else "该群未关注此 UP"
             elif acts == "删除":
@@ -52,4 +52,4 @@ async def main(
     else:
         msg = "请输入正确的 UID"
 
-    await app.sendGroupMessage(group, MessageChain.create(msg))
+    await app.send_group_message(group, MessageChain(msg))

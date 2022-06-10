@@ -15,17 +15,17 @@ async def main(app: Ariadne, event: NewFriendRequestEvent):
     """
     收到新好友事件
     """
-    sourceGroup: Optional[int] = event.sourceGroup
-    groupname = await app.getGroup(sourceGroup) if sourceGroup else None
+    source_group: Optional[int] = event.source_group
+    groupname = await app.get_group(source_group) if source_group else None
     groupname = groupname.name if groupname else "未知"
     for qq in BotConfig.admins:
-        await app.sendFriendMessage(
+        await app.send_friend_message(
             qq,
-            MessageChain.create(
+            MessageChain(
                 "收到添加好友事件",
                 f"\nQQ：{event.supplicant}",
                 f"\n昵称：{event.nickname}",
-                f"\n来自群：{groupname}({sourceGroup})" if sourceGroup else "\n来自好友搜索",
+                f"\n来自群：{groupname}({source_group})" if source_group else "\n来自好友搜索",
                 "\n状态：已通过申请\n",
                 event.message or "无附加信息",
             ),

@@ -39,7 +39,7 @@ ADD_ERROR_MSG = """增加失败, 请正确输入!
             Twilight(
                 [
                     RegexMatch(r"(添加|增加)(主播|[uU][pP])到订阅组"),
-                    "groupName"
+                    "group_name"
                     @ ArgumentMatch("--name", optional=True, nargs="*", type=str),
                     "sublist"
                     @ ArgumentMatch("--uids", optional=True, nargs="*", type=int),
@@ -48,31 +48,31 @@ ADD_ERROR_MSG = """增加失败, 请正确输入!
         ],
     )
 )
-async def main(app: Ariadne, friend: Friend, groupName: ArgResult, sublist: ArgResult):
+async def main(app: Ariadne, friend: Friend, group_name: ArgResult, sublist: ArgResult):
     """
     通过指定的命令进行添加up主到对应的订阅组中
 
     Attributes:
-        groupName: 要添加的订阅组名称
+        group_name: 要添加的订阅组名称
         sublist: 要添加的订阅列表
     """
     Permission.manual(friend, Permission.MASTER)
 
-    if groupName.matched and sublist.matched:
-        group_name = groupName.result[0]
+    if group_name.matched and sublist.matched:
+        group_name = group_name.result[0]
         uid_list: list = sublist.result
         sg = SubGroup(group_name)
-        if sg.is_in_groupNames():
+        if sg.is_in_group_names():
             if sg.add_to_subGroups(uid_list):
-                await app.sendFriendMessage(
-                    friend, MessageChain.create(f"添加到订阅组 [{group_name}] 成功")
+                await app.send_friend_message(
+                    friend, MessageChain(f"添加到订阅组 [{group_name}] 成功")
                 )
             else:
-                await app.sendFriendMessage(
+                await app.send_friend_message(
                     friend,
-                    MessageChain.create(f"添加失败, 订阅组 [{group_name}] 添加后up主数量将超过12个!"),
+                    MessageChain(f"添加失败, 订阅组 [{group_name}] 添加后up主数量将超过12个!"),
                 )
         else:
-            await app.sendFriendMessage(friend, MessageChain.create("添加的订阅组名称不存在!"))
+            await app.send_friend_message(friend, MessageChain("添加的订阅组名称不存在!"))
     else:
-        await app.sendFriendMessage(friend, MessageChain.create(ADD_ERROR_MSG))
+        await app.send_friend_message(friend, MessageChain(ADD_ERROR_MSG))

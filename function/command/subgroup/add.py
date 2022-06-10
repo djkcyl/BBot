@@ -22,29 +22,29 @@ channel = Channel.current()
         listening_events=[FriendMessage],
         inline_dispatchers=[
             Twilight(
-                [FullMatch("添加订阅组"), "groupName" @ WildcardMatch(optional=True)],
+                [FullMatch("添加订阅组"), "group_name" @ WildcardMatch(optional=True)],
             )
         ],
     )
 )
-async def main(app: Ariadne, friend: Friend, groupName: RegexResult):
+async def main(app: Ariadne, friend: Friend, group_name: RegexResult):
     """
     添加订阅组指令
 
     Attributes:
-        groupName: 订阅组名称, 用于添加组
+        group_name: 订阅组名称, 用于添加组
     """
     Permission.manual(friend, Permission.MASTER)
-    if groupName.matched:
-        say = groupName.result.asDisplay()
+    if group_name.matched:
+        say = group_name.result.display
         sg = SubGroup(say)
-        if sg.add_to_groupNames():
-            await app.sendFriendMessage(
-                friend, MessageChain.create(f"成功将名称 [{say}] 加入订阅组")
+        if sg.add_to_group_names():
+            await app.send_friend_message(
+                friend, MessageChain(f"成功将名称 [{say}] 加入订阅组")
             )
         else:
-            await app.sendFriendMessage(
-                friend, MessageChain.create(f"该名称 [{say}] 已在订阅组中")
+            await app.send_friend_message(
+                friend, MessageChain(f"该名称 [{say}] 已在订阅组中")
             )
     else:
-        await app.sendFriendMessage(friend, MessageChain.create("未输入订阅组名称"))
+        await app.send_friend_message(friend, MessageChain("未输入订阅组名称"))

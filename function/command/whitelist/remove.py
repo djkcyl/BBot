@@ -30,16 +30,16 @@ channel = Channel.current()
 async def main(app: Ariadne, friend: Friend, groupid: RegexResult):
     Permission.manual(friend, Permission.MASTER)
     if groupid.matched:
-        say = groupid.result.asDisplay()
+        say = groupid.result.display
         gp = GroupPermission(say)
         if say.isdigit():
             if gp.remove_from_whitelist():
-                await app.sendFriendMessage(friend, MessageChain.create("成功将该群移出白名单"))
-                if await app.getGroup(gp.group_id):
-                    await app.quitGroup(gp.group_id)
+                await app.send_friend_message(friend, MessageChain("成功将该群移出白名单"))
+                if await app.get_group(gp.group_id):
+                    await app.quit_group(gp.group_id)
             else:
-                await app.sendFriendMessage(friend, MessageChain.create("该群未在白名单中"))
+                await app.send_friend_message(friend, MessageChain("该群未在白名单中"))
         else:
-            await app.sendFriendMessage(friend, MessageChain.create("群号仅可为数字"))
+            await app.send_friend_message(friend, MessageChain("群号仅可为数字"))
     else:
-        await app.sendFriendMessage(friend, MessageChain.create("未输入群号"))
+        await app.send_friend_message(friend, MessageChain("未输入群号"))

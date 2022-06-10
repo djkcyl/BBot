@@ -27,9 +27,9 @@ async def init(app: Ariadne):
     )
 
     if cache:
-        await app.sendFriendMessage(
+        await app.send_friend_message(
             BotConfig.master,
-            MessageChain.create(
+            MessageChain(
                 f"[BiliBili推送] 使用缓存登录成功\n账号：{login_data['username']}\nmid：{login_data['data']['token_info']['mid']}"
             ),
         )
@@ -78,7 +78,7 @@ async def init(app: Ariadne):
     await asyncio.sleep(2)
     BOT_Status["init"] = True
 
-    await app.sendFriendMessage(
+    await app.send_friend_message(
         BotConfig.master,
-        MessageChain.create(f"[BiliBili推送] 将对 {sub_num} 个账号进行监控，初始化完成"),
+        MessageChain(f"[BiliBili推送] 将对 {sub_num} 个账号进行监控，初始化完成"),
     )

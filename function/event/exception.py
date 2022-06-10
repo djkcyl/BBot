@@ -2,7 +2,7 @@ import traceback
 
 from io import StringIO
 from graia.saya import Channel
-from graia.ariadne import get_running
+
 from graia.ariadne.app import Ariadne
 from graia.ariadne.message.element import Image
 from graia.ariadne.message.chain import MessageChain
@@ -27,16 +27,16 @@ async def make_msg_for_unknow_exception(event: ExceptionThrowed):
         + f"\n \n异常追踪：\n{tb}\n{str(event.exception)}"
     )
     image = await text2image(msg, 200)
-    return MessageChain.create("发生未捕获的异常\n", Image(data_bytes=image))
+    return MessageChain("发生未捕获的异常\n", Image(data_bytes=image))
 
 
 @channel.use(ListenerSchema(listening_events=[ExceptionThrowed]))
 async def main(event: ExceptionThrowed):
     if isinstance(event.event, ExceptionThrowed):
         return
-    app = get_running(Ariadne)
+    app = Ariadne.current()
     eimg = await make_msg_for_unknow_exception(event)
-    return await app.sendFriendMessage(
+    return await app.send_friend_message(
         BotConfig.master,
         eimg,
     )

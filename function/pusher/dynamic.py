@@ -1,3 +1,4 @@
+from graia.ariadne.connection.util import UploadMethod
 import asyncio
 
 from loguru import logger
@@ -8,7 +9,7 @@ from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.message.element import Image, AtAll
 from graia.scheduler.saya.schema import SchedulerSchema
 from graia.scheduler.timers import every_custom_seconds
-from graia.ariadne.model import MemberPerm, UploadMethod
+from graia.ariadne.model import MemberPerm
 
 from core import BOT_Status
 from core.bot_config import BotConfig
@@ -82,15 +83,15 @@ async def main(app: Ariadne):
                 )
                 try:
                     shot_image = await get_dynamic_screenshot(dynid)
-                    dyn_img = await app.uploadImage(shot_image, UploadMethod.Group)
+                    dyn_img = await app.upload_image(shot_image, UploadMethod.Group)
                 except Exception as e:
                     err_msg = f"[BiliBili推送] {dynid} | {up_name} 更新了动态，截图失败"
                     logger.error(err_msg)
                     logger.exception(e)
                     BOT_Status["updateing"] = False
-                    return await app.sendFriendMessage(
+                    return await app.send_friend_message(
                         BotConfig.master,
-                        MessageChain.create(
+                        MessageChain(
                             Image(data_bytes=await text2image(f"{err_msg}\n{e}"))
                         ),
                     )
@@ -113,9 +114,9 @@ async def main(app: Ariadne):
                 else:
                     type_text = "发布了一条动态！"
 
-                await app.sendFriendMessage(
+                await app.send_friend_message(
                     BotConfig.master,
-                    MessageChain.create(
+                    MessageChain(
                         f"UP {up_name}（{up_id}）{type_text}\n",
                         dyn_img,
                         f"\nhttps://t.bilibili.com/{dynid}",
@@ -137,7 +138,7 @@ async def main(app: Ariadne):
                             f"\nhttps://t.bilibili.com/{dynid}",
                         ]
                         if data["atall"]:
-                            bot_perm = (await app.getGroup(int(groupid))).accountPerm
+                            bot_perm = (await app.get_group(int(groupid))).account_perm
 
                             if bot_perm in [
                                 MemberPerm.Administrator,
@@ -147,9 +148,9 @@ async def main(app: Ariadne):
                             else:
                                 msg = ["@全体成员 "] + msg
                         try:
-                            await app.sendGroupMessage(
+                            await app.send_group_message(
                                 groupid,
-                                MessageChain.create(msg),
+                                MessageChain(msg),
                             )
                             await asyncio.sleep(1)
                         except UnknownTarget:
@@ -187,9 +188,9 @@ async def main(app: Ariadne):
                 else:
                     logger.error(f"[BiliBili推送] {dynid} | 退订失败：{resp}")
                     msg = f"退订失败：{resp}"
-                await app.sendFriendMessage(
+                await app.send_friend_message(
                     BotConfig.master,
-                    MessageChain.create(
+                    MessageChain(
                         f"[BiliBili推送] {dynid} | 未找到订阅 {up_name}（{up_id}）的群，{msg}",
                     ),
                 )

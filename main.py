@@ -8,15 +8,14 @@ from graia.ariadne.app import Ariadne
 from prompt_toolkit.styles import Style
 from graia.ariadne.console import Console
 from graia.scheduler import GraiaScheduler
-from graia.ariadne.model import MiraiSession
 from prompt_toolkit.formatted_text import HTML
 from graia.broadcast.interrupt import InterruptControl
 from graia.ariadne.console.saya import ConsoleBehaviour
 from graia.scheduler.saya import GraiaSchedulerBehaviour
 from graia.saya.builtins.broadcast import BroadcastBehaviour
+from graia.ariadne.entry import config, HttpClientConfig, WebsocketClientConfig
 
 from core.bot_config import BotConfig
-
 
 LOGPATH = Path("logs")
 LOGPATH.mkdir(exist_ok=True)
@@ -47,11 +46,13 @@ logger.add(
 logger.info("BBot is starting...")
 
 
+host = BotConfig.Mirai.mirai_host
 app = Ariadne(
-    MiraiSession(
-        host=BotConfig.Mirai.mirai_host,
-        verify_key=BotConfig.Mirai.verify_key,
-        account=BotConfig.Mirai.account,
+    config(
+        BotConfig.Mirai.account,
+        BotConfig.Mirai.verify_key,
+        HttpClientConfig(host),
+        WebsocketClientConfig(host),
     ),
 )
 

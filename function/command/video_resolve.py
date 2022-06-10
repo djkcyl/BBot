@@ -25,7 +25,7 @@ async def bilibili_main(
     if message.has(Image) or message.has(Voice) or message.has(FlashImage):
         return
 
-    message_str = message.asPersistentString()
+    message_str = message.as_persistent_string()
     if "b23.tv" in message_str:
         message_str = await b23_extract(message_str) or message_str
     p = re.compile(r"av(\d{1,15})|BV(1[A-Za-z0-9]{2}4.1.7[A-Za-z0-9]{2})")
@@ -36,25 +36,25 @@ async def bilibili_main(
     if video_info:
         if video_info["code"] != 0:
             await Interval.manual(member.id)
-            return await app.sendGroupMessage(
-                group, MessageChain.create([Plain("视频不存在或解析失败")])
+            return await app.send_group_message(
+                group, MessageChain([Plain("视频不存在或解析失败")])
             )
         else:
             await Interval.manual(int(video_info["data"]["aid"]))
         try:
             logger.info(f"开始生成视频信息图片：{video_info['data']['aid']}")
             image = await asyncio.to_thread(binfo_image_create, video_info)
-            await app.sendGroupMessage(
+            await app.send_group_message(
                 group,
-                MessageChain.create(
+                MessageChain(
                     Image(data_bytes=image),
                     Plain(f"https://b23.tv/{video_info['data']['bvid']}"),
                 ),
             )
         except Exception as err:
             logger.error(err)
-            await app.sendGroupMessage(
-                group, MessageChain.create("视频解析 API 调用出错"), quote=source
+            await app.send_group_message(
+                group, MessageChain("视频解析 API 调用出错"), quote=source
             )
 
 

@@ -40,7 +40,7 @@ async def main(app: Ariadne, group: Group, anything: RegexResult):
 
     if not anything.matched:
         return
-    message = anything.result.asDisplay()
+    message = anything.result.display
     uid = await uid_extract(message)
     if uid:
         uid = uid
@@ -56,28 +56,28 @@ async def main(app: Ariadne, group: Group, anything: RegexResult):
             if data["result"][0]["uname"] == message:
                 uid = data["result"][0]["mid"]
             else:
-                return await app.sendGroupMessage(
+                return await app.send_group_message(
                     group,
-                    MessageChain.create("请输入正确的 UP 名、UP UID 或 UP 首页链接"),
+                    MessageChain("请输入正确的 UP 名、UP UID 或 UP 首页链接"),
                 )
         else:
-            return await app.sendGroupMessage(
+            return await app.send_group_message(
                 group,
-                MessageChain.create("未搜索到该 UP"),
+                MessageChain("未搜索到该 UP"),
             )
 
     if BOT_Status["updateing"]:
-        await app.sendGroupMessage(
+        await app.send_group_message(
             group,
-            MessageChain.create("正在订阅，请稍后..."),
+            MessageChain("正在订阅，请稍后..."),
         )
 
     msg = await subscribe_uid(uid, group.id)
-    await app.sendGroupMessage(
+    await app.send_group_message(
         group,
-        MessageChain.create(msg),
+        MessageChain(msg),
     )
-    await app.sendFriendMessage(
+    await app.send_friend_message(
         BotConfig.master,
-        MessageChain.create(f"群 {group.name}（{group.id}）正在订阅 UP：{uid}\n{msg}"),
+        MessageChain(f"群 {group.name}（{group.id}）正在订阅 UP：{uid}\n{msg}"),
     )

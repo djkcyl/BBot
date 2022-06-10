@@ -16,9 +16,9 @@ async def main(app: Ariadne, event: BotGroupPermissionChangeEvent):
     """
     if BotConfig.Event.permchange:
         for qq in BotConfig.admins:
-            await app.sendFriendMessage(
+            await app.send_friend_message(
                 qq,
-                MessageChain.create(
+                MessageChain(
                     "收到权限变动事件",
                     f"\n群号：{event.group.id}",
                     f"\n群名：{event.group.name}",

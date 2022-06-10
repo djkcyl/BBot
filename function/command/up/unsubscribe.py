@@ -38,14 +38,14 @@ async def main(app: Ariadne, group: Group, anything: RegexResult):
 
     if not anything.matched:
         return
-    message = anything.result.asDisplay()
+    message = anything.result.display
     uid = await uid_extract(message)
     if uid:
         uid = uid
     else:
         if not (up_list := get_group_sublist(group.id)):
-            return await app.sendGroupMessage(
-                group, MessageChain.create(f"本群未订阅该 UP（{message}）")
+            return await app.send_group_message(
+                group, MessageChain(f"本群未订阅该 UP（{message}）")
             )
 
         for up_uid, up_name, up_nick in up_list:
@@ -53,22 +53,22 @@ async def main(app: Ariadne, group: Group, anything: RegexResult):
                 uid = up_uid
                 break
         else:
-            return await app.sendGroupMessage(
-                group, MessageChain.create(f"本群未订阅该 UP（{message}）")
+            return await app.send_group_message(
+                group, MessageChain(f"本群未订阅该 UP（{message}）")
             )
 
     if uid:
         msg = await unsubscribe_uid(uid, group.id)
-        await app.sendFriendMessage(
+        await app.send_friend_message(
             BotConfig.master,
-            MessageChain.create(f"群 {group.name}（{group.id}）正在退订 UP：{uid}\n{msg}"),
+            MessageChain(f"群 {group.name}（{group.id}）正在退订 UP：{uid}\n{msg}"),
         )
-        await app.sendGroupMessage(
+        await app.send_group_message(
             group,
-            MessageChain.create(msg),
+            MessageChain(msg),
         )
     else:
-        await app.sendGroupMessage(
+        await app.send_group_message(
             group,
-            MessageChain.create("请输入正确的 UP 名、UP UID 或 UP 首页链接"),
+            MessageChain("请输入正确的 UP 名、UP UID 或 UP 首页链接"),
         )

@@ -25,4 +25,4 @@ channel = Channel.current()
 async def main(app: Ariadne, friend: Friend):
     Permission.manual(friend, Permission.MASTER)
     msg = "白名单开启成功" if open_access_control() else "白名单当前已开启"
-    await app.sendFriendMessage(friend, MessageChain.create(msg))
+    await app.send_friend_message(friend, MessageChain(msg))

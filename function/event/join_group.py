@@ -26,19 +26,19 @@ async def main(app: Ariadne, joingroup: BotJoinGroupEvent):
     ]
     if gp.can_join():
         for admin in BotConfig.admins:
-            await app.sendFriendMessage(
+            await app.send_friend_message(
                 admin,
-                MessageChain.create(
+                MessageChain(
                     msg,
                     "已自动加入",
                 ),
             )
     else:
-        await app.quitGroup(group)
+        await app.quit_group(group)
         for admin in BotConfig.admins:
-            await app.sendFriendMessage(
+            await app.send_friend_message(
                 admin,
-                MessageChain.create(
+                MessageChain(
                     msg,
                     "该群不在白名单中，已自动退出",
                 ),

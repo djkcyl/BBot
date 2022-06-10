@@ -28,14 +28,14 @@ class ConfirmWaiter(Waiter.create([GroupMessage], block_propagation=True)):
     async def detected_event(
         self, app: Ariadne, group: Group, member: Member, message: MessageChain
     ):
-        msg = message.asDisplay()
+        msg = message.display
         if self.group == group.id and self.member == member.id:
             if msg == self.verify:
                 return True
             elif msg == "/quit cancel":
                 return False
             else:
-                await app.sendGroupMessage(group, "请输入正确的验证码，或者发送 /quit cancel 来取消")
+                await app.send_group_message(group, "请输入正确的验证码，或者发送 /quit cancel 来取消")
 
 
 @channel.use(
@@ -47,8 +47,8 @@ class ConfirmWaiter(Waiter.create([GroupMessage], block_propagation=True)):
 )
 async def main(app: Ariadne, group: Group, member: Member):
     verify_code = generate_verify_code()
-    await app.sendGroupMessage(
-        group, MessageChain.create(f"正在请求退出本群，请在30秒内输入验证码 {verify_code}")
+    await app.send_group_message(
+        group, MessageChain(f"正在请求退出本群，请在30秒内输入验证码 {verify_code}")
     )
     try:
         res = await inc.wait(
@@ -59,8 +59,8 @@ async def main(app: Ariadne, group: Group, member: Member):
         res = False
 
     if res:
-        await app.sendGroupMessage(group, MessageChain.create("正在退出"))
+        await app.send_group_message(group, MessageChain("正在退出"))
         await asyncio.sleep(3)
-        await app.quitGroup(group)
+        await app.quit_group(group)
     else:
-        await app.sendGroupMessage(group, MessageChain.create("已取消退群"))
+        await app.send_group_message(group, MessageChain("已取消退群"))

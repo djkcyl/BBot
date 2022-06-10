@@ -9,7 +9,7 @@ from loguru import logger
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_v1_5
 from graia.saya import Channel, Saya
-from graia.ariadne import get_running
+
 from graia.ariadne.app import Ariadne
 from graia.ariadne.model import Friend
 from graia.broadcast.interrupt.waiter import Waiter
@@ -26,21 +26,21 @@ inc = InterruptControl(saya.broadcast)
 
 @Waiter.create_using_function(listening_events=[FriendMessage])
 async def waiter(friend: Friend, message: MessageChain):
-    app = get_running(Ariadne)
+    app = Ariadne.current()
     if friend.id == BotConfig.master:
-        message = message.asDisplay()
+        message = message.display
         if message.isdigit():
             if len(message) == 6:
                 return message
             else:
-                await app.sendFriendMessage(
+                await app.send_friend_message(
                     BotConfig.master,
-                    MessageChain.create("请输入正确的验证码"),
+                    MessageChain("请输入正确的验证码"),
                 )
         else:
-            await app.sendFriendMessage(
+            await app.send_friend_message(
                 BotConfig.master,
-                MessageChain.create("请输入正确的验证码"),
+                MessageChain("请输入正确的验证码"),
             )
 
 
@@ -54,7 +54,7 @@ class bilibiliMobile:
     """登录函数"""
 
     async def login(self):
-        app = get_running(Ariadne)
+        app = Ariadne.current()
         # 加密
         response = await self.session.get(self.key_url)
         hash_value, public_key = (
@@ -117,22 +117,22 @@ class bilibiliMobile:
             logger.info(f"[BiliBili推送] {self.username} 登录成功")
             infos_return = {"username": self.username}
             infos_return |= response_json
-            app = get_running(Ariadne)
-            await app.sendFriendMessage(
+            app = Ariadne.current()
+            await app.send_friend_message(
                 BotConfig.master,
-                MessageChain.create(f"[BiliBili推送] {self.username} 登录成功"),
+                MessageChain(f"[BiliBili推送] {self.username} 登录成功"),
             )
             return infos_return
         elif response_json["code"] == -629:
-            await app.sendFriendMessage(
+            await app.send_friend_message(
                 BotConfig.master,
-                MessageChain.create(f"[BiliBili推送] {self.username} 登录失败，账号或密码错误"),
+                MessageChain(f"[BiliBili推送] {self.username} 登录失败，账号或密码错误"),
             )
             raise RuntimeError(f"[BiliBili推送] {self.username} 登录失败，账号或密码错误")
         else:
-            await app.sendFriendMessage(
+            await app.send_friend_message(
                 BotConfig.master,
-                MessageChain.create(f"[BiliBili推送] {self.username} 登录失败，详细信息请查看日志"),
+                MessageChain(f"[BiliBili推送] {self.username} 登录失败，详细信息请查看日志"),
             )
             raise RuntimeError(response_json.get("data", {}))
 
@@ -187,10 +187,10 @@ class bilibiliMobile:
         # 验证登录
         if response.json()["code"] == 0:
             captcha_key = response.json()["data"]["captcha_key"]
-            app = get_running(Ariadne)
-            await app.sendFriendMessage(
+            app = Ariadne.current()
+            await app.send_friend_message(
                 BotConfig.master,
-                MessageChain.create("[BiliBili推送] 验证码已发送至您的手机，请在 2 分钟内完成验证"),
+                MessageChain("[BiliBili推送] 验证码已发送至您的手机，请在 2 分钟内完成验证"),
             )
             code = await inc.wait(waiter)
             data_sms = {
@@ -213,9 +213,9 @@ class bilibiliMobile:
             return response.json()
         else:
             logger.error(f"[BiliBili推送] {self.username} 验证码发送失败\n{response.json()}")
-            await app.sendFriendMessage(
+            await app.send_friend_message(
                 BotConfig.master,
-                MessageChain.create(
+                MessageChain(
                     f"[BiliBili推送] {self.username} 验证码发送失败，BBot 已关闭\n{response.json()}"
                 ),
             )

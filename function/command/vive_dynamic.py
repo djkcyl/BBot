@@ -29,15 +29,15 @@ channel = Channel.current()
 )
 async def main(app: Ariadne, group: Group, anything: RegexResult):
 
-    if not (uid := await uid_extract(anything.result.asDisplay())):
-        return await app.sendGroupMessage(
-            group, MessageChain.create("请输入正确的 UP UID 或 首页链接")
+    if not (uid := await uid_extract(anything.result.display)):
+        return await app.send_group_message(
+            group, MessageChain("请输入正确的 UP UID 或 首页链接")
         )
 
     if res := await grpc_dyn_get(uid):
         shot_image = await get_dynamic_screenshot(res.list[0].extend.dyn_id_str)
-        await app.sendGroupMessage(
-            group, MessageChain.create(Image(data_bytes=shot_image))
+        await app.send_group_message(
+            group, MessageChain(Image(data_bytes=shot_image))
         )
     else:
-        await app.sendGroupMessage(group, MessageChain.create("该 UP 未发布任何动态"))
+        await app.send_group_message(group, MessageChain("该 UP 未发布任何动态"))
