@@ -11,7 +11,7 @@ graia-ariadne = {extras = ["graia"], version = "^0.6.16"}
 grpcio = "^1.46.3"
 httpx = "^0.22.0"
 peewee = "^3.14.10"
-prompt-toolkit = "^3.0.29"
+prompt-toolkit = "3.0.26"
 playwright = "^1.22.0"
 pyyaml = "^6.0"
 qrcode = "^7.3.1"

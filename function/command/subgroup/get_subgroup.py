@@ -1,8 +1,8 @@
 from graia.saya import Channel
 from graia.ariadne.app import Ariadne
 from graia.ariadne.model import Friend
-from graia.ariadne.event.message import FriendMessage
 from graia.ariadne.message.chain import MessageChain
+from graia.ariadne.event.message import FriendMessage
 from graia.broadcast.exceptions import PropagationCancelled
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import Twilight, RegexMatch
@@ -16,12 +16,8 @@ channel = Channel.current()
 @channel.use(
     ListenerSchema(
         listening_events=[FriendMessage],
-        inline_dispatchers=[
-            Twilight(
-                RegexMatch(r"(查看)?订阅组列表")
-            )
-        ],
-        priority=10
+        inline_dispatchers=[Twilight(RegexMatch(r"(查看)?订阅组列表"))],
+        priority=10,
     )
 )
 async def sub_list(app: Ariadne, friend: Friend):
