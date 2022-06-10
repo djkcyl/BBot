@@ -16,12 +16,7 @@ channel = Channel.current()
 @channel.use(
     ListenerSchema(
         listening_events=[FriendMessage],
-        inline_dispatchers=[
-            Twilight(
-                RegexMatch(r"(查看)?订阅组列表")
-            )
-        ],
-        priority=10
+        inline_dispatchers=[Twilight(RegexMatch(r"(查看)?订阅组列表"))],
     )
 )
 async def sub_list(app: Ariadne, friend: Friend):

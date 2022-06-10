@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bbot-graia"
-version = "0.1.13"
+version = "0.1.14"
 description = "一个用于 QQ 群内高效推送哔哩哔哩 UP 动态及直播的机器人"
 authors = ["djkcyl <cyl@cyllive.cn>"]
 license = "AGPL3.0"
@@ -11,7 +11,7 @@ graia-ariadne = {extras = ["graia"], version = "^0.6.16"}
 grpcio = "^1.46.3"
 httpx = "^0.22.0"
 peewee = "^3.14.10"
-prompt-toolkit = "^3.0.29"
+prompt-toolkit = "3.0.26"
 playwright = "^1.22.0"
 pyyaml = "^6.0"
 qrcode = "^7.3.1"
