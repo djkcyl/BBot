@@ -6,7 +6,6 @@ data/subscription_list.json
 data/white_list.json
 data/bot_config.yaml
 data/subscription_list copy.json
-data/subgroup_list.json
 logs/
 test.py
 data/history.db

@@ -16,8 +16,9 @@ async def main(app: Ariadne, event: NewFriendRequestEvent):
     收到新好友事件
     """
     sourceGroup: Optional[int] = event.sourceGroup
-    groupname = await app.getGroup(sourceGroup) if sourceGroup else None
-    groupname = groupname.name if groupname else "未知"
+    if sourceGroup:
+        groupname = await app.getGroup(sourceGroup)
+        groupname = groupname.name if groupname else "未知"
     for qq in BotConfig.admins:
         await app.sendFriendMessage(
             qq,
