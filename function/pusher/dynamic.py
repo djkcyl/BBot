@@ -1,15 +1,15 @@
-from graia.ariadne.connection.util import UploadMethod
 import asyncio
 
 from loguru import logger
 from graia.saya import Channel
 from graia.ariadne.app import Ariadne
+from graia.ariadne.model import MemberPerm
 from graia.ariadne.exception import UnknownTarget
 from graia.ariadne.message.chain import MessageChain
+from graia.ariadne.connection.util import UploadMethod
 from graia.ariadne.message.element import Image, AtAll
 from graia.scheduler.saya.schema import SchedulerSchema
 from graia.scheduler.timers import every_custom_seconds
-from graia.ariadne.model import MemberPerm
 
 from core import BOT_Status
 from core.bot_config import BotConfig
@@ -145,8 +145,8 @@ async def main(app: Ariadne):
                                 MemberPerm.Owner,
                             ]:
                                 msg = [AtAll(), " "] + msg
-                            else:
-                                msg = ["@全体成员 "] + msg
+                            # else:
+                            #     msg = ["@全体成员 "] + msg
                         try:
                             await app.send_group_message(
                                 groupid,

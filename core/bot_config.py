@@ -35,6 +35,7 @@ class BotConfig:
     class Bilibili:
         username: int = bot_config["bilibili"]["username"]
         password: str = bot_config["bilibili"]["password"]
+        mobile_style: bool = bot_config["bilibili"]["mobile_style"]
 
     class Event:
         mute: bool = bot_config["event"]["mute"]

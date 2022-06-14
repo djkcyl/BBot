@@ -40,6 +40,12 @@ async def main(app: Ariadne):
         live_list = live_statu.items
     except Exception:
         return
+
+    _live = [str(up.uid) for up in live_list]
+    for up in BOT_Status["liveing"]:
+        if up not in _live:
+            BOT_Status["liveing"].remove(up)
+
     for up in live_list:
         up_id = str(up.uid)
         up_name = up.name

@@ -9,6 +9,7 @@ debug:
 bilibili:
   username: xxxxxxx
   password: xxxxxxx
+  mobile_style: true
 event:
   mute: true
   permchange: true

@@ -6,6 +6,7 @@ from typing import Optional
 from playwright.__main__ import main
 from playwright.async_api import Browser, async_playwright
 
+from core.bot_config import BotConfig
 
 user_data_dir = Path(__file__).parent.joinpath("data")
 
@@ -19,8 +20,19 @@ async def init() -> Browser:
     _browser = await browser.chromium.launch_persistent_context(
         user_data_dir,
         headless=True,
-        device_scale_factor=1.25,
+        device_scale_factor=2 if BotConfig.Bilibili.mobile_style else 1.25,
+        user_agent=(
+            "Mozilla/5.0 (Linux; Android 10; RMX1911) AppleWebKit/537.36 "
+            "(KHTML, like Gecko) Chrome/100.0.4896.127 Mobile Safari/537.36"
+        )
+        if BotConfig.Bilibili.mobile_style
+        else None,
     )
+    if not BotConfig.Bilibili.mobile_style:
+        await _browser.add_cookies(
+            [{"name": "hit-dyn-v2", "value": "1", "domain": ".bilibili.com", "path": "/"}]
+        )
+
     return _browser
 
 
