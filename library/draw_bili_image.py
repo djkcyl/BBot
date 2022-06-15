@@ -9,10 +9,21 @@ from .strings import get_cut_str, numf
 
 
 def binfo_image_create(video_info: dict):
+    client = httpx.Client()
+    client.headers.update(
+        {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+                "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36"
+            ),
+            "origin": "https://www.bilibili.com",
+            "referer": f"https://www.bilibili.com/video/{video_info['data']['bvid']}",
+        }
+    )
     bg_y = 0
     # 封面
     pic_url = video_info["data"]["pic"]
-    pic_get = httpx.get(pic_url).content
+    pic_get = client.get(pic_url).content
     pic_bio = BytesIO(pic_get)
     pic = Image.open(pic_bio)
     pic = pic.resize((560, 350))
@@ -94,7 +105,7 @@ def binfo_image_create(video_info: dict):
         up_list = []
         for up in video_info["data"]["staff"]:
             up_mid = up["mid"]
-            up_data = httpx.get(
+            up_data = client.get(
                 f"https://api.bilibili.com/x/space/acc/info?mid={up_mid}"
             ).json()
             up_list.append(
@@ -111,10 +122,10 @@ def binfo_image_create(video_info: dict):
             )
     else:
         up_mid = video_info["data"]["owner"]["mid"]
-        up_data = httpx.get(
+        up_data = client.get(
             f"https://api.bilibili.com/x/space/acc/info?mid={up_mid}"
         ).json()
-        up_stat = httpx.get(
+        up_stat = client.get(
             f"https://api.bilibili.com/x/relation/stat?vmid={up_mid}"
         ).json()
         up_list = [
@@ -165,7 +176,7 @@ def binfo_image_create(video_info: dict):
 
         # 头像
         face_url = up["face"]
-        face_get = httpx.get(face_url).content
+        face_get = client.get(face_url).content
         face_bio = BytesIO(face_get)
         face = Image.open(face_bio)
         face.convert("RGB")
