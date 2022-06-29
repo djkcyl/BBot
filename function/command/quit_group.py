@@ -30,14 +30,14 @@ class ConfirmWaiter(Waiter.create([GroupMessage], block_propagation=True)):
     async def detected_event(
         self, app: Ariadne, group: Group, member: Member, message: MessageChain
     ):
-        msg = message.display
         if self.group == group.id and self.member == member.id:
+            msg = message.display
             if msg == self.verify:
                 return True
             elif msg == "/quit cancel":
                 return False
             else:
-                await app.send_group_message(group, "请输入正确的验证码，或者发送 /quit cancel 来取消")
+                await app.send_group_message(self.group, "请输入正确的验证码，或者发送 /quit cancel 来取消")
 
 
 @channel.use(
