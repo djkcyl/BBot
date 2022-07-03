@@ -4,17 +4,16 @@ from loguru import logger
 from graia.saya import Channel
 from graia.ariadne.app import Ariadne
 from graia.ariadne.model import MemberPerm
+from graia.ariadne.message.element import AtAll
 from graia.ariadne.exception import UnknownTarget
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.connection.util import UploadMethod
-from graia.ariadne.message.element import Image, AtAll
 from graia.scheduler.saya.schema import SchedulerSchema
 from graia.scheduler.timers import every_custom_seconds
 
 from core import BOT_Status
 from core.bot_config import BotConfig
 from library.grpc import grpc_dynall_get
-from library.text2image import text2image
 from data import insert_dynamic_push, is_dyn_pushed
 from library.dynamic_shot import get_dynamic_screenshot
 from library.bilibili_request import relation_modify, dynamic_like
@@ -81,20 +80,22 @@ async def main(app: Ariadne):
                 logger.info(
                     f"[BiliBili推送] {dynid} | {up_name} 更新了动态，共有 {len(sub_list[up_id])} 个群订阅了该 UP"
                 )
-                try:
-                    shot_image = await get_dynamic_screenshot(dynid)
+
+                logger.debug(f"[Dynamic] Geting screenshot of {dynid}")
+                shot_image = await get_dynamic_screenshot(dynid)
+
+                if shot_image:
+                    logger.debug(f"[Dynamic] Get dynamic screenshot {dynid}")
                     dyn_img = await app.upload_image(shot_image, UploadMethod.Group)
-                except Exception as e:
+                    logger.debug(f"[Dynamic] Upload dynamic screenshot {dynid}")
+                else:
+                    logger.debug(f"[Dynamic] Get dynamic screenshot {dynid} failed")
                     err_msg = f"[BiliBili推送] {dynid} | {up_name} 更新了动态，截图失败"
                     logger.error(err_msg)
-                    logger.exception(e)
+                    await app.send_friend_message(BotConfig.master, MessageChain(err_msg))
                     BOT_Status["updateing"] = False
-                    return await app.send_friend_message(
-                        BotConfig.master,
-                        MessageChain(
-                            Image(data_bytes=await text2image(f"{err_msg}\n{e}"))
-                        ),
-                    )
+                    logger.debug("[Dynamic] Stop updateing")
+                    return
 
                 if set_name(up_id, up_name):
                     logger.debug(f"[Dynamic] Set {up_id} name to {up_name}")

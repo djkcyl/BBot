@@ -1,4 +1,7 @@
+import contextlib
+
 from loguru import logger
+from playwright._impl._api_types import TimeoutError
 
 from core.bot_config import BotConfig
 
@@ -14,7 +17,8 @@ async def get_dynamic_screenshot(id):
             if BotConfig.Bilibili.mobile_style:
                 url = f"https://m.bilibili.com/dynamic/{id}"
                 await page.set_viewport_size({"width": 400, "height": 780})
-                await page.goto(url, wait_until="networkidle", timeout=10000)
+                with contextlib.suppress(TimeoutError):
+                    await page.goto(url, wait_until="networkidle", timeout=15000)
                 content = await page.content()
                 content = content.replace(
                     '<div class="dyn-header__right">'
@@ -44,8 +48,9 @@ async def get_dynamic_screenshot(id):
                 )
             else:
                 url = f"https://t.bilibili.com/{id}"
-                await page.goto(url, wait_until="networkidle", timeout=10000)
                 await page.set_viewport_size({"width": 2560, "height": 1080})
+                with contextlib.suppress(TimeoutError):
+                    await page.goto(url, wait_until="networkidle", timeout=10000)
                 card = await page.query_selector(".card")
                 assert card
                 clip = await card.bounding_box()
