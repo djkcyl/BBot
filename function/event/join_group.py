@@ -17,7 +17,7 @@ async def main(app: Ariadne, joingroup: BotJoinGroupEvent):
     """
     group = joingroup.group
     inviter = (
-        (await app.get_member(joingroup.inviter.group, joingroup.inviter))
+        (await app.get_member(joingroup.inviter.group, joingroup.inviter.id))
         if joingroup.inviter
         else None
     )

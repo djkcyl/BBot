@@ -45,7 +45,7 @@ async def main(app: Ariadne, group: Group, anything: RegexResult):
     if uid:
         uid = uid
     elif message.startswith("UID:"):
-        uid = message[3:]
+        uid = message[4:]
     else:
         async with httpx.AsyncClient() as client:
             resp = await client.get(

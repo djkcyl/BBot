@@ -43,7 +43,7 @@ async def main(app: Ariadne, group: Group, anything: RegexResult):
     if uid:
         uid = uid
     elif message.startswith("UID:"):
-        uid = message[3:]
+        uid = message[4:]
     else:
         if not (up_list := get_group_sublist(group.id)):
             return await app.send_group_message(
