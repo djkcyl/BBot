@@ -47,13 +47,23 @@ async def init(app: Ariadne):
             resp = await relation_modify(up, 1)
             if resp["code"] != 0:
                 await delete_uid(up)
-                logger.error(f"订阅失败：{resp['code']}, {resp['message']}")
+                logger.error(f"UP {up} 订阅失败：{resp['code']}, {resp['message']}")
+                await app.send_friend_message(
+                    BotConfig.master,
+                    MessageChain(
+                        f"UP {up} 订阅失败：{resp['code']}, {resp['message']}，请手动重启 Bot"
+                    ),
+                )
                 exit()
 
     for uid in resp.items:
         if str(uid.uid) not in subid_list:
             await delete_uid(up)
-            logger.error(f"[Init] {uid.name} is not in subidlist json")
+            logger.error(f"UP {uid.name} 不在订阅列表中，已删除")
+            await app.send_friend_message(
+                BotConfig.master,
+                MessageChain(f"UP {uid.name} 不在订阅列表中，已删除，请手动重启 Bot"),
+            )
             exit()
 
         if uid.live_info.status:
