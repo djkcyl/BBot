@@ -26,7 +26,7 @@ async def main(app: Ariadne, joingroup: BotJoinGroupEvent):
         f"收到入群事件：{inviter.name if inviter else '<!!>'}（{inviter.id if inviter else '<!!>'}）\n",
         f"邀请来源：{joingroup.inviter.name}（{joingroup.inviter.id}）\n"
         if joingroup.inviter
-        else None,
+        else "",
     ]
     if gp.can_join():
         for admin in BotConfig.admins:
