@@ -1,6 +1,7 @@
 import asyncio
 
 from loguru import logger
+from datetime import datetime
 from graia.saya import Channel
 from graia.ariadne.app import Ariadne
 from graia.ariadne.model import MemberPerm
@@ -26,12 +27,17 @@ channel = Channel.current()
 @channel.use(SchedulerSchema(every_custom_seconds(3)))
 async def main(app: Ariadne):
 
+    logger.debug("[Dynamic Pusher] Dynamic Pusher is running")
+
     if not BOT_Status["init"]:
+        logger.debug("[Dynamic Pusher] Dynamic Pusher is not init")
         return
     elif len(get_subid_list()) == 0:
+        logger.debug("[Dynamic Pusher] Dynamic Pusher is not have subids")
         return
 
     BOT_Status["updateing"] = True
+    BOT_Status["last_update"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     sub_list = get_subid_list().copy()
 
     # 动态更新检测
@@ -157,11 +163,19 @@ async def main(app: Ariadne):
                         except UnknownTarget:
                             remove_list = []
                             logger.warning(
-                                f"[BiliBili推送] {dynid} | 推送失败，找不到该群 {groupid}，已删除该群订阅的 {len(remove_list)} 个 UP"
+                                f"[BiliBili推送] {dynid} | 推送失败，找不到该群 {groupid}，正在删除该群订阅的 {len(remove_list)} 个 UP"
                             )
                             for subid, _, _ in get_group_sublist(groupid):
                                 await unsubscribe_uid(subid, groupid)
                                 remove_list.append(subid)
+                                logger.info(f"[BiliBili推送] 删除了 {groupid} 群 {subid} 的订阅")
+                                await asyncio.sleep(2)
+                            await app.send_friend_message(
+                                BotConfig.master,
+                                MessageChain(
+                                    f"[BiliBili推送] {dynid} | 推送失败，找不到该群 {groupid}，已删除该群订阅的 {len(remove_list)} 个 UP"
+                                ),
+                            )
                         except Exception as e:
                             logger.error(f"[BiliBili推送] {dynid} | 推送失败，未知错误")
                             logger.exception(e)
@@ -205,6 +219,7 @@ async def main(app: Ariadne):
         if BOT_Status["offset"] > int(dynall[-1].extend.dyn_id_str):
             logger.info("[BiliBili推送] 有 UP 删除了动态")
         BOT_Status["offset"] = int(dynall[-1].extend.dyn_id_str)
+        BOT_Status["last_finish"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     else:
         logger.debug(dynall)
     BOT_Status["updateing"] = False

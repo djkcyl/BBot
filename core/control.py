@@ -45,7 +45,7 @@ class Permission:
             user_permission = member.permission
         if isinstance(member, int):
             user = member
-            user_permission = cls.DEFAULT
+            user_permission = None
 
         if user == 80000000:
             raise ExecutionStop()
@@ -67,17 +67,14 @@ class Permission:
         :param level: 限制等级
         """
 
-        def perm_check(event: GroupMessage):
-            member_level = cls.get(event.sender)
+        def perm_check(member: Member):
+            member_level = cls.get(member)
 
-            if (
-                cls.GROUP_ADMIN > member_level >= level
-                and BotConfig.Debug.enable
-                and event.sender.group.id not in BotConfig.Debug.groups
-                or member_level < cls.GROUP_ADMIN
-                and member_level < level
-            ):
+            if BotConfig.Debug.enable and member.group.id not in BotConfig.Debug.groups:
                 raise ExecutionStop()
+            if member_level >= level:
+                return
+            raise ExecutionStop()
 
         return Depend(perm_check)
 
@@ -86,14 +83,11 @@ class Permission:
 
         member_level = cls.get(member.id)
 
-        if (
-            cls.GROUP_ADMIN > member_level >= level
-            and BotConfig.Debug.enable
-            and member.group.id not in BotConfig.Debug.groups
-            or member_level < cls.GROUP_ADMIN
-            and member_level < level
-        ):
+        if BotConfig.Debug.enable and member.group.id not in BotConfig.Debug.groups:
             raise ExecutionStop()
+        if member_level >= level:
+            return
+        raise ExecutionStop()
 
 
 class Interval:

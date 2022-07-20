@@ -30,7 +30,7 @@ async def main(app: Ariadne, group: Group, anything: RegexResult):
     if anything.matched:
         msg = anything.result.display
         sended = []
-        for group in app.get_group_list():
+        for group in await app.get_group_list():
             if group.id in sended:
                 continue
             await app.send_group_message(

@@ -3,6 +3,8 @@ import json
 
 from pathlib import Path
 
+from loguru import logger
+
 from core import BOT_Status
 from core.group_config import GroupPermission
 
@@ -82,9 +84,9 @@ async def subscribe_uid(uid, groupid) -> str:
     if groupid in uid_sub_group:
         BOT_Status["init"] = True
         return f"本群已订阅 UP {up_name}（{uid}），请勿重复订阅"
-    if len(get_group_sublist(groupid)) >= 12 and not gp.is_vip():
+    if len(get_group_sublist(groupid)) >= 4 and not gp.is_vip():
         BOT_Status["init"] = True
-        return "每个群聊最多仅可订阅 12 个 UP"
+        return "每个群聊最多仅可订阅 4 个 UP"
     if uid not in sub.get_data():
         need_sub = True
         sub.get_data()[uid] = {}
@@ -102,7 +104,7 @@ async def subscribe_uid(uid, groupid) -> str:
         if resp["code"] != 0:
             await unsubscribe_uid(uid, groupid)
             BOT_Status["init"] = True
-            return f"订阅失败：{resp['code']}, {resp['message']}"
+            return f"UP（{uid}）订阅失败：{resp['code']}，{resp['message']}"
 
     BOT_Status["init"] = True
 
@@ -113,6 +115,7 @@ async def unsubscribe_uid(uid, groupid):
     """在某个群退订某个 up"""
     uid = str(uid)
     groupid = str(groupid)
+    logger.info(f"正在群 {groupid} 取消订阅 {uid}")
     while BOT_Status["updateing"]:
         await asyncio.sleep(0.1)
     BOT_Status["init"] = False
@@ -122,24 +125,32 @@ async def unsubscribe_uid(uid, groupid):
     uid_sub_group = sub.get_data().get(uid, {})
     if groupid not in uid_sub_group:
         BOT_Status["init"] = True
+        logger.info(f"群 {groupid} 未订阅 {uid}")
         return f"本群未订阅该 UP（{uid}）"
     up_name = uid_sub_group[groupid]["name"]
-    if not len(sub.get_data()[uid]) - 1:
+    if len(sub.get_data()[uid]) == 1:
+        logger.info(f"正在从 BliBili 取消订阅 {uid}")
         await delete_uid(uid)
     else:
+        logger.info(f"正在从取消订阅 {uid}")
         del sub.get_data()[uid][groupid]
     sub.save()
     BOT_Status["init"] = True
+    logger.info(f"成功从群 {groupid} 取消订阅 UP {up_name}（{uid}）")
     return f"{up_name}（{uid}）退订成功"
 
 
 async def delete_uid(uid):
     """直接删除订阅的某个 up"""
+    logger.info(f"正在从 BliBili 取消订阅 {uid}")
     uid = str(uid)
-
-    await relation_modify(uid, 2)
-    del sub.get_data()[uid]
-    sub.save()
+    resp = await relation_modify(uid, 2)
+    if resp["code"] != 0:
+        logger.info(f"取关 {uid} 失败：{resp['code']}，{resp['message']}")
+    else:
+        del sub.get_data()[uid]
+        logger.info(f"成功从 BliBili 取消订阅 {uid}")
+        sub.save()
 
 
 def set_name(uid, name):
