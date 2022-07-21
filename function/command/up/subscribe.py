@@ -1,5 +1,3 @@
-import httpx
-
 from graia.saya import Channel
 from graia.ariadne.app import Ariadne
 from graia.ariadne.model import Group
@@ -43,43 +41,22 @@ async def main(app: Ariadne, group: Group, anything: RegexResult):
     message = anything.result.display
     uid = await uid_extract(message)
     if uid:
-        uid = uid
-    elif message.startswith("UID:"):
-        uid = message[4:]
-    else:
-        async with httpx.AsyncClient() as client:
-            resp = await client.get(
-                "https://api.bilibili.com/x/web-interface/search/type",
-                params={"keyword": message, "search_type": "bili_user"},
-            )
-
-        data = resp.json()["data"]
-        if data["numResults"]:
-            if data["result"][0]["uname"] == message:
-                uid = data["result"][0]["mid"]
-            else:
-                return await app.send_group_message(
-                    group,
-                    MessageChain("请输入正确的 UP 名、UP UID 或 UP 首页链接"),
-                )
-        else:
-            return await app.send_group_message(
+        if BOT_Status["updateing"]:
+            await app.send_group_message(
                 group,
-                MessageChain("未搜索到该 UP"),
+                MessageChain("正在订阅，请稍后..."),
             )
-
-    if BOT_Status["updateing"]:
+        msg = await subscribe_uid(uid, group.id)
         await app.send_group_message(
             group,
-            MessageChain("正在订阅，请稍后..."),
+            MessageChain(msg),
         )
-
-    msg = await subscribe_uid(uid, group.id)
-    await app.send_group_message(
-        group,
-        MessageChain(msg),
-    )
-    await app.send_friend_message(
-        BotConfig.master,
-        MessageChain(f"群 {group.name}（{group.id}）正在订阅 UP：{uid}\n{msg}"),
-    )
+        await app.send_friend_message(
+            BotConfig.master,
+            MessageChain(f"群：{group.name}（{group.id}）\n正在订阅 UP：{uid}\n{msg}"),
+        )
+    else:
+        await app.send_group_message(
+            group,
+            MessageChain("未找到该 UP，请输入正确的 UP 群内昵称、UP 名、UP UID或 UP 首页链接"),
+        )

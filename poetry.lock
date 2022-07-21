@@ -974,7 +974,7 @@ reference = "tsinghua"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "601f9f4c3fcd572a17b8021a2822aa7b5b9b14c3fb2ab6627b788937b41b1a10"
+content-hash = "40ff1b3f7cd066bb94f202ca4dce4f1ca3f1a88c4e71977046b652ee38cd25ec"
 
 [metadata.files]
 aiohttp = [

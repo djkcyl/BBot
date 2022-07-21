@@ -37,4 +37,4 @@ async def main(app: Ariadne, group: Group, anything: RegexResult):
                 group, MessageChain(f"公告 - {group.id}：\n{msg}")
             )
             sended.append(group.id)
-            await asyncio.sleep(0.3)
+            await asyncio.sleep(2)

@@ -8,10 +8,11 @@ from graia.ariadne.event.lifecycle import ApplicationLaunched
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 
 from core import BOT_Status
-from library import delete_uid, get_subid_list
+from data import get_all_uid
+from library import delete_uid
 from core.bot_config import BotConfig
-from library.bilibili_request import bilibili_login, relation_modify
 from library.grpc import grpc_dynall_get, grpc_uplist_get
+from library.bilibili_request import bilibili_login, relation_modify
 
 channel = Channel.current()
 
@@ -34,48 +35,58 @@ async def init(app: Ariadne):
             ),
         )
 
-    subid_list = get_subid_list()
-    # 直播状态初始化
+    # 初始化
+    subid_list = get_all_uid()
     resp = await grpc_uplist_get()
 
-    for up in subid_list.keys():
+    # 检测在数据库但不在B站关注列表的uid
+    for up in subid_list:
         for uid in resp.items:
             if up == str(uid.uid):
                 break
         else:
-            logger.warning(f"[Init] {up} is not in Bilibili sublist, fixing...")
+            logger.warning(f"[BiliBili推送] {up} 不在关注列表中，正在修复")
             resp = await relation_modify(up, 1)
             if resp["code"] != 0:
                 await delete_uid(up)
-                logger.error(f"UP {up} 订阅失败：{resp['code']}, {resp['message']}")
+                logger.error(f"[BiliBili推送] {up} 订阅修复失败，请检查后重启 Bot：{resp}")
                 await app.send_friend_message(
                     BotConfig.master,
-                    MessageChain(
-                        f"UP {up} 订阅失败：{resp['code']}, {resp['message']}，请手动重启 Bot"
-                    ),
+                    MessageChain(f"[BiliBili推送] UP {up} 订阅修复失败，请检查后重启 Bot：{resp}"),
                 )
                 exit()
+            else:
+                logger.info(f"[BiliBili推送] {up} 订阅修复成功")
+            await asyncio.sleep(1)
 
-    for uid in resp.items:
-        if str(uid.uid) not in subid_list:
-            await delete_uid(up)
-            logger.error(f"UP {uid.name} 不在订阅列表中，已删除")
-            await app.send_friend_message(
-                BotConfig.master,
-                MessageChain(f"UP {uid.name} 不在订阅列表中，已删除，请手动重启 Bot"),
-            )
-            exit()
+    # 检测在B站关注列表但不在数据库的uid
+    if resp.items:
+        for uid in resp.items:
+            if str(uid.uid) not in subid_list:
+                logger.warning(f"[BiliBili推送] {uid.name}（{uid.uid}）在关注列表中，但不在数据库中，正在取消关注")
+                resp = await delete_uid(uid.uid)
+                if resp["code"] == 0:
+                    await app.send_friend_message(
+                        BotConfig.master,
+                        MessageChain(
+                            f"[BiliBili推送] {uid.name}（{uid.uid}）在关注列表中，但不在数据库中，正在取消关注"
+                        ),
+                    )
+                    await asyncio.sleep(1)
+                    continue
+                else:
+                    logger.error(
+                        f"[BiliBili推送] {uid.name}（{uid.uid}）取消关注失败，请检查后重启 Bot：{resp}"
+                    )
+                    exit()
 
-        if uid.live_info.status:
-            logger.info(f"[BiliBili推送] {uid.name} 已开播")
-            BOT_Status["liveing"].append(str(uid.uid))
+            # 顺便检测直播状态
+            if uid.live_info.status:
+                logger.info(f"[BiliBili推送] {uid.name} 已开播")
+                BOT_Status["liveing"].append(str(uid.uid))
     logger.info(f"[BiliBili推送] 直播初始化完成，当前 {len(BOT_Status['liveing'])} 个 UP 正在直播")
 
     # 动态初始化
-    resp = await grpc_dynall_get()
-    BOT_Status["offset"] = int(resp[-1].extend.dyn_id_str)
-    logger.info(f"[BiliBili推送] 动态初始化完成，offset：{BOT_Status['offset']}")
-
     sub_num = len(subid_list)
     if sub_num == 0:
         await asyncio.sleep(1)
@@ -83,6 +94,11 @@ async def init(app: Ariadne):
         BOT_Status["init"] = True
         return
     await asyncio.sleep(1)
+
+    resp = await grpc_dynall_get()
+    BOT_Status["offset"] = int(resp[-1].extend.dyn_id_str)
+    logger.info(f"[BiliBili推送] 动态初始化完成，offset：{BOT_Status['offset']}")
+
     logger.info(f"[BiliBili推送] 将对 {sub_num} 个账号进行监控")
 
     await asyncio.sleep(2)

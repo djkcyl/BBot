@@ -12,3 +12,5 @@ data/history.db
 data/group_list.json
 data/subgroup_list.json
 migrator.py
+pwtest.py
+data/data.db

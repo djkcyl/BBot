@@ -12,9 +12,10 @@ from graia.ariadne.event.mirai import (
     BotLeaveEventDisband,
 )
 
+from data import get_sub_by_group
+from library import unsubscribe_uid
 from core.bot_config import BotConfig
 from core.group_config import GroupPermission
-from library import get_group_sublist, unsubscribe_uid
 
 channel = Channel.current()
 
@@ -28,10 +29,10 @@ async def main(app: Ariadne, group: Group):
     GroupPermission(group).remove_from_whitelist()
     logger.info(f"[BiliBili推送] 检测到退群事件 > {group.name}({group.id})，正在删除该群的订阅")
     remove_list = []
-    for subid, _, _ in get_group_sublist(group.id):
-        unsubscribe_uid(subid, group.id)
-        remove_list.append(subid)
-        logger.info(f"[BiliBili推送] 已删除订阅 > {subid}")
+    for data in get_sub_by_group(group.id):
+        unsubscribe_uid(data.uid, group.id)
+        remove_list.append(data.uid)
+        logger.info(f"[BiliBili推送] 已删除订阅 > {data.uid}")
         await asyncio.sleep(2)
     logger.info(
         f"[BiliBili推送] 检测到退群事件 > {group.name}({group.id})，已删除该群订阅的 {len(remove_list)} 个 UP"

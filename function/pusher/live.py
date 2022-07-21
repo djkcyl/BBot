@@ -12,11 +12,11 @@ from graia.scheduler.timers import every_custom_seconds
 from graia.ariadne.model import MemberPerm
 
 from core import BOT_Status
-from data import insert_live_push
 from core.bot_config import BotConfig
 from library.grpc import grpc_uplist_get
-from library import get_group_sublist, get_subid_list, set_name, unsubscribe_uid
+from library import set_name, unsubscribe_uid
 from library.bilibili_request import get_status_info_by_uids, relation_modify
+from data import insert_live_push, get_sub_by_group, get_all_uid, get_sub_by_uid
 
 channel = Channel.current()
 
@@ -24,9 +24,9 @@ channel = Channel.current()
 @channel.use(SchedulerSchema(every_custom_seconds(3)))
 async def main(app: Ariadne):
 
-    if not BOT_Status["init"] or BOT_Status["init"] and len(get_subid_list()) == 0:
+    if not BOT_Status["init"] or BOT_Status["init"] and len(get_all_uid()) == 0:
         return
-    sub_list = get_subid_list().copy()
+    sub_list = get_all_uid()
 
     # 直播状态更新检测
     try:
@@ -73,13 +73,16 @@ async def main(app: Ariadne):
                 )
                 logger.info(f"[BiliBili推送] {up_name} 开播了 - {room_area} - {title}")
 
-                for groupid, data in sub_list[up_id].items():
-                    if BotConfig.Debug.enable and groupid not in BotConfig.Debug.groups:
+                for data in get_sub_by_uid(up_id):
+                    if (
+                        BotConfig.Debug.enable
+                        and int(data.group) not in BotConfig.Debug.groups
+                    ):
                         continue
-                    if data["send"]["live"]:
+                    if data.live:
                         nick = (
                             f"*{up_nick} "
-                            if (up_nick := data["nick"])
+                            if (up_nick := data.nick)
                             else f"UP {up_name}（{up_id}）"
                         )
                         msg = [
@@ -87,8 +90,8 @@ async def main(app: Ariadne):
                             cover_img,
                             f"\nhttps://live.bilibili.com/{room_id}",
                         ]
-                        if data["atall"]:
-                            bot_perm = (await app.get_group(int(groupid))).account_perm
+                        if data.atall:
+                            bot_perm = (await app.get_group(int(data.group))).account_perm
                             if bot_perm in [
                                 MemberPerm.Administrator,
                                 MemberPerm.Owner,
@@ -98,51 +101,54 @@ async def main(app: Ariadne):
                                 msg = ["@全体成员 "] + msg
                         try:
                             await app.send_group_message(
-                                groupid,
+                                int(data.group),
                                 MessageChain(msg),
                             )
                             await asyncio.sleep(1)
                         except UnknownTarget:
                             remove_list = []
-                            for subid, _, _ in get_group_sublist(groupid):
-                                await unsubscribe_uid(subid, groupid)
-                                remove_list.append(subid)
+                            for data in get_sub_by_group(data.group):
+                                await unsubscribe_uid(data.uid, data.group)
+                                remove_list.append(data.uid)
                             logger.info(
-                                f"[BiliBili推送] 推送失败，找不到该群 {groupid}，已删除该群订阅的 {len(remove_list)} 个 UP"
+                                f"[BiliBili推送] 推送失败，找不到该群 {data.group}，已删除该群订阅的 {len(remove_list)} 个 UP"
                             )
 
                 BOT_Status["liveing"].append(up_id)
                 insert_live_push(
-                    up_id, True, len(sub_list[up_id]), title, area_parent, area
+                    up_id, True, len(get_sub_by_uid(up_id)), title, area_parent, area
                 )
             elif up_id in BOT_Status["liveing"]:
                 BOT_Status["liveing"].remove(up_id)
                 logger.info(f"[BiliBili推送] {up_name} 已下播")
-                for groupid, data in sub_list[up_id].items():
-                    if BotConfig.Debug.enable and groupid not in BotConfig.Debug.groups:
+                for data in get_sub_by_uid(up_id):
+                    if (
+                        BotConfig.Debug.enable
+                        and int(data.group) not in BotConfig.Debug.groups
+                    ):
                         continue
-                    if data["send"]["live"]:
+                    if data.live:
                         try:
                             nick = (
-                                f"{up_nick} "
-                                if (up_nick := data["nick"])
+                                f"*{up_nick} "
+                                if (up_nick := data.nick)
                                 else f"UP {up_name}（{up_id}）"
                             )
                             await app.send_group_message(
-                                groupid,
+                                int(data.group),
                                 MessageChain(f"本群订阅的 {nick}已下播！"),
                             )
 
                         except UnknownTarget:
                             remove_list = []
-                            for subid, _, _ in get_group_sublist(groupid):
-                                await unsubscribe_uid(subid, groupid)
-                                remove_list.append(subid)
+                            for data in get_sub_by_group(data.group):
+                                await unsubscribe_uid(data.uid, data.group)
+                                remove_list.append(data.uid)
                             logger.info(
-                                f"[BiliBili推送] 发送失败，找不到该群 {groupid}，已删除该群订阅的 {len(remove_list)} 个 UP"
+                                f"[BiliBili推送] 发送失败，找不到该群 {data.group}，已删除该群订阅的 {len(remove_list)} 个 UP"
                             )
                         await asyncio.sleep(1)
-                insert_live_push(up_id, False, len(sub_list[up_id]))
+                insert_live_push(up_id, False, len(get_sub_by_uid(up_id)))
         else:
             logger.warning(f"[BiliBili推送] 未找到订阅 UP {up_name}（{up_id}）的群，已退订！")
             resp = await relation_modify(up_id, 2)

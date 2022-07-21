@@ -1,6 +1,7 @@
 import contextlib
 
 from loguru import logger
+from playwright.async_api._generated import Request
 from playwright._impl._api_types import TimeoutError
 
 from core.bot_config import BotConfig
@@ -14,11 +15,13 @@ async def get_dynamic_screenshot(id):
         try:
             page = None
             page = await browser.new_page()
+            page.on("requestfinished", network_request)
+            page.on("requestfailed", network_requestfailed)
             if BotConfig.Bilibili.mobile_style:
                 url = f"https://m.bilibili.com/dynamic/{id}"
                 await page.set_viewport_size({"width": 400, "height": 780})
                 with contextlib.suppress(TimeoutError):
-                    await page.goto(url, wait_until="networkidle", timeout=15000)
+                    await page.goto(url, wait_until="networkidle", timeout=20000)
                 content = await page.content()
                 content = content.replace(
                     '<div class="dyn-header__right">'
@@ -50,7 +53,7 @@ async def get_dynamic_screenshot(id):
                 url = f"https://t.bilibili.com/{id}"
                 await page.set_viewport_size({"width": 2560, "height": 1080})
                 with contextlib.suppress(TimeoutError):
-                    await page.goto(url, wait_until="networkidle", timeout=10000)
+                    await page.goto(url, wait_until="networkidle", timeout=20000)
                 card = await page.query_selector(".card")
                 assert card
                 clip = await card.bounding_box()
@@ -67,3 +70,19 @@ async def get_dynamic_screenshot(id):
             logger.error(f"[BiliBili推送] {id} 动态截图失败，正在重试：")
             logger.exception(e)
     return None
+
+
+async def network_request(request: Request):
+    url = request.url
+    method = request.method
+    response = await request.response()
+    status = response.status
+    time = "%.2f" % response.request.timing["responseEnd"]
+    logger.debug(f"[Response] [{method} {status}] {time}ms <<  {url}")
+
+
+def network_requestfailed(request: Request):
+    url = request.url
+    fail = request.failure
+    method = request.method
+    logger.warning(f"[RequestFailed] [{method} {fail}] << {url}")

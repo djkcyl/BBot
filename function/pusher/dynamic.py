@@ -15,11 +15,18 @@ from graia.scheduler.timers import every_custom_seconds
 from core import BOT_Status
 from core.bot_config import BotConfig
 from library.grpc import grpc_dynall_get
-from data import insert_dynamic_push, is_dyn_pushed
+from library import set_name, unsubscribe_uid
 from library.dynamic_shot import get_dynamic_screenshot
 from library.bilibili_request import relation_modify, dynamic_like
-from library import get_subid_list, get_group_sublist, set_name, unsubscribe_uid
 from library.grpc.bilibili.app.dynamic.v2.dynamic_pb2 import DynamicType, DynModuleType
+from data import (
+    uid_exists,
+    get_all_uid,
+    is_dyn_pushed,
+    get_sub_by_uid,
+    get_sub_by_group,
+    insert_dynamic_push,
+)
 
 channel = Channel.current()
 
@@ -32,13 +39,12 @@ async def main(app: Ariadne):
     if not BOT_Status["init"]:
         logger.debug("[Dynamic Pusher] Dynamic Pusher is not init")
         return
-    elif len(get_subid_list()) == 0:
+    elif len(get_all_uid()) == 0:
         logger.debug("[Dynamic Pusher] Dynamic Pusher is not have subids")
         return
 
     BOT_Status["updateing"] = True
     BOT_Status["last_update"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    sub_list = get_subid_list().copy()
 
     # 动态更新检测
     # 获取当前登录账号的动态列表
@@ -82,9 +88,9 @@ async def main(app: Ariadne):
                 continue
 
             logger.debug(f"[Dynamic] Start to push dynamic {dynid}")
-            if up_id in sub_list:
+            if uid_exists(up_id):
                 logger.info(
-                    f"[BiliBili推送] {dynid} | {up_name} 更新了动态，共有 {len(sub_list[up_id])} 个群订阅了该 UP"
+                    f"[BiliBili推送] {dynid} | {up_name} 更新了动态，共有 {len(get_sub_by_uid(up_id))} 个群订阅了该 UP"
                 )
 
                 logger.debug(f"[Dynamic] Geting screenshot of {dynid}")
@@ -129,14 +135,16 @@ async def main(app: Ariadne):
                         f"\nhttps://t.bilibili.com/{dynid}",
                     ),
                 )
-
-                for groupid, data in sub_list[up_id].items():
-                    if BotConfig.Debug.enable and groupid not in BotConfig.Debug.groups:
+                for data in get_sub_by_uid(up_id):
+                    if (
+                        BotConfig.Debug.enable
+                        and int(data.group) not in BotConfig.Debug.groups
+                    ):
                         continue
-                    if data["send"]["dynamic"]:
+                    if data.dynamic:
                         nick = (
                             f"*{up_nick} "
-                            if (up_nick := data["nick"])
+                            if (up_nick := data.nick)
                             else f"UP {up_name}（{up_id}）"
                         )
                         msg = [
@@ -144,8 +152,8 @@ async def main(app: Ariadne):
                             dyn_img,
                             f"\nhttps://t.bilibili.com/{dynid}",
                         ]
-                        if data["atall"]:
-                            bot_perm = (await app.get_group(int(groupid))).account_perm
+                        if data.atall:
+                            bot_perm = (await app.get_group(int(data.group))).account_perm
 
                             if bot_perm in [
                                 MemberPerm.Administrator,
@@ -155,25 +163,28 @@ async def main(app: Ariadne):
                             # else:
                             #     msg = ["@全体成员 "] + msg
                         try:
+                            print(f"[Dynamic] Send dynamic {dynid} to {data.group}")
                             await app.send_group_message(
-                                groupid,
+                                int(data.group),
                                 MessageChain(msg),
                             )
                             await asyncio.sleep(1)
                         except UnknownTarget:
                             remove_list = []
                             logger.warning(
-                                f"[BiliBili推送] {dynid} | 推送失败，找不到该群 {groupid}，正在删除该群订阅的 {len(remove_list)} 个 UP"
+                                f"[BiliBili推送] {dynid} | 推送失败，找不到该群 {data.group}，正在删除该群订阅的 {len(remove_list)} 个 UP"
                             )
-                            for subid, _, _ in get_group_sublist(groupid):
-                                await unsubscribe_uid(subid, groupid)
-                                remove_list.append(subid)
-                                logger.info(f"[BiliBili推送] 删除了 {groupid} 群 {subid} 的订阅")
+                            for data in get_sub_by_group(data.group):
+                                await unsubscribe_uid(data.uid, data.group)
+                                remove_list.append(data.uid)
+                                logger.info(
+                                    f"[BiliBili推送] 删除了 {data.group} 群 {data.uname}（{data.uid}）的订阅"
+                                )
                                 await asyncio.sleep(2)
                             await app.send_friend_message(
                                 BotConfig.master,
                                 MessageChain(
-                                    f"[BiliBili推送] {dynid} | 推送失败，找不到该群 {groupid}，已删除该群订阅的 {len(remove_list)} 个 UP"
+                                    f"[BiliBili推送] {dynid} | 推送失败，找不到该群 {data.group}，已删除该群订阅的 {len(remove_list)} 个 UP"
                                 ),
                             )
                         except Exception as e:
@@ -190,7 +201,7 @@ async def main(app: Ariadne):
                     dynid,
                     dyn.card_type,
                     dyn_desc,
-                    len(sub_list[up_id]),
+                    len(get_sub_by_uid(up_id)),
                 )
             else:
                 logger.warning(
@@ -218,6 +229,7 @@ async def main(app: Ariadne):
         # 将当前检测到的第一条动态 id 设置为最新的动态 id
         if BOT_Status["offset"] > int(dynall[-1].extend.dyn_id_str):
             logger.info("[BiliBili推送] 有 UP 删除了动态")
+
         BOT_Status["offset"] = int(dynall[-1].extend.dyn_id_str)
         BOT_Status["last_finish"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     else:

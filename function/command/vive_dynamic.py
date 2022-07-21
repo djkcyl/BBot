@@ -23,15 +23,13 @@ channel = Channel.current()
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[
-            Twilight([FullMatch("查看动态"), "anything" @ WildcardMatch()])
-        ],
+        inline_dispatchers=[Twilight([FullMatch("查看动态"), "anything" @ WildcardMatch()])],
         decorators=[Permission.require(), Interval.require(20)],
     )
 )
 async def main(app: Ariadne, group: Group, anything: RegexResult):
 
-    if not (uid := await uid_extract(anything.result.display)):
+    if not (uid := await uid_extract(anything.result.display, group.id)):
         return await app.send_group_message(group, MessageChain("请输入正确的 UP UID 或 首页链接"))
 
     if res := await grpc_dyn_get(uid):

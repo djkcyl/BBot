@@ -7,11 +7,12 @@ from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import (
     Twilight,
     RegexMatch,
+    ParamMatch,
     RegexResult,
-    WildcardMatch,
 )
 
 from library import set_nick
+from library.uid_extract import uid_extract
 from core.control import Interval, Permission
 
 channel = Channel.current()
@@ -25,8 +26,8 @@ channel = Channel.current()
                 [
                     "act" @ RegexMatch(r"设定|删除"),
                     RegexMatch(r"昵称|别名"),
-                    "uid" @ RegexMatch(r"\d+", optional=True),
-                    "nick" @ WildcardMatch(optional=True),
+                    "uid" @ ParamMatch(optional=True),
+                    "nick" @ ParamMatch(optional=True),
                 ]
             )
         ],
@@ -37,16 +38,19 @@ async def main(
     app: Ariadne, group: Group, act: RegexResult, uid: RegexResult, nick: RegexResult
 ):
     if uid.matched:
-        uids = uid.result.display
-        if uids.isdigit():
-            nicks = nick.result.display
-            if len(nicks) > 24:
-                msg = "昵称过长，设定失败"
+        uid = await uid_extract(uid.result.display, group.id)
+        if uid:
             acts = act.result.display
             if acts == "设定":
-                msg = "昵称设定成功" if set_nick(uids, group.id, nicks) else "该群未关注此 UP"
+                nicks = nick.result.display
+                if len(nicks) > 24:
+                    msg = "昵称过长，设定失败"
+                else:
+                    msg = (
+                        f"{uid} 昵称设定成功" if set_nick(uid, group.id, nicks) else "该群未关注此 UP"
+                    )
             elif acts == "删除":
-                msg = "昵称删除成功" if set_nick(uids, group.id, None) else "该群未关注此 UP"
+                msg = f"{uid} 昵称删除成功" if set_nick(uid, group.id, None) else "该群未关注此 UP"
         else:
             msg = "请输入正确的 UID"
     else:

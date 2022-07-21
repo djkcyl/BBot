@@ -12,7 +12,6 @@ from graia.ariadne.message.parser.twilight import (
 )
 
 from library import unsubscribe_uid
-from library import get_group_sublist
 from core.bot_config import BotConfig
 from library.uid_extract import uid_extract
 from core.control import Interval, Permission
@@ -39,25 +38,8 @@ async def main(app: Ariadne, group: Group, anything: RegexResult):
     if not anything.matched:
         return
     message = anything.result.display
-    uid = await uid_extract(message)
-    if uid:
-        uid = uid
-    elif message.startswith("UID:"):
-        uid = message[4:]
-    else:
-        if not (up_list := get_group_sublist(group.id)):
-            return await app.send_group_message(
-                group, MessageChain(f"本群未订阅该 UP（{message}）")
-            )
 
-        for up_uid, up_name, up_nick in up_list:
-            if up_nick == message or up_name == message:
-                uid = up_uid
-                break
-        else:
-            return await app.send_group_message(
-                group, MessageChain(f"本群未订阅该 UP（{message}）")
-            )
+    uid = await uid_extract(message, group.id)
 
     if uid:
         msg = await unsubscribe_uid(uid, group.id)
@@ -72,5 +54,5 @@ async def main(app: Ariadne, group: Group, anything: RegexResult):
     else:
         await app.send_group_message(
             group,
-            MessageChain("请输入正确的 UP 名、UP UID 或 UP 首页链接"),
+            MessageChain("未找到该 UP，请输入正确的 UP 群内昵称、UP 名、UP UID或 UP 首页链接"),
         )

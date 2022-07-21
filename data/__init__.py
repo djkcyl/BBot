@@ -10,7 +10,7 @@ from peewee import (
 )
 
 
-db = SqliteDatabase("data/history.db")
+db = SqliteDatabase("data/data.db")
 
 
 class BaseModel(Model):
@@ -48,7 +48,22 @@ class LivePush(BaseModel):
         table_name = "live_push"
 
 
-db.create_tables([DynamicPush, LivePush], safe=True)
+class SubList(BaseModel):
+    """订阅列表"""
+
+    uid = CharField()
+    uname = CharField()
+    nick = CharField(null=True)
+    group = CharField()
+    atall = BooleanField(default=False)
+    live = BooleanField(default=True)
+    dynamic = BooleanField(default=True)
+
+    class Meta:
+        table_name = "sub_list"
+
+
+db.create_tables([DynamicPush, LivePush, SubList], safe=True)
 
 
 def insert_dynamic_push(
@@ -92,3 +107,66 @@ def insert_live_push(
 def is_dyn_pushed(pushid: Union[str, int]) -> bool:
     "查询某个动态是否推送过"
     return bool(DynamicPush.select().where(DynamicPush.dyn_id == str(pushid)).exists())
+
+
+def add_sub(uid: Union[str, int], uname: str, group: Union[str, int]):
+    "添加订阅"
+    SubList(uid=str(uid), uname=uname, group=group).save()
+
+
+def get_all_uid() -> list[str]:
+    "获取所有uid"
+    return [i.uid for i in SubList.select(SubList.uid).distinct()]
+
+
+def get_sub_by_group(group: Union[str, int]) -> list[SubList]:
+    "根据群组获取订阅列表"
+    return list(SubList.select().where(SubList.group == group).order_by(SubList.uid))
+
+
+def get_sub_by_uid(uid: Union[str, int]) -> list[SubList]:
+    "根据uid获取订阅该uid的群"
+    return list(SubList.select().where(SubList.uid == str(uid)).order_by(SubList.group))
+
+
+def uid_in_group_exists(uid: Union[str, int], group: Union[str, int]) -> bool:
+    "检查uid是否在该群订阅中"
+    return bool(
+        SubList.select()
+        .where(SubList.uid == str(uid), SubList.group == str(group))
+        .exists()
+    )
+
+
+def get_sub_data(uid: Union[str, int], group: Union[str, int]) -> SubList:
+    "获取订阅数据"
+    return SubList.get(SubList.uid == str(uid), SubList.group == str(group))
+
+
+def set_uid_name(uid: Union[str, int], uname: str):
+    "设置用户名"
+    SubList.update(uname=uname).where(SubList.uid == str(uid)).execute()
+
+
+def uid_exists(uid: Union[str, int]) -> bool:
+    "检查uid是否存在数据库中"
+    return bool(SubList.select().where(SubList.uid == str(uid)).exists())
+
+
+def uid_in_group(uid: Union[str, int], group: Union[str, int]) -> bool:
+    "检查uid是否在该群订阅中"
+    return bool(
+        SubList.select()
+        .where(SubList.uid == str(uid), SubList.group == str(group))
+        .exists()
+    )
+
+
+def unsub_uid_by_group(uid: Union[str, int], group: Union[str, int]):
+    "取消该uid在该群的订阅"
+    SubList.delete().where(SubList.uid == str(uid), SubList.group == str(group)).execute()
+
+
+def delete_sub_by_uid(uid: Union[str, int]):
+    "删除该uid的所有订阅"
+    SubList.delete().where(SubList.uid == str(uid)).execute()
