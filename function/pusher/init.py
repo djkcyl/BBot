@@ -1,3 +1,4 @@
+import json
 import asyncio
 
 from loguru import logger
@@ -12,7 +13,13 @@ from data import get_all_uid
 from library import delete_uid
 from core.bot_config import BotConfig
 from library.grpc import grpc_dynall_get, grpc_uplist_get
-from library.bilibili_request import bilibili_login, relation_modify
+from library.bilibili_request import (
+    set_token,
+    save_token,
+    token_refresh,
+    bilibili_login,
+    relation_modify,
+)
 
 channel = Channel.current()
 
@@ -23,17 +30,34 @@ async def init(app: Ariadne):
     await asyncio.sleep(1)
     cache, login_data = await bilibili_login()
 
-    logger.info(
-        f"[BiliBili推送] 登录完成，账号：{login_data['username']}，mid：{login_data['data']['token_info']['mid']}"
-    )
+    logger.info(f"[BiliBili推送] 登录完成，token：{login_data['data']['token_info']}")
 
     if cache:
         await app.send_friend_message(
             BotConfig.master,
             MessageChain(
-                f"[BiliBili推送] 使用缓存登录成功\n账号：{login_data['username']}\nmid：{login_data['data']['token_info']['mid']}"
+                f"[BiliBili推送] 使用缓存登录成功\n{json.dumps(login_data['data']['token_info'], indent=2)}"
             ),
         )
+
+    resp = await token_refresh()
+    if resp["code"] == 0:
+        set_token(resp)
+        save_token()
+        logger.success(f"[BiliBili推送] 刷新 token 成功，token：{resp['data']['token_info']}")
+        await app.send_friend_message(
+            BotConfig.master,
+            MessageChain(
+                f"[BiliBili推送] 刷新 token 成功\n{json.dumps(resp['data']['token_info'], indent=2)}"
+            ),
+        )
+    else:
+        logger.error(f"[BiliBili推送] 刷新 token 失败，{resp}")
+        await app.send_friend_message(
+            BotConfig.master,
+            MessageChain(f"[BiliBili推送] 刷新 token 失败，{resp}"),
+        )
+        exit()
 
     # 初始化
     subid_list = get_all_uid()
@@ -83,7 +107,7 @@ async def init(app: Ariadne):
             # 顺便检测直播状态
             if uid.live_info.status:
                 logger.info(f"[BiliBili推送] {uid.name} 已开播")
-                BOT_Status["liveing"].append(str(uid.uid))
+                BOT_Status["liveing"][str(uid.uid)] = None
     logger.info(f"[BiliBili推送] 直播初始化完成，当前 {len(BOT_Status['liveing'])} 个 UP 正在直播")
 
     # 动态初始化

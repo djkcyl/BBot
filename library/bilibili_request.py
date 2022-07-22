@@ -21,10 +21,9 @@ head = {
 }
 
 login_cache_file = Path("data/login_cache.json")
-bilibili_client = bilibiliMobile(
-    BotConfig.Bilibili.username, BotConfig.Bilibili.password
-)
+bilibili_client = bilibiliMobile(BotConfig.Bilibili.username, BotConfig.Bilibili.password)
 bilibili_token = None
+refresh_token = None
 token_json = None
 
 
@@ -32,16 +31,21 @@ def get_token():
     return bilibili_token
 
 
+def get_referer():
+    return refresh_token
+
+
 def set_token(token):
-    global bilibili_token, token_json
+    global bilibili_token, token_json, refresh_token
     bilibili_token = token["data"]["token_info"]["access_token"]
+    refresh_token = token["data"]["token_info"]["refresh_token"]
     token_json = token
 
 
 async def bilibili_login():
     if login_cache_file.exists():
         token_json = json.loads(login_cache_file.read_text())
-        logger.info("[BiliBili推送] 已读取缓存的登录信息")
+        logger.success("[BiliBili推送] 已读取缓存的登录信息")
         set_token(token_json)
         return True, token_json
     else:
@@ -53,6 +57,7 @@ async def bilibili_login():
 
 def save_token():
     login_cache_file.write_text(json.dumps(token_json, indent=2))
+    logger.success("[BiliBili推送] 已保存登录信息")
 
 
 async def get_status_info_by_uids(uids):
@@ -133,6 +138,47 @@ async def dynamic_like(dynid):
                 "https://api.vc.bilibili.com/dynamic_like/v1/dynamic_like/thumb",
                 data=data,
                 headers=bilibili_client.headers,
+            )
+            return response.json()
+        except httpx.HTTPError as e:
+            logger.error(f"[BiliBili推送] API 访问失败，正在第 {retry + 1} 重试 {e}")
+
+
+async def get_b23_url(url: str) -> str:
+    for retry in range(3):
+        try:
+            async with httpx.AsyncClient(headers=head) as client:
+                data = {
+                    "build": 6700300,
+                    "buvid": bilibili_client.fakebuvid(),
+                    "oid": url,
+                    "platform": "android",
+                    "share_channel": "COPY",
+                    "share_id": "public.webview.0.0.pv",
+                    "share_mode": 3,
+                }
+                r = await client.post("https://api.bilibili.com/x/share/click", json=data)
+                return r.json()["data"]["content"]
+        except httpx.HTTPError as e:
+            logger.error(f"[BiliBili推送] API 访问失败，正在第 {retry + 1} 重试 {e}")
+
+
+async def token_refresh():
+    for retry in range(3):
+        try:
+            data = {
+                "access_key": get_token(),
+                "refresh_token": get_referer(),
+                "appkey": "783bbb7264451d82",
+                "ts": str(int(time.time())),
+            }
+            keys = sorted(data.keys())
+            data_sorted = {key: data[key] for key in keys}
+            data = data_sorted
+            sign = bilibili_client.calcSign(data)
+            data["sign"] = sign
+            response = await bilibili_client.session.post(
+                "https://passport.bilibili.com/api/v2/oauth2/refresh_token", data=data
             )
             return response.json()
         except httpx.HTTPError as e:

@@ -115,14 +115,12 @@ class bilibiliMobile:
                     cookie["name"], cookie["value"], domain=".bilibili"
                 )
             logger.info(f"[BiliBili推送] {self.username} 登录成功")
-            infos_return = {"username": self.username}
-            infos_return |= response_json
             app = Ariadne.current()
             await app.send_friend_message(
                 BotConfig.master,
                 MessageChain(f"[BiliBili推送] {self.username} 登录成功"),
             )
-            return infos_return
+            return response_json
         elif response_json["code"] == -629:
             await app.send_friend_message(
                 BotConfig.master,

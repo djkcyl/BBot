@@ -1,20 +1,22 @@
-from graia.ariadne.connection.util import UploadMethod
+import time
 import asyncio
 
 from loguru import logger
 from graia.saya import Channel
 from graia.ariadne.app import Ariadne
+from graia.ariadne.model import MemberPerm
 from graia.ariadne.exception import UnknownTarget
 from graia.ariadne.message.chain import MessageChain
+from graia.ariadne.connection.util import UploadMethod
 from graia.ariadne.message.element import Image, AtAll
 from graia.scheduler.saya.schema import SchedulerSchema
 from graia.scheduler.timers import every_custom_seconds
-from graia.ariadne.model import MemberPerm
 
 from core import BOT_Status
 from core.bot_config import BotConfig
 from library.grpc import grpc_uplist_get
 from library import set_name, unsubscribe_uid
+from library.time_tools import calc_time_total
 from library.bilibili_request import get_status_info_by_uids, relation_modify
 from data import insert_live_push, get_sub_by_group, get_all_uid, get_sub_by_uid
 
@@ -33,6 +35,7 @@ async def main(app: Ariadne):
         live_statu = await asyncio.wait_for(grpc_uplist_get(), timeout=10)
     except asyncio.TimeoutError:
         logger.debug("[Live] Get live status failed")
+
     # 由于叔叔的 api 太烂了，会把同一个 up 开播和未开播的状态放在同一个列表里，所以这里需要去重
     # 不过好消息是，这个列表可以按照开播和未开播的顺序排列
     lives = []
@@ -44,7 +47,7 @@ async def main(app: Ariadne):
     _live = [str(up.uid) for up in live_list]
     for up in BOT_Status["liveing"]:
         if up not in _live:
-            BOT_Status["liveing"].remove(up)
+            del BOT_Status["liveing"][up]
 
     for up in live_list:
         up_id = str(up.uid)
@@ -61,6 +64,9 @@ async def main(app: Ariadne):
             if up.live_info.status:
                 if up_id in BOT_Status["liveing"]:
                     continue
+                BOT_Status["liveing"][up_id] = (
+                    None if up_id in BOT_Status["skip_uid"] else time.time()
+                )
                 room_id = up.live_info.room_id
                 resp = await get_status_info_by_uids({"uids": [up_id]})
                 title = resp["data"][up_id]["title"]
@@ -114,13 +120,19 @@ async def main(app: Ariadne):
                                 f"[BiliBili推送] 推送失败，找不到该群 {data.group}，已删除该群订阅的 {len(remove_list)} 个 UP"
                             )
 
-                BOT_Status["liveing"].append(up_id)
                 insert_live_push(
                     up_id, True, len(get_sub_by_uid(up_id)), title, area_parent, area
                 )
             elif up_id in BOT_Status["liveing"]:
-                BOT_Status["liveing"].remove(up_id)
-                logger.info(f"[BiliBili推送] {up_name} 已下播")
+                live_time = (
+                    "，本次直播时长 "
+                    + calc_time_total((time.time() - BOT_Status["liveing"][up_id]) * 1000)
+                    + "。"
+                    if BOT_Status["liveing"][up_id]
+                    else "。"
+                )
+                del BOT_Status["liveing"][up_id]
+                logger.info(f"[BiliBili推送] {up_name} 已下播{live_time}")
                 for data in get_sub_by_uid(up_id):
                     if (
                         BotConfig.Debug.enable
@@ -136,7 +148,7 @@ async def main(app: Ariadne):
                             )
                             await app.send_group_message(
                                 int(data.group),
-                                MessageChain(f"本群订阅的 {nick}已下播！"),
+                                MessageChain(f"本群订阅的 {nick}已下播{live_time}"),
                             )
 
                         except UnknownTarget:

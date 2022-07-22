@@ -1,5 +1,5 @@
 BOT_Status = {
-    "liveing": [],
+    "liveing": {},
     "offset": 0,
     "init": False,
     "skip": 0,
