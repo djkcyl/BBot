@@ -1,5 +1,6 @@
 import asyncio
 
+from typing import Union
 from loguru import logger
 
 from core import BOT_Status
@@ -13,15 +14,15 @@ from data import (
     get_sub_by_uid,
     get_sub_by_group,
     delete_sub_by_uid,
-    uid_in_group_exists,
     unsub_uid_by_group,
+    uid_in_group_exists,
 )
 
 from .grpc import grpc_dyn_get
 from .bilibili_request import relation_modify
 
 
-async def subscribe_uid(uid, groupid) -> str:
+async def subscribe_uid(uid: Union[str, int], groupid: Union[str, int]):
     """在某个群订阅某个 up"""
     uid = str(uid)
     groupid = str(groupid)

@@ -17,8 +17,8 @@ from core.bot_config import BotConfig
 from library.grpc import grpc_uplist_get
 from library import set_name, unsubscribe_uid
 from library.time_tools import calc_time_total
-from library.bilibili_request import get_status_info_by_uids, relation_modify
 from data import insert_live_push, get_sub_by_group, get_all_uid, get_sub_by_uid
+from library.bilibili_request import get_b23_url, get_status_info_by_uids, relation_modify
 
 channel = Channel.current()
 
@@ -94,7 +94,8 @@ async def main(app: Ariadne):
                         msg = [
                             f"本群订阅的 {nick}在 {room_area} 区开播啦 ！\n标题：{title}\n",
                             cover_img,
-                            f"\nhttps://live.bilibili.com/{room_id}",
+                            "\n",
+                            await get_b23_url(f"https://live.bilibili.com/{room_id}"),
                         ]
                         if data.atall:
                             bot_perm = (await app.get_group(int(data.group))).account_perm

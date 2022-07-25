@@ -17,7 +17,7 @@ from core.bot_config import BotConfig
 from library.grpc import grpc_dynall_get
 from library import set_name, unsubscribe_uid
 from library.dynamic_shot import get_dynamic_screenshot
-from library.bilibili_request import relation_modify, dynamic_like
+from library.bilibili_request import get_b23_url, relation_modify, dynamic_like
 from library.grpc.bilibili.app.dynamic.v2.dynamic_pb2 import DynamicType, DynModuleType
 from data import (
     uid_exists,
@@ -132,7 +132,8 @@ async def main(app: Ariadne):
                     MessageChain(
                         f"UP {up_name}（{up_id}）{type_text}\n",
                         dyn_img,
-                        f"\nhttps://t.bilibili.com/{dynid}",
+                        "\n",
+                        await get_b23_url(f"https://t.bilibili.com/{dynid}"),
                     ),
                 )
                 for data in get_sub_by_uid(up_id):
@@ -148,9 +149,10 @@ async def main(app: Ariadne):
                             else f"UP {up_name}（{up_id}）"
                         )
                         msg = [
-                            f"本群订阅的 {nick}{type_text}\n",
+                            f"{nick}{type_text}\n",
                             dyn_img,
-                            f"\nhttps://t.bilibili.com/{dynid}",
+                            "\n",
+                            await get_b23_url(f"https://t.bilibili.com/{dynid}"),
                         ]
                         if data.atall:
                             bot_perm = (await app.get_group(int(data.group))).account_perm

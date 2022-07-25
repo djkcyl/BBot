@@ -13,6 +13,7 @@ from graia.ariadne.message.element import Image, Plain, Voice, FlashImage, Sourc
 
 from core.control import Interval
 from library.b23_extract import b23_extract
+from library.bilibili_request import get_b23_url
 from library.draw_bili_image import binfo_image_create
 
 channel = Channel.current()
@@ -43,12 +44,15 @@ async def bilibili_main(
             await Interval.manual(int(video_info["data"]["aid"]))
         try:
             logger.info(f"开始生成视频信息图片：{video_info['data']['aid']}")
-            image = await asyncio.to_thread(binfo_image_create, video_info)
+            b23_url = await get_b23_url(
+                f"https://www.bilibili.com/video/{video_info['data']['bvid']}"
+            )
+            image = await asyncio.to_thread(binfo_image_create, video_info, b23_url)
             await app.send_group_message(
                 group,
                 MessageChain(
                     Image(data_bytes=image),
-                    Plain(f"https://b23.tv/{video_info['data']['bvid']}"),
+                    f"\n{b23_url}",
                 ),
             )
         except Exception as err:

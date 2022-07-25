@@ -9,13 +9,25 @@ from .b23_extract import b23_extract
 
 
 async def uid_extract(text: str, groupid: str = None):
-    logger.debug(f"[UID Extract] Original text: {text}")
+    logger.debug(f"[UID Extract] Original Text: {text}")
     if up_list := get_sub_by_group(groupid):
-        logger.debug(f"[UID Extract] Group {groupid} has {len(up_list)} subscribers")
+        logger.debug(f"[UID Extract] Group {groupid} has {len(up_list)} Subscribers")
+        if text.isdigit():
+            logger.debug("[UID Extract] Text is a Number")
         for data in up_list:
-            if data.nick == text or data.uname == text:
-                logger.debug(f"[UID Extract] Found Subscriber: {data.uname}({data.uid})")
-                return str(data.uid)
+            if text.isdigit():
+                if data.uid == text:
+                    logger.debug(
+                        f"[UID Extract] Found UID from Group Subscribers: {data.uname}({data.uid})"
+                    )
+                    return str(data.uid)
+            else:
+                text = text.strip("\"'“”‘’")
+                if data.nick == text or data.uname == text:
+                    logger.debug(
+                        f"[UID Extract] Found UName from Group Subscribers: {data.uname}({data.uid})"
+                    )
+                    return str(data.uid)
         logger.debug("[UID Extract] No Subscriber found")
     b23_msg = await b23_extract(text) if "b23.tv" in text else None
     message = b23_msg or text

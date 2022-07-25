@@ -30,9 +30,12 @@ channel = Channel.current()
 async def main(app: Ariadne, group: Group, anything: RegexResult):
 
     if not (uid := await uid_extract(anything.result.display, group.id)):
-        return await app.send_group_message(group, MessageChain("请输入正确的 UP UID 或 首页链接"))
+        return await app.send_group_message(
+            group, MessageChain("未找到该 UP，请输入正确的 UP 群内昵称、UP 名、UP UID或 UP 首页链接")
+        )
 
-    if res := await grpc_dyn_get(uid):
+    res = await grpc_dyn_get(uid)
+    if res.list:
         shot_image = await get_dynamic_screenshot(res.list[0].extend.dyn_id_str)
         await app.send_group_message(group, MessageChain(Image(data_bytes=shot_image)))
     else:

@@ -8,7 +8,7 @@ from PIL import Image, ImageFont, ImageDraw
 from .strings import get_cut_str, numf
 
 
-def binfo_image_create(video_info: dict):
+def binfo_image_create(video_info: dict, b23_url: str):
     client = httpx.Client()
     client.headers.update(
         {
@@ -218,7 +218,7 @@ def binfo_image_create(video_info: dict):
     draw = ImageDraw.Draw(baner_bg)
     # 二维码
     qr = qrcode.QRCode(border=1)
-    qr.add_data("https://b23.tv/" + video_info["data"]["bvid"])
+    qr.add_data(b23_url)
     qr_image = qr.make_image(PilImage, fill_color=icon_color, back_color="#F5F5F7")
     qr_image = qr_image.resize((140, 140))
     baner_bg.paste(qr_image, (50, 10))

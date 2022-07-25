@@ -2,7 +2,7 @@ import re
 import httpx
 
 
-async def b23_extract(text):
+async def b23_extract(text: str):
     if "b23.tv" not in text:
         return None
     b23 = re.compile(r"b23.tv\\/(\w+)").search(text)
