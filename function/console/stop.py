@@ -9,5 +9,5 @@ channel = Channel.current()
 
 @channel.use(ConsoleSchema(dispatchers=[Twilight([FullMatch("stop")])]))
 async def stop(app: Ariadne, console: Console):
-    app.stop()
     console.stop()
+    app.stop()

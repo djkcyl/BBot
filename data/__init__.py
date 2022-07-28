@@ -1,12 +1,13 @@
 from datetime import datetime
 from typing import Union
 from peewee import (
-    SqliteDatabase,
+    Cast,
     Model,
     CharField,
-    DateTimeField,
     IntegerField,
     BooleanField,
+    DateTimeField,
+    SqliteDatabase,
 )
 
 
@@ -121,7 +122,9 @@ def get_all_uid() -> list[str]:
 
 def get_sub_by_group(group: Union[str, int]) -> list[SubList]:
     "根据群组获取订阅列表"
-    return list(SubList.select().where(SubList.group == group).order_by(SubList.uid))
+    return list(
+        SubList.select().where(SubList.group == group).order_by(Cast(SubList.uid, "int"))
+    )
 
 
 def get_sub_by_uid(uid: Union[str, int]) -> list[SubList]:

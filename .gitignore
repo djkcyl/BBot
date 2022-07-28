@@ -14,3 +14,4 @@ data/subgroup_list.json
 migrator.py
 pwtest.py
 data/data.db
+error/

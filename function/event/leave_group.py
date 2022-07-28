@@ -41,7 +41,7 @@ async def main(app: Ariadne, group: Group):
         await app.send_friend_message(
             qq,
             MessageChain(
-                "收到被踢出群聊事件",
+                "收到退出群聊事件",
                 f"\n群号：{group.id}",
                 f"\n群名：{group.name}",
                 f"\n已移出白名单并删除该群订阅的 {len(remove_list)} 个 UP",

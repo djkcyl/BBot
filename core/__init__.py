@@ -4,5 +4,6 @@ BOT_Status = {
     "init": False,
     "skip": 0,
     "skip_uid": [],
-    "updateing": False,
+    "dynamic_updateing": False,
+    "live_updateing": False,
 }

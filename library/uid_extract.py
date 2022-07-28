@@ -22,8 +22,8 @@ async def uid_extract(text: str, groupid: str = None):
                     )
                     return str(data.uid)
             else:
-                text = text.strip("\"'“”‘’")
-                if data.nick == text or data.uname == text:
+                text_g = text.strip("\"'“”‘’")
+                if data.nick == text_g or data.uname == text_g:
                     logger.debug(
                         f"[UID Extract] Found UName from Group Subscribers: {data.uname}({data.uid})"
                     )
@@ -43,18 +43,20 @@ async def uid_extract(text: str, groupid: str = None):
             logger.debug(f"[UID Extract] UID: {match}")
             return str(match[0])
     else:
-        text = text.strip("\"'“”‘’")
-        logger.debug(f"[UID Extract] Searching UID in BiLiBili: {text}")
+        text_u = text.strip("\"'“”‘’")
+        if text_u != text:
+            logger.debug(f"[UID Extract] Text is a Quoted Digit: {text_u}")
+        logger.debug(f"[UID Extract] Searching UID in BiLiBili: {text_u}")
         async with httpx.AsyncClient() as client:
             resp = await client.get(
                 "https://api.bilibili.com/x/web-interface/search/type",
-                params={"keyword": text, "search_type": "bili_user"},
+                params={"keyword": text_u, "search_type": "bili_user"},
             )
         data = resp.json()["data"]
         logger.debug(f"[UID Extract] Search result: {data}")
         if data["numResults"]:
             for result in data["result"]:
-                if result["uname"] == text:
+                if result["uname"] == text_u:
                     logger.debug(f"[UID Extract] Found User: {result}")
                     return str(result["mid"])
         logger.debug("[UID Extract] No User found")

@@ -43,7 +43,7 @@ async def main(app: Ariadne):
         logger.debug("[Dynamic Pusher] Dynamic Pusher is not have subids")
         return
 
-    BOT_Status["updateing"] = True
+    BOT_Status["dynamic_updateing"] = True
     BOT_Status["last_update"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # 动态更新检测
@@ -58,7 +58,7 @@ async def main(app: Ariadne):
             continue
     else:
         logger.debug("[Dynamic] Get dynamic list failed")
-        BOT_Status["updateing"] = False
+        BOT_Status["dynamic_updateing"] = False
 
     logger.debug(f"[Dynamic] Get {len(dynall)} dynamics")
     if dynall:
@@ -105,7 +105,7 @@ async def main(app: Ariadne):
                     err_msg = f"[BiliBili推送] {dynid} | {up_name} 更新了动态，截图失败"
                     logger.error(err_msg)
                     await app.send_friend_message(BotConfig.master, MessageChain(err_msg))
-                    BOT_Status["updateing"] = False
+                    BOT_Status["dynamic_updateing"] = False
                     logger.debug("[Dynamic] Stop updateing")
                     return
 
@@ -236,7 +236,7 @@ async def main(app: Ariadne):
         BOT_Status["last_finish"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     else:
         logger.debug(dynall)
-    BOT_Status["updateing"] = False
+    BOT_Status["dynamic_updateing"] = False
     logger.debug("[Dynamic] Updateing finished")
 
 

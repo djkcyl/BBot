@@ -30,6 +30,8 @@ async def main(app: Ariadne):
         return
     sub_list = get_all_uid()
 
+    BOT_Status["live_updateing"] = True
+
     # 直播状态更新检测
     try:
         live_statu = await asyncio.wait_for(grpc_uplist_get(), timeout=10)
@@ -45,7 +47,7 @@ async def main(app: Ariadne):
         return
 
     _live = [str(up.uid) for up in live_list]
-    for up in BOT_Status["liveing"]:
+    for up in BOT_Status["liveing"].copy():
         if up not in _live:
             del BOT_Status["liveing"][up]
 
@@ -92,7 +94,7 @@ async def main(app: Ariadne):
                             else f"UP {up_name}（{up_id}）"
                         )
                         msg = [
-                            f"本群订阅的 {nick}在 {room_area} 区开播啦 ！\n标题：{title}\n",
+                            f"{nick}在 {room_area} 区开播啦 ！\n标题：{title}\n",
                             cover_img,
                             "\n",
                             await get_b23_url(f"https://live.bilibili.com/{room_id}"),
@@ -149,7 +151,7 @@ async def main(app: Ariadne):
                             )
                             await app.send_group_message(
                                 int(data.group),
-                                MessageChain(f"本群订阅的 {nick}已下播{live_time}"),
+                                MessageChain(f"{nick}已下播{live_time}"),
                             )
 
                         except UnknownTarget:
@@ -175,3 +177,5 @@ async def main(app: Ariadne):
                 )
             else:
                 logger.error(f"[BiliBili推送] {up_name}（{up_id}）退订失败：{resp}")
+
+    BOT_Status["live_updateing"] = False

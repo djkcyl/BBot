@@ -28,7 +28,7 @@ async def subscribe_uid(uid: Union[str, int], groupid: Union[str, int]):
     groupid = str(groupid)
     gp = GroupPermission(int(groupid))
     # 做一些小处理，用来避免出现奇怪的bug
-    while BOT_Status["updateing"]:
+    while BOT_Status["dynamic_updateing"]:
         await asyncio.sleep(0.1)
     BOT_Status["init"] = False
     BOT_Status["skip"] += 2
@@ -71,7 +71,7 @@ async def unsubscribe_uid(uid, groupid):
     uid = str(uid)
     groupid = str(groupid)
     logger.info(f"正在群 {groupid} 取消订阅 {uid}")
-    while BOT_Status["updateing"]:
+    while BOT_Status["dynamic_updateing"]:
         await asyncio.sleep(0.1)
     BOT_Status["init"] = False
     BOT_Status["skip"] += 2

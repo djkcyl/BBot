@@ -27,16 +27,26 @@ channel = Channel.current()
         decorators=[Permission.require(), Interval.require(20)],
     )
 )
-async def main(app: Ariadne, group: Group, anything: RegexResult):
+async def main(app: Ariadne, group: Group, message: MessageChain, anything: RegexResult):
 
     if not (uid := await uid_extract(anything.result.display, group.id)):
         return await app.send_group_message(
-            group, MessageChain("未找到该 UP，请输入正确的 UP 群内昵称、UP 名、UP UID或 UP 首页链接")
+            group,
+            MessageChain("未找到该 UP，请输入正确的 UP 群内昵称、UP 名、UP UID或 UP 首页链接"),
+            quote=message,
         )
 
     res = await grpc_dyn_get(uid)
     if res.list:
-        shot_image = await get_dynamic_screenshot(res.list[0].extend.dyn_id_str)
-        await app.send_group_message(group, MessageChain(Image(data_bytes=shot_image)))
-    else:
-        await app.send_group_message(group, MessageChain("该 UP 未发布任何动态"))
+        if len(res.list) > 1:
+            if res.list[0].modules[0].module_author.is_top:
+                dyn_id = res.list[1].extend.dyn_id_str
+            else:
+                dyn_id = res.list[0].extend.dyn_id_str
+        else:
+            dyn_id = res.list[0].extend.dyn_id_str
+        shot_image = await get_dynamic_screenshot(dyn_id)
+        return await app.send_group_message(
+            group, MessageChain(Image(data_bytes=shot_image)), quote=message
+        )
+    await app.send_group_message(group, MessageChain("该 UP 未发布任何动态"), quote=message)

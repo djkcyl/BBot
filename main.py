@@ -117,7 +117,7 @@ with saya.module_context():
     saya.require("function.event.exception")
     saya.require("function.event.invited_join_group")
     saya.require("function.event.join_group")
-    saya.require("function.event.kick_from_group")
+    saya.require("function.event.leave_group")
     saya.require("function.event.mute")
     saya.require("function.event.new_friend")
     saya.require("function.event.prem_change")
@@ -125,6 +125,8 @@ with saya.module_context():
     saya.require("function.pusher.init")
     saya.require("function.pusher.dynamic")
     saya.require("function.pusher.live")
+
+    saya.require("function.scheduler.refresh_token")
 
 
 with contextlib.suppress(KeyboardInterrupt, asyncio.exceptions.CancelledError):

@@ -1,5 +1,7 @@
+import time
 import contextlib
 
+from pathlib import Path
 from loguru import logger
 from playwright.async_api._generated import Request
 from playwright._impl._api_types import TimeoutError
@@ -9,9 +11,14 @@ from core.bot_config import BotConfig
 from .browser import get_browser
 
 
+error_path = Path("error")
+error_path.mkdir(exist_ok=True)
+
+
 async def get_dynamic_screenshot(id):
+    st = int(time.time())
     browser = await get_browser()
-    for _ in range(3):
+    for i in range(3):
         try:
             page = None
             page = await browser.new_page()
@@ -36,7 +43,7 @@ async def get_dynamic_screenshot(id):
                     'style="font-family: sans-serif; overflow-wrap: break-word;">',
                 )
                 content = content.replace(
-                    '<div class="launch-app-btn dynamic-float-openapp">'
+                    '<div class="launch-app-btn dynamic-float-openapp dynamic-float-btn">'
                     '<div class="m-dynamic-float-openapp">'
                     "<span>打开APP，查看更多精彩内容</span></div> <!----></div>",
                     "",
@@ -46,9 +53,6 @@ async def get_dynamic_screenshot(id):
                 assert card
                 clip = await card.bounding_box()
                 assert clip
-                image = await page.screenshot(
-                    clip=clip, full_page=True, type="jpeg", quality=98
-                )
             else:
                 url = f"https://t.bilibili.com/{id}"
                 await page.set_viewport_size({"width": 2560, "height": 1080})
@@ -63,12 +67,27 @@ async def get_dynamic_screenshot(id):
                 bar_bound = await bar.bounding_box()
                 assert bar_bound
                 clip["height"] = bar_bound["y"] - clip["y"] - 2
-
+            image = await page.screenshot(
+                clip=clip, full_page=True, type="jpeg", quality=98
+            )
             await page.close()
             return image
         except Exception as e:
-            logger.error(f"[BiliBili推送] {id} 动态截图失败，正在重试：")
-            logger.exception(e)
+            text = await page.content()
+            if "访问的页面不见" in text:
+                logger.error(f"[Bilibili] {id} 动态不存在，正在重试")
+            else:
+                logger.error(f"[BiliBili推送] {id} 动态截图失败，正在重试：")
+                logger.exception(e)
+                await page.screenshot(
+                    path=f"{error_path}/{id}_{i}_{st}.jpg",
+                    full_page=True,
+                    type="jpeg",
+                    quality=80,
+                )
+            with contextlib.suppress():
+                await page.close()
+                page = None
     return None
 
 
@@ -77,8 +96,8 @@ async def network_request(request: Request):
     method = request.method
     response = await request.response()
     status = response.status
-    time = "%.2f" % response.request.timing["responseEnd"]
-    logger.debug(f"[Response] [{method} {status}] {time}ms <<  {url}")
+    timing = "%.2f" % response.request.timing["responseEnd"]
+    logger.debug(f"[Response] [{method} {status}] {timing}ms <<  {url}")
 
 
 def network_requestfailed(request: Request):

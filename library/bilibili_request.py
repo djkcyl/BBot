@@ -64,11 +64,14 @@ async def get_status_info_by_uids(uids):
     for retry in range(3):
         try:
             async with httpx.AsyncClient(headers=head) as client:
-                r = await client.post(
-                    "https://api.live.bilibili.com/room/v1/Room/get_status_info_by_uids",
-                    json=uids,
-                )
-                return r.json()
+                resp = (
+                    await client.post(
+                        "https://api.live.bilibili.com/room/v1/Room/get_status_info_by_uids",
+                        json=uids,
+                    )
+                ).json()
+                logger.debug(resp)
+                return resp
         except httpx.HTTPError as e:
             logger.error(f"[BiliBili推送] API 访问失败，正在第 {retry + 1} 重试 {e}")
     logger.error("[BiliBili推送] API 访问连续失败，请检查")
@@ -100,12 +103,15 @@ async def relation_modify(uid, act: int):
             data = data_sorted
             sign = bilibili_client.calcSign(data)
             data["sign"] = sign
-            response = await bilibili_client.session.post(
-                "https://api.bilibili.com/x/relation/modify",
-                data=data,
-                headers=bilibili_client.headers,
-            )
-            return response.json()
+            resp = (
+                await bilibili_client.session.post(
+                    "https://api.bilibili.com/x/relation/modify",
+                    data=data,
+                    headers=bilibili_client.headers,
+                )
+            ).json()
+            logger.debug(resp)
+            return resp
         except httpx.HTTPError as e:
             logger.error(f"[BiliBili推送] API 访问失败，正在第 {retry + 1} 重试 {e}")
 
@@ -134,12 +140,15 @@ async def dynamic_like(dynid):
             data = data_sorted
             sign = bilibili_client.calcSign(data)
             data["sign"] = sign
-            response = await bilibili_client.session.post(
-                "https://api.vc.bilibili.com/dynamic_like/v1/dynamic_like/thumb",
-                data=data,
-                headers=bilibili_client.headers,
-            )
-            return response.json()
+            resp = (
+                await bilibili_client.session.post(
+                    "https://api.vc.bilibili.com/dynamic_like/v1/dynamic_like/thumb",
+                    data=data,
+                    headers=bilibili_client.headers,
+                )
+            ).json()
+            logger.debug(resp)
+            return resp
         except httpx.HTTPError as e:
             logger.error(f"[BiliBili推送] API 访问失败，正在第 {retry + 1} 重试 {e}")
 
@@ -157,8 +166,11 @@ async def get_b23_url(url: str) -> str:
                     "share_id": "public.webview.0.0.pv",
                     "share_mode": 3,
                 }
-                r = await client.post("https://api.bilibili.com/x/share/click", json=data)
-                return r.json()["data"]["content"]
+                resp = (
+                    await client.post("https://api.bilibili.com/x/share/click", json=data)
+                ).json()
+                logger.debug(resp)
+                return resp["data"]["content"]
         except httpx.HTTPError as e:
             logger.error(f"[BiliBili推送] API 访问失败，正在第 {retry + 1} 重试 {e}")
 
@@ -177,9 +189,12 @@ async def token_refresh():
             data = data_sorted
             sign = bilibili_client.calcSign(data)
             data["sign"] = sign
-            response = await bilibili_client.session.post(
-                "https://passport.bilibili.com/api/v2/oauth2/refresh_token", data=data
-            )
-            return response.json()
+            resp = (
+                await bilibili_client.session.post(
+                    "https://passport.bilibili.com/api/v2/oauth2/refresh_token", data=data
+                )
+            ).json()
+            logger.debug(resp)
+            return resp
         except httpx.HTTPError as e:
             logger.error(f"[BiliBili推送] API 访问失败，正在第 {retry + 1} 重试 {e}")
