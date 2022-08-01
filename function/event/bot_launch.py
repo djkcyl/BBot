@@ -6,6 +6,7 @@ from graia.ariadne.event.lifecycle import ApplicationLaunched
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 
 from core.bot_config import BotConfig
+from library.browser import get_browser
 
 channel = Channel.current()
 
@@ -21,6 +22,14 @@ async def main(app: Ariadne):
     if not master:
         logger.error(f"当前未添加主人好友（{BotConfig.master}），请手动添加")
         exit()
+    try:
+        browser = await get_browser()
+        logger.info(f"[BiliBili推送] 浏览器启动完成，当前版本 {browser.version}")
+    except Exception as e:
+        logger.error("[BiliBili推送] 浏览器启动失败")
+        logger.exception(e)
+        exit()
+
     await app.send_friend_message(
         BotConfig.master,
         MessageChain(

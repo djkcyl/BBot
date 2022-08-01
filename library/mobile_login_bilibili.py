@@ -185,9 +185,9 @@ class bilibiliMobile:
             self.send_url, headers=self.headers, data=data
         )
         # 验证登录
+        app = Ariadne.current()
         if response.json()["code"] == 0:
             captcha_key = response.json()["data"]["captcha_key"]
-            app = Ariadne.current()
             await app.send_friend_message(
                 BotConfig.master,
                 MessageChain("[BiliBili推送] 验证码已发送至您的手机，请在 2 分钟内完成验证"),
