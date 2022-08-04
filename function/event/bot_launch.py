@@ -16,6 +16,7 @@ async def main(app: Ariadne):
     """
     Graia 成功启动
     """
+    logger.info("Graia 成功启动")
     groupList = await app.get_group_list()
     groupNum = len(groupList)
     master = await app.get_friend(BotConfig.master)
@@ -24,10 +25,11 @@ async def main(app: Ariadne):
         exit()
     try:
         browser = await get_browser()
-        logger.info(f"[BiliBili推送] 浏览器启动完成，当前版本 {browser.version}")
-    except Exception as e:
-        logger.error("[BiliBili推送] 浏览器启动失败")
-        logger.exception(e)
+        page = await browser.new_page()
+        version = await page.evaluate("() => navigator.appVersion")
+        logger.info(f"[BiliBili推送] 浏览器启动完成，当前版本 {version}")
+    except Exception:
+        logger.exception("[BiliBili推送] 浏览器启动失败")
         exit()
 
     await app.send_friend_message(

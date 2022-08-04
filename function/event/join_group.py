@@ -16,18 +16,10 @@ async def main(app: Ariadne, joingroup: BotJoinGroupEvent):
     收到入群事件
     """
     group = joingroup.group
-    inviter = (
-        (await app.get_member(joingroup.inviter.group, joingroup.inviter.id))
-        if joingroup.inviter
-        else None
-    )
     gp = GroupPermission(group)
-    msg = [
-        f"收到入群事件：{inviter.name if inviter else '<!!>'}（{inviter.id if inviter else '<!!>'}）\n",
-        f"邀请来源：{joingroup.inviter.name}（{joingroup.inviter.id}）\n"
-        if joingroup.inviter
-        else "",
-    ]
+    msg = [f"收到入群事件：{joingroup.group.name}（{joingroup.group.id}）"]
+    if joingroup.inviter:
+        msg.append(f"邀请者：{joingroup.inviter.name}（{joingroup.inviter.id}）")
     if gp.can_join():
         for admin in BotConfig.admins:
             await app.send_friend_message(

@@ -1,6 +1,7 @@
 import asyncio
 import contextlib
 
+from creart import it
 from pathlib import Path
 from loguru import logger
 from graia.saya import Saya
@@ -9,10 +10,7 @@ from prompt_toolkit.styles import Style
 from graia.ariadne.console import Console
 from graia.scheduler import GraiaScheduler
 from prompt_toolkit.formatted_text import HTML
-from graia.broadcast.interrupt import InterruptControl
 from graia.ariadne.console.saya import ConsoleBehaviour
-from graia.scheduler.saya import GraiaSchedulerBehaviour
-from graia.saya.builtins.broadcast import BroadcastBehaviour
 from graia.ariadne.entry import config, HttpClientConfig, WebsocketClientConfig
 
 from core.bot_config import BotConfig
@@ -68,13 +66,8 @@ console = Console(
 
 
 app.create(GraiaScheduler)
-saya = app.create(Saya)
-saya.install_behaviours(
-    app.create(BroadcastBehaviour),
-    app.create(GraiaSchedulerBehaviour),
-    ConsoleBehaviour(console),
-    app.create(InterruptControl),
-)
+saya = it(Saya)
+saya.install_behaviours(ConsoleBehaviour(console))
 
 
 with saya.module_context():

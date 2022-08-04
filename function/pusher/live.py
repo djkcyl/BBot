@@ -23,10 +23,11 @@ from library.bilibili_request import get_b23_url, get_status_info_by_uids, relat
 channel = Channel.current()
 
 
-@channel.use(SchedulerSchema(every_custom_seconds(3)))
+@channel.use(SchedulerSchema(every_custom_seconds(0)))
 async def main(app: Ariadne):
 
     if not BOT_Status["init"] or BOT_Status["init"] and len(get_all_uid()) == 0:
+        await asyncio.sleep(5)
         return
     sub_list = get_all_uid()
 
@@ -179,3 +180,4 @@ async def main(app: Ariadne):
                 logger.error(f"[BiliBili推送] {up_name}（{up_id}）退订失败：{resp}")
 
     BOT_Status["live_updateing"] = False
+    await asyncio.sleep(0.5)

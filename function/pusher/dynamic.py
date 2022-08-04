@@ -31,16 +31,18 @@ from data import (
 channel = Channel.current()
 
 
-@channel.use(SchedulerSchema(every_custom_seconds(3)))
+@channel.use(SchedulerSchema(every_custom_seconds(0)))
 async def main(app: Ariadne):
 
     logger.debug("[Dynamic Pusher] Dynamic Pusher is running")
 
     if not BOT_Status["init"]:
         logger.debug("[Dynamic Pusher] Dynamic Pusher is not init")
+        await asyncio.sleep(3)
         return
     elif len(get_all_uid()) == 0:
         logger.debug("[Dynamic Pusher] Dynamic Pusher is not have subids")
+        await asyncio.sleep(5)
         return
 
     BOT_Status["dynamic_updateing"] = True
@@ -59,6 +61,7 @@ async def main(app: Ariadne):
     else:
         logger.debug("[Dynamic] Get dynamic list failed")
         BOT_Status["dynamic_updateing"] = False
+        return
 
     logger.debug(f"[Dynamic] Get {len(dynall)} dynamics")
     if dynall:
@@ -238,6 +241,7 @@ async def main(app: Ariadne):
         logger.debug(dynall)
     BOT_Status["dynamic_updateing"] = False
     logger.debug("[Dynamic] Updateing finished")
+    await asyncio.sleep(0.5)
 
 
 @channel.use(SchedulerSchema(every_custom_seconds(2)))

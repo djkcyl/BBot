@@ -10,10 +10,10 @@ from typing import Optional
 from graia.saya import Channel
 from collections import defaultdict
 from typing import DefaultDict, Set, Tuple, Union
-from graia.ariadne.model import Member, MemberPerm
 from graia.broadcast.exceptions import ExecutionStop
 from graia.ariadne.event.message import GroupMessage
 from graia.broadcast.builtin.decorators import Depend
+from graia.ariadne.model import Member, MemberPerm, Friend
 
 from .bot_config import BotConfig
 
@@ -43,9 +43,11 @@ class Permission:
         if isinstance(member, Member):
             user = member.id
             user_permission = member.permission
-        if isinstance(member, int):
+        elif isinstance(member, int):
             user = member
             user_permission = None
+        else:
+            raise TypeError("member must be Member or int")
 
         if user == 80000000:
             raise ExecutionStop()
@@ -79,11 +81,13 @@ class Permission:
         return Depend(perm_check)
 
     @classmethod
-    def manual(cls, member: Member, level: int = DEFAULT):
-
+    def manual(cls, member: Union[Member, Friend], level: int = DEFAULT):
         member_level = cls.get(member.id)
-
-        if BotConfig.Debug.enable and member.group.id not in BotConfig.Debug.groups:
+        if (
+            isinstance(member, Member)
+            and BotConfig.Debug.enable
+            and member.group.id not in BotConfig.Debug.groups
+        ):
             raise ExecutionStop()
         if member_level >= level:
             return
@@ -152,6 +156,8 @@ class Interval:
         max_exec: int = 1,
         override_level: int = Permission.MASTER,
     ):
+        if isinstance(member, Member):
+            member = member.id
         if Permission.get(member) >= override_level:
             return
         current = time.time()

@@ -18,10 +18,9 @@ error_path.mkdir(exist_ok=True)
 async def get_dynamic_screenshot(id):
     st = int(time.time())
     browser = await get_browser()
+    page = await browser.new_page()
     for i in range(3):
         try:
-            page = None
-            page = await browser.new_page()
             page.on("requestfinished", network_request)
             page.on("requestfailed", network_requestfailed)
             if BotConfig.Bilibili.mobile_style:
@@ -73,8 +72,8 @@ async def get_dynamic_screenshot(id):
             await page.close()
             return image
         except Exception as e:
-            text = await page.content()
-            if "访问的页面不见" in text:
+            url = page.url
+            if "bilibili.com/404" in url:
                 logger.error(f"[Bilibili] {id} 动态不存在，正在重试")
             else:
                 logger.error(f"[BiliBili推送] {id} 动态截图失败，正在重试：")
@@ -87,7 +86,6 @@ async def get_dynamic_screenshot(id):
                 )
             with contextlib.suppress():
                 await page.close()
-                page = None
     return None
 
 
@@ -95,8 +93,12 @@ async def network_request(request: Request):
     url = request.url
     method = request.method
     response = await request.response()
-    status = response.status
-    timing = "%.2f" % response.request.timing["responseEnd"]
+    if response:
+        status = response.status
+        timing = "%.2f" % response.request.timing["responseEnd"]
+    else:
+        status = "/"
+        timing = "/"
     logger.debug(f"[Response] [{method} {status}] {timing}ms <<  {url}")
 
 

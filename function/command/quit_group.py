@@ -1,5 +1,6 @@
 import asyncio
 
+from creart import it
 from typing import Union
 from graia.saya import Channel, Saya
 from graia.ariadne.app import Ariadne
@@ -16,7 +17,7 @@ from library.strings import generate_verify_code
 
 saya = Saya.current()
 channel = Channel.current()
-inc = InterruptControl(saya.broadcast)
+inc = it(InterruptControl)
 
 
 class ConfirmWaiter(Waiter.create([GroupMessage], block_propagation=True)):

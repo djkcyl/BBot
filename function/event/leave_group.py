@@ -30,7 +30,7 @@ async def main(app: Ariadne, group: Group):
     logger.info(f"[BiliBili推送] 检测到退群事件 > {group.name}({group.id})，正在删除该群的订阅")
     remove_list = []
     for data in get_sub_by_group(group.id):
-        unsubscribe_uid(data.uid, group.id)
+        await unsubscribe_uid(data.uid, group.id)
         remove_list.append(data.uid)
         logger.info(f"[BiliBili推送] 已删除订阅 > {data.uid}")
         await asyncio.sleep(2)

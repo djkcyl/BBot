@@ -74,4 +74,6 @@ async def video_info_get(id):
                 f"http://api.bilibili.com/x/web-interface/view?bvid={id}"
             )
             video_info = video_info.json()
+        else:
+            raise ValueError("视频 ID 格式错误，只可为 av 或 BV")
         return video_info

@@ -20,7 +20,7 @@ else:
 
 
 class GroupPermission:
-    def __init__(self, group: Union[int, Group]):
+    def __init__(self, group: Union[str, int, Group]):
         self.group_id = group.id if isinstance(group, Group) else int(group)
 
     def can_join(self):

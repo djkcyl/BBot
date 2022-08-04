@@ -5,11 +5,11 @@ import urllib
 import random
 import hashlib
 
+from creart import it
 from loguru import logger
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_v1_5
 from graia.saya import Channel, Saya
-
 from graia.ariadne.app import Ariadne
 from graia.ariadne.model import Friend
 from graia.broadcast.interrupt.waiter import Waiter
@@ -21,7 +21,7 @@ from core.bot_config import BotConfig
 
 saya = Saya.current()
 channel = Channel.current()
-inc = InterruptControl(saya.broadcast)
+inc = it(InterruptControl)
 
 
 @Waiter.create_using_function(listening_events=[FriendMessage])
