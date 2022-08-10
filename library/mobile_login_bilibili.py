@@ -1,3 +1,4 @@
+import sys
 import time
 import httpx
 import base64
@@ -219,7 +220,7 @@ class bilibiliMobile:
                     f"[BiliBili推送] {self.username} 验证码发送失败，BBot 已关闭\n{response.json()}"
                 ),
             )
-            exit()
+            sys.exit(1)
 
     """初始化"""
 

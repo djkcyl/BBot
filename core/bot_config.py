@@ -1,3 +1,4 @@
+import sys
 import yaml
 
 from pathlib import Path
@@ -14,8 +15,31 @@ bot_config_file = Path("data/bot_config.yaml")
 if bot_config_file.exists():
     bot_config = yaml.load(bot_config_file.read_bytes(), Loader=yaml.FullLoader)
 else:
-    logger.error("未找到配置文件，请检查配置文件（data/bot_group.yaml）是否存在")
-    exit()
+    logger.error("未找到配置文件，已为您创建配置文件（data/bot_group.yaml），请手动修改后重新启动")
+    bot_config_file.parent.mkdir(parents=True, exist_ok=True)
+    bot_config_file.write_text(
+        yaml.dump(
+            {
+                "mirai": {
+                    "mirai_host": "http://xxxxxxx:xxxx",
+                    "verify_key": "xxxxxxx",
+                    "account": "xxxxxxx",
+                },
+                "debug": {"enable": False, "groups": ["xxxxxxx"]},
+                "bilibili": {
+                    "username": "xxxxxxx",
+                    "password": "xxxxxxx",
+                    "mobile_style": True,
+                },
+                "event": {"mute": True, "permchange": True},
+                "name": "xxxxxxx",
+                "access_control": True,
+                "master": "xxxxxxx",
+                "admins": ["xxxxxxx"],
+            }
+        )
+    )
+    sys.exit(1)
 
 if bot_config["master"] not in bot_config["admins"]:
     logger.warning("管理员内未添加主人，已自动添加")

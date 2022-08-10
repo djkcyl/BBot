@@ -11,8 +11,9 @@ from core.bot_config import BotConfig
 from .browser import get_browser
 
 
-error_path = Path("error")
-error_path.mkdir(exist_ok=True)
+font_path = Path("data").joinpath("fonts")
+error_path = Path("data").joinpath("error")
+error_path.mkdir(parents=True, exist_ok=True)
 
 
 async def get_dynamic_screenshot(id):

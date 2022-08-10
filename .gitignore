@@ -1,5 +1,4 @@
 __pycache__/
-library/browser/data
 
 data/login_cache.json
 data/subscription_list.json
@@ -15,3 +14,4 @@ migrator.py
 pwtest.py
 data/data.db
 error/
+data/browser

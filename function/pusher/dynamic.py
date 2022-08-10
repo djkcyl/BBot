@@ -31,7 +31,7 @@ from data import (
 channel = Channel.current()
 
 
-@channel.use(SchedulerSchema(every_custom_seconds(0)))
+@channel.use(SchedulerSchema(every_custom_seconds(0.001)))
 async def main(app: Ariadne):
 
     logger.debug("[Dynamic Pusher] Dynamic Pusher is running")

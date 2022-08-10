@@ -1,3 +1,4 @@
+import sys
 import asyncio
 import contextlib
 
@@ -45,14 +46,18 @@ logger.info("BBot is starting...")
 
 
 host = BotConfig.Mirai.mirai_host
-app = Ariadne(
-    config(
+try:
+    app_config = config(
         BotConfig.Mirai.account,
         BotConfig.Mirai.verify_key,
         HttpClientConfig(host),
         WebsocketClientConfig(host),
-    ),
-)
+    )
+except AssertionError:
+    logger.critical("请检查配置文件是否有误")
+    sys.exit(1)
+
+app = Ariadne(app_config)
 
 console = Console(
     broadcast=app.broadcast,
@@ -72,55 +77,9 @@ saya.install_behaviours(ConsoleBehaviour(console))
 
 with saya.module_context():
 
-    saya.require("function.command.announcement")
-    saya.require("function.command.quit_group")
-    saya.require("function.command.status")
-    saya.require("function.command.video_resolve")
-    saya.require("function.command.vive_dynamic")
+    saya.require("function")
 
-    saya.require("function.command.admin.add")
-    saya.require("function.command.admin.remove")
-
-    saya.require("function.command.configure.atall")
-    saya.require("function.command.configure.nick")
-
-    saya.require("function.command.menu")
-
-    saya.require("function.command.subgroup.add_up")
-    saya.require("function.command.subgroup.add")
-    saya.require("function.command.subgroup.get_subgroup")
-    saya.require("function.command.subgroup.remove_up")
-    saya.require("function.command.subgroup.remove")
-
-    saya.require("function.command.up.get_subscribe")
-    saya.require("function.command.up.subscribe")
-    saya.require("function.command.up.unsubscribe")
-
-    saya.require("function.command.vip.add")
-    saya.require("function.command.vip.remove")
-
-    saya.require("function.command.whitelist.add")
-    saya.require("function.command.whitelist.close")
-    saya.require("function.command.whitelist.open")
-    saya.require("function.command.whitelist.remove")
-
-    saya.require("function.console.stop")
-
-    saya.require("function.event.bot_launch")
-    saya.require("function.event.exception")
-    saya.require("function.event.invited_join_group")
-    saya.require("function.event.join_group")
-    saya.require("function.event.leave_group")
-    saya.require("function.event.mute")
-    saya.require("function.event.new_friend")
-    saya.require("function.event.prem_change")
-
-    saya.require("function.pusher.init")
-    saya.require("function.pusher.dynamic")
-    saya.require("function.pusher.live")
-
-    saya.require("function.scheduler.refresh_token")
-
+import function  # noqa: E402 F401
 
 with contextlib.suppress(KeyboardInterrupt, asyncio.exceptions.CancelledError):
     app.launch_blocking()

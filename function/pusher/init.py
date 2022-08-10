@@ -1,3 +1,4 @@
+import sys
 import json
 import asyncio
 
@@ -57,7 +58,7 @@ async def init(app: Ariadne):
             BotConfig.master,
             MessageChain(f"[BiliBili推送] 刷新 token 失败，{resp}"),
         )
-        exit()
+        sys.exit(1)
 
     # 初始化
     subid_list = get_all_uid()
@@ -78,7 +79,7 @@ async def init(app: Ariadne):
                     BotConfig.master,
                     MessageChain(f"[BiliBili推送] UP {up} 订阅修复失败，请检查后重启 Bot：{resp}"),
                 )
-                exit()
+                sys.exit(1)
             else:
                 logger.info(f"[BiliBili推送] {up} 订阅修复成功")
             await asyncio.sleep(1)
@@ -102,12 +103,16 @@ async def init(app: Ariadne):
                     logger.error(
                         f"[BiliBili推送] {uid.name}（{uid.uid}）取消关注失败，请检查后重启 Bot：{resp}"
                     )
-                    exit()
+                    sys.exit(1)
 
             # 顺便检测直播状态
             if uid.live_info.status:
                 logger.info(f"[BiliBili推送] {uid.name} 已开播")
-                BOT_Status["liveing"][str(uid.uid)] = None
+                BOT_Status["liveing"][str(uid.uid)] = {
+                    "time": None,
+                    "wait_close": False,
+                    "close_time": 0,
+                }
     logger.info(f"[BiliBili推送] 直播初始化完成，当前 {len(BOT_Status['liveing'])} 个 UP 正在直播")
 
     # 动态初始化

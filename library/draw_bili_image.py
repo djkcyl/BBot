@@ -2,10 +2,16 @@ import httpx
 import qrcode
 
 from io import BytesIO
+from pathlib import Path
 from qrcode.image.pil import PilImage
 from PIL import Image, ImageFont, ImageDraw
 
 from .strings import get_cut_str, numf
+
+font_path = Path("data").joinpath("font")
+font_semibold = str(font_path.joinpath("sarasa-mono-sc-semibold.ttf"))
+font_bold = str(font_path.joinpath("sarasa-mono-sc-bold.ttf"))
+font_vanfont = str(font_path.joinpath("vanilla.ttf"))
 
 
 def binfo_image_create(video_info: dict, b23_url: str):
@@ -35,7 +41,7 @@ def binfo_image_create(video_info: dict, b23_url: str):
     minutes, seconds = divmod(video_info["data"]["duration"], 60)
     hours, minutes = divmod(minutes, 60)
     video_time = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-    tiem_font = ImageFont.truetype("./font/sarasa-mono-sc-bold.ttf", 30)
+    tiem_font = ImageFont.truetype(font_bold, 30)
     draw = ImageDraw.Draw(pic)
     draw.text((10, 305), video_time, "white", tiem_font)
 
@@ -46,7 +52,7 @@ def binfo_image_create(video_info: dict, b23_url: str):
 
     # 标题
     title = video_info["data"]["title"]
-    title_font = ImageFont.truetype("./font/sarasa-mono-sc-bold.ttf", 25)
+    title_font = ImageFont.truetype(font_bold, 25)
     title_cut_str = "\n".join(get_cut_str(title, 40))
     _, title_text_y = title_font.getsize_multiline(title_cut_str)
     title_bg = Image.new("RGB", (560, title_text_y + 23), "#F5F5F7")
@@ -59,7 +65,7 @@ def binfo_image_create(video_info: dict, b23_url: str):
     dynamic = (
         "该视频没有简介" if video_info["data"]["desc"] == "" else video_info["data"]["desc"]
     )
-    dynamic_font = ImageFont.truetype("./font/sarasa-mono-sc-semibold.ttf", 18)
+    dynamic_font = ImageFont.truetype(font_semibold, 18)
     dynamic_cut_str = "\n".join(get_cut_str(dynamic, 58))
     _, dynamic_text_y = dynamic_font.getsize_multiline(dynamic_cut_str)
     dynamic_bg = Image.new("RGB", (560, dynamic_text_y + 24), "#F5F5F7")
@@ -70,9 +76,9 @@ def binfo_image_create(video_info: dict, b23_url: str):
     bg_y += dynamic_bg_y
 
     # 视频数据
-    icon_font = ImageFont.truetype("./font/vanfont.ttf", 46)
+    icon_font = ImageFont.truetype(font_vanfont, 46)
     icon_color = (247, 145, 185)
-    info_font = ImageFont.truetype("./font/sarasa-mono-sc-bold.ttf", 26)
+    info_font = ImageFont.truetype(font_bold, 26)
 
     view = numf(video_info["data"]["stat"]["view"])  # 播放 \uE6E6
     danmaku = numf(video_info["data"]["stat"]["danmaku"])  # 弹幕 \uE6E7
@@ -147,9 +153,9 @@ def binfo_image_create(video_info: dict, b23_url: str):
     mask = Image.new("RGBA", face_size, color=(0, 0, 0, 0))
     mask_draw = ImageDraw.Draw(mask)
     mask_draw.ellipse((0, 0, face_size[0], face_size[1]), fill=(0, 0, 0, 255))
-    name_font = ImageFont.truetype("./font/sarasa-mono-sc-bold.ttf", 24)
-    up_title_font = ImageFont.truetype("./font/sarasa-mono-sc-bold.ttf", 20)
-    follower_font = ImageFont.truetype("./font/sarasa-mono-sc-semibold.ttf", 22)
+    name_font = ImageFont.truetype(font_bold, 24)
+    up_title_font = ImageFont.truetype(font_bold, 20)
+    follower_font = ImageFont.truetype(font_semibold, 22)
 
     for i, up in enumerate(up_list):
         if up["level"] == 0:
@@ -224,7 +230,7 @@ def binfo_image_create(video_info: dict, b23_url: str):
     baner_bg.paste(qr_image, (50, 10))
     # Logo
     # LOGO \uE725
-    logo_font = ImageFont.truetype("./font/vanfont.ttf", 100)
+    logo_font = ImageFont.truetype(font_vanfont, 100)
     draw.text((300, 28), "\uE725", "#F5F5F7", logo_font)
     bg_y += 170
 

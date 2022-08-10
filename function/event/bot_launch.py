@@ -1,3 +1,5 @@
+import sys
+
 from loguru import logger
 from graia.saya import Channel
 from graia.ariadne.app import Ariadne
@@ -22,7 +24,7 @@ async def main(app: Ariadne):
     master = await app.get_friend(BotConfig.master)
     if not master:
         logger.error(f"当前未添加主人好友（{BotConfig.master}），请手动添加")
-        exit()
+        sys.exit(1)
     try:
         browser = await get_browser()
         page = await browser.new_page()
@@ -30,7 +32,7 @@ async def main(app: Ariadne):
         logger.info(f"[BiliBili推送] 浏览器启动完成，当前版本 {version}")
     except Exception:
         logger.exception("[BiliBili推送] 浏览器启动失败")
-        exit()
+        sys.exit(1)
 
     await app.send_friend_message(
         BotConfig.master,

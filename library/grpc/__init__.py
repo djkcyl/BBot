@@ -87,7 +87,7 @@ async def grpc_dynall_get():
             for key, value in e.trailing_metadata():
                 if key == "grpc-status-details-bin":
                     logger.error(Status.FromString(value))
-
+            return None
         exclude_list = [
             DynamicType.ad,
             DynamicType.live,

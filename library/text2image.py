@@ -1,19 +1,21 @@
+import sys
 import asyncio
 
 from io import BytesIO
+from pathlib import Path
 from loguru import logger
 from PIL import Image, ImageFont, ImageDraw
 
 from .strings import get_cut_str
 
-font_file = "./font/sarasa-mono-sc-semibold.ttf"
-try:
-    font = ImageFont.truetype(font_file, 22)
-except OSError:
+font_file = Path("data").joinpath("font").joinpath("sarasa-mono-sc-semibold.ttf")
+if font_file.exists():
+    font = ImageFont.truetype(str(font_file), size=20)
+else:
     logger.error(
-        f"未找到字体文件：{font_file}，请前往 https://github.com/djkcyl/ABot-Resource/releases/tag/Font 进行下载后解压至 ABot 根目录"
+        f"未找到字体文件：{font_file}，请前往 https://github.com/djkcyl/ABot-Resource/releases/tag/Font 进行下载后解压至 BBot 根目录"
     )
-    exit(1)
+    sys.exit(1)
 
 
 async def text2image(text: str, cut=64) -> bytes:

@@ -23,7 +23,7 @@ from library.bilibili_request import get_b23_url, get_status_info_by_uids, relat
 channel = Channel.current()
 
 
-@channel.use(SchedulerSchema(every_custom_seconds(0)))
+@channel.use(SchedulerSchema(every_custom_seconds(0.001)))
 async def main(app: Ariadne):
 
     if not BOT_Status["init"] or BOT_Status["init"] and len(get_all_uid()) == 0:
@@ -66,73 +66,92 @@ async def main(app: Ariadne):
             # 如果存在直播信息则为已开播
             if up.live_info.status:
                 if up_id in BOT_Status["liveing"]:
+                    if not BOT_Status["liveing"][up_id]["wait_close"]:
+                        BOT_Status["liveing"][up_id]["wait_close"] = False
+                        BOT_Status["liveing"][up_id]["close_time"] = 0
                     continue
-                BOT_Status["liveing"][up_id] = (
-                    None if up_id in BOT_Status["skip_uid"] else time.time()
-                )
+                BOT_Status["liveing"][up_id] = {
+                    "time": None if up_id in BOT_Status["skip_uid"] else time.time(),
+                    "wait_close": False,
+                    "close_time": 0,
+                }
                 room_id = up.live_info.room_id
                 resp = await get_status_info_by_uids({"uids": [up_id]})
-                title = resp["data"][up_id]["title"]
-                area_parent = resp["data"][up_id]["area_v2_parent_name"]
-                area = resp["data"][up_id]["area_v2_name"]
-                room_area = f"{area_parent} / {area}"
-                cover_from_user = resp["data"][up_id]["cover_from_user"]
-                cover_img = await app.upload_image(
-                    await Image(url=cover_from_user).get_bytes(), UploadMethod.Group
-                )
-                logger.info(f"[BiliBili推送] {up_name} 开播了 - {room_area} - {title}")
+                if resp:
+                    title = resp["data"][up_id]["title"]
+                    area_parent = resp["data"][up_id]["area_v2_parent_name"]
+                    area = resp["data"][up_id]["area_v2_name"]
+                    room_area = f"{area_parent} / {area}"
+                    cover_from_user = resp["data"][up_id]["cover_from_user"]
+                    cover_img = await app.upload_image(
+                        await Image(url=cover_from_user).get_bytes(), UploadMethod.Group
+                    )
+                    logger.info(f"[BiliBili推送] {up_name} 开播了 - {room_area} - {title}")
 
-                for data in get_sub_by_uid(up_id):
-                    if (
-                        BotConfig.Debug.enable
-                        and int(data.group) not in BotConfig.Debug.groups
-                    ):
-                        continue
-                    if data.live:
-                        nick = (
-                            f"*{up_nick} "
-                            if (up_nick := data.nick)
-                            else f"UP {up_name}（{up_id}）"
-                        )
-                        msg = [
-                            f"{nick}在 {room_area} 区开播啦 ！\n标题：{title}\n",
-                            cover_img,
-                            "\n",
-                            await get_b23_url(f"https://live.bilibili.com/{room_id}"),
-                        ]
-                        if data.atall:
-                            bot_perm = (await app.get_group(int(data.group))).account_perm
-                            if bot_perm in [
-                                MemberPerm.Administrator,
-                                MemberPerm.Owner,
-                            ]:
-                                msg = [AtAll(), " "] + msg
-                            else:
-                                msg = ["@全体成员 "] + msg
-                        try:
-                            await app.send_group_message(
-                                int(data.group),
-                                MessageChain(msg),
+                    for data in get_sub_by_uid(up_id):
+                        if (
+                            BotConfig.Debug.enable
+                            and int(data.group) not in BotConfig.Debug.groups
+                        ):
+                            continue
+                        if data.live:
+                            nick = (
+                                f"*{up_nick} "
+                                if (up_nick := data.nick)
+                                else f"UP {up_name}（{up_id}）"
                             )
-                            await asyncio.sleep(1)
-                        except UnknownTarget:
-                            remove_list = []
-                            for data in get_sub_by_group(data.group):
-                                await unsubscribe_uid(data.uid, data.group)
-                                remove_list.append(data.uid)
-                            logger.info(
-                                f"[BiliBili推送] 推送失败，找不到该群 {data.group}，已删除该群订阅的 {len(remove_list)} 个 UP"
-                            )
+                            msg = [
+                                f"{nick}在 {room_area} 区开播啦 ！\n标题：{title}\n",
+                                cover_img,
+                                "\n",
+                                await get_b23_url(f"https://live.bilibili.com/{room_id}"),
+                            ]
+                            if data.atall:
+                                bot_perm = (
+                                    await app.get_group(int(data.group))
+                                ).account_perm
+                                if bot_perm in [
+                                    MemberPerm.Administrator,
+                                    MemberPerm.Owner,
+                                ]:
+                                    msg = [AtAll(), " "] + msg
+                                else:
+                                    msg = ["@全体成员 "] + msg
+                            try:
+                                await app.send_group_message(
+                                    int(data.group),
+                                    MessageChain(msg),
+                                )
+                                await asyncio.sleep(1)
+                            except UnknownTarget:
+                                remove_list = []
+                                for data in get_sub_by_group(data.group):
+                                    await unsubscribe_uid(data.uid, data.group)
+                                    remove_list.append(data.uid)
+                                logger.info(
+                                    f"[BiliBili推送] 推送失败，找不到该群 {data.group}，已删除该群订阅的 {len(remove_list)} 个 UP"
+                                )
 
-                insert_live_push(
-                    up_id, True, len(get_sub_by_uid(up_id)), title, area_parent, area
-                )
+                    insert_live_push(
+                        up_id, True, len(get_sub_by_uid(up_id)), title, area_parent, area
+                    )
             elif up_id in BOT_Status["liveing"]:
+                if BOT_Status["liveing"][up_id]["wait_close"]:
+                    if time.time() - BOT_Status["liveing"][up_id]["close_time"] < 5:
+                        continue
+                else:
+                    BOT_Status["liveing"][up_id]["wait_close"] = True
+                    BOT_Status["liveing"][up_id]["close_time"] = time.time()
+                    continue
+
                 live_time = (
                     "，本次直播时长 "
-                    + calc_time_total((time.time() - BOT_Status["liveing"][up_id]) * 1000)
+                    + calc_time_total(
+                        BOT_Status["liveing"][up_id]["close_time"]
+                        - BOT_Status["liveing"][up_id]["time"]
+                    )
                     + "。"
-                    if BOT_Status["liveing"][up_id]
+                    if BOT_Status["liveing"][up_id]["time"]
                     else "。"
                 )
                 del BOT_Status["liveing"][up_id]
