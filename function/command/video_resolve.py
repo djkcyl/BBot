@@ -55,8 +55,8 @@ async def bilibili_main(
                     f"\n{b23_url}",
                 ),
             )
-        except Exception as err:
-            logger.error(err)
+        except Exception:
+            logger.exception("视频解析 API 调用出错")
             await app.send_group_message(
                 group, MessageChain("视频解析 API 调用出错"), quote=source
             )

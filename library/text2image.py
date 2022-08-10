@@ -8,7 +8,12 @@ from PIL import Image, ImageFont, ImageDraw
 
 from .strings import get_cut_str
 
-font_file = Path("data").joinpath("font").joinpath("sarasa-mono-sc-semibold.ttf")
+font_file = (
+    Path(__file__)
+    .parent.parent.joinpath("data")
+    .joinpath("font")
+    .joinpath("sarasa-mono-sc-semibold.ttf")
+)
 if font_file.exists():
     font = ImageFont.truetype(str(font_file), size=20)
 else:

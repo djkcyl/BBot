@@ -45,16 +45,16 @@ logger.add(
 logger.info("BBot is starting...")
 
 
-host = BotConfig.Mirai.mirai_host
 try:
+    host = BotConfig.Mirai.mirai_host
     app_config = config(
         BotConfig.Mirai.account,
         BotConfig.Mirai.verify_key,
         HttpClientConfig(host),
         WebsocketClientConfig(host),
     )
-except AssertionError:
-    logger.critical("请检查配置文件是否有误")
+except (AssertionError, TypeError):
+    logger.critical("请检查配置文件（data/bot_group.yaml）是否有误")
     sys.exit(1)
 
 app = Ariadne(app_config)

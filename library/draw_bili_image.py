@@ -8,10 +8,10 @@ from PIL import Image, ImageFont, ImageDraw
 
 from .strings import get_cut_str, numf
 
-font_path = Path("data").joinpath("font")
+font_path = Path(__file__).parent.parent.joinpath("data").joinpath("font")
 font_semibold = str(font_path.joinpath("sarasa-mono-sc-semibold.ttf"))
 font_bold = str(font_path.joinpath("sarasa-mono-sc-bold.ttf"))
-font_vanfont = str(font_path.joinpath("vanilla.ttf"))
+font_vanfont = str(font_path.joinpath("vanfont.ttf"))
 
 
 def binfo_image_create(video_info: dict, b23_url: str):

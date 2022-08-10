@@ -11,39 +11,28 @@ class NoAliasDumper(yaml.SafeDumper):
         return True
 
 
-bot_config_file = Path("data/bot_config.yaml")
+def save_config():
+    bot_config_file.write_text(
+        yaml.dump(bot_config, Dumper=NoAliasDumper, sort_keys=False)
+    )
+
+
+bot_config_file = Path("data").joinpath("bot_config.yaml")
+bot_config_file.parent.mkdir(parents=True, exist_ok=True)
 if bot_config_file.exists():
     bot_config = yaml.load(bot_config_file.read_bytes(), Loader=yaml.FullLoader)
-else:
-    logger.error("未找到配置文件，已为您创建配置文件（data/bot_group.yaml），请手动修改后重新启动")
-    bot_config_file.parent.mkdir(parents=True, exist_ok=True)
+    if bot_config["master"] not in bot_config["admins"]:
+        logger.warning("管理员内未添加主人，已自动添加")
+        bot_config["admins"].append(bot_config["master"])
+elif Path(sys.argv[0]).name != "_child.py":
+    logger.error(f"未找到配置文件，已为您创建默认配置文件（{bot_config_file}），请修改后重新启动")
     bot_config_file.write_text(
-        yaml.dump(
-            {
-                "mirai": {
-                    "mirai_host": "http://xxxxxxx:xxxx",
-                    "verify_key": "xxxxxxx",
-                    "account": "xxxxxxx",
-                },
-                "debug": {"enable": False, "groups": ["xxxxxxx"]},
-                "bilibili": {
-                    "username": "xxxxxxx",
-                    "password": "xxxxxxx",
-                    "mobile_style": True,
-                },
-                "event": {"mute": True, "permchange": True},
-                "name": "xxxxxxx",
-                "access_control": True,
-                "master": "xxxxxxx",
-                "admins": ["xxxxxxx"],
-            }
-        )
+        Path(__file__)
+        .parent.parent.joinpath("data")
+        .joinpath("bot_config.exp.yaml")
+        .read_text()
     )
     sys.exit(1)
-
-if bot_config["master"] not in bot_config["admins"]:
-    logger.warning("管理员内未添加主人，已自动添加")
-    bot_config["admins"].append(bot_config["master"])
 
 
 class BotConfig:
@@ -101,7 +90,3 @@ def remove_admin(admin: int):
         bot_config_file.write_text(yaml.dump(bot_config, Dumper=NoAliasDumper))
         return True
     return False
-
-
-def save_config():
-    bot_config_file.write_text(yaml.dump(bot_config, Dumper=NoAliasDumper))
