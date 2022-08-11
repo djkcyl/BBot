@@ -4,7 +4,7 @@ import platform
 
 project_version = (
     pathlib.Path("pyproject.toml")
-    .read_text()
+    .read_text(encoding="utf-8")
     .split("version = ")[1]
     .split("\n")[0]
     .strip('"')
