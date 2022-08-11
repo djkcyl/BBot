@@ -36,7 +36,6 @@ jobs:
           prerelease: false
 
   build:
-    if: ${{ always() }}
     name: Build
     needs: release
     outputs:
