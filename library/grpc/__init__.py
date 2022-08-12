@@ -10,13 +10,12 @@ from .bilibili.metadata.metadata_pb2 import Metadata
 from .bilibili.metadata.device.device_pb2 import Device
 from .bilibili.metadata.locale.locale_pb2 import Locale
 from .bilibili.metadata.network.network_pb2 import Network
-from .bilibili.live.app.room.v1.room_pb2 import GetStudioListReq
 from .bilibili.app.dynamic.v2.dynamic_pb2_grpc import DynamicStub
-from .bilibili.live.app.room.v1.room_pb2_grpc import StudioListStub
 from .bilibili.app.dynamic.v2.dynamic_pb2 import (
     DynAllReq,
     DynamicType,
     DynSpaceReq,
+    DynDetailsReq,
     DynMixUpListViewMoreReq,
 )
 
@@ -59,9 +58,7 @@ def make_metadata():
 
 
 async def grpc_dyn_get(uid):
-    async with grpc.aio.secure_channel(
-        server, grpc.ssl_channel_credentials()
-    ) as channel:
+    async with grpc.aio.secure_channel(server, grpc.ssl_channel_credentials()) as channel:
         stub = DynamicStub(channel)
         req = DynSpaceReq(host_uid=int(uid))
         meta = make_metadata()
@@ -75,9 +72,7 @@ async def grpc_dyn_get(uid):
 
 
 async def grpc_dynall_get():
-    async with grpc.aio.secure_channel(
-        server, grpc.ssl_channel_credentials()
-    ) as channel:
+    async with grpc.aio.secure_channel(server, grpc.ssl_channel_credentials()) as channel:
         stub = DynamicStub(channel)
         req = DynAllReq()
         meta = make_metadata()
@@ -102,9 +97,7 @@ async def grpc_dynall_get():
 
 
 async def grpc_uplist_get():
-    async with grpc.aio.secure_channel(
-        server, grpc.ssl_channel_credentials()
-    ) as channel:
+    async with grpc.aio.secure_channel(server, grpc.ssl_channel_credentials()) as channel:
         stub = DynamicStub(channel)
         req = DynMixUpListViewMoreReq(sort_type=1)
         meta = make_metadata()
@@ -117,17 +110,15 @@ async def grpc_uplist_get():
         return resp
 
 
-async def grpc_studio_get(room_id):
-    async with grpc.aio.secure_channel(
-        server, grpc.ssl_channel_credentials()
-    ) as channel:
-        stub = StudioListStub(channel)
-        req = GetStudioListReq(room_id=int(room_id))
+async def grpc_details_get(dynamic_ids):
+    async with grpc.aio.secure_channel(server, grpc.ssl_channel_credentials()) as channel:
+        stub = DynamicStub(channel)
+        req = DynDetailsReq(dynamic_id=str(dynamic_ids))
         meta = make_metadata()
         try:
-            resp = await stub.GetStudioList(req, metadata=meta)
+            resp = await stub.DynDetails(req, metadata=meta)
         except RpcError as e:
             for key, value in e.trailing_metadata():
                 if key == "grpc-status-details-bin":
                     logger.error(Status.FromString(value))
-        return resp
+        return resp.list
