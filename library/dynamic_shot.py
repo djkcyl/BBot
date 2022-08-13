@@ -11,7 +11,6 @@ from core.bot_config import BotConfig
 from .browser import get_browser
 
 
-font_path = Path("data").joinpath("fonts")
 error_path = Path("data").joinpath("error")
 error_path.mkdir(parents=True, exist_ok=True)
 

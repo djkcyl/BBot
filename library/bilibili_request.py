@@ -64,14 +64,12 @@ async def get_status_info_by_uids(uids):
     for retry in range(3):
         try:
             async with httpx.AsyncClient(headers=head) as client:
-                resp = (
+                return (
                     await client.post(
                         "https://api.live.bilibili.com/room/v1/Room/get_status_info_by_uids",
-                        json=uids,
+                        json={"uids": uids},
                     )
                 ).json()
-                logger.debug(resp)
-                return resp
         except httpx.HTTPError as e:
             logger.error(f"[BiliBili推送] API 访问失败，正在第 {retry + 1} 重试 {e}")
     logger.error("[BiliBili推送] API 访问连续失败，请检查")
@@ -173,6 +171,7 @@ async def get_b23_url(url: str) -> str:
                 return resp["data"]["content"]
         except httpx.HTTPError as e:
             logger.error(f"[BiliBili推送] API 访问失败，正在第 {retry + 1} 重试 {e}")
+    return url
 
 
 async def token_refresh():

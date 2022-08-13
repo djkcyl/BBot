@@ -4,6 +4,7 @@ from typing import Union
 from loguru import logger
 
 from core import BOT_Status
+from core.bot_config import BotConfig
 from core.group_config import GroupPermission
 from data import (
     add_sub,
@@ -27,17 +28,16 @@ async def subscribe_uid(uid: Union[str, int], groupid: Union[str, int]):
     uid = str(uid)
     groupid = str(groupid)
     gp = GroupPermission(int(groupid))
-    # 做一些小处理，用来避免出现奇怪的bug
     while BOT_Status["dynamic_updateing"]:
         await asyncio.sleep(0.1)
     BOT_Status["init"] = False
-    BOT_Status["skip"] += 2
-    BOT_Status["skip_uid"].append(uid)
+
+    # BOT_Status["skip"] += 2
+    # BOT_Status["skip_uid"].append(uid)
 
     if not uid:
         BOT_Status["init"] = True
         return "Bot 状态异常，订阅失败，请稍后再试"
-
     r = await grpc_dyn_get(uid)
     if not r:
         BOT_Status["init"] = True
@@ -55,13 +55,12 @@ async def subscribe_uid(uid: Union[str, int], groupid: Union[str, int]):
         return "每个群聊最多仅可订阅 4 个 UP"
     need_sub = not uid_exists(uid)
     add_sub(uid, up_name, groupid)
-    if need_sub:
+    if need_sub and BotConfig.Bilibili.use_login:
         resp = await relation_modify(uid, 1)
-        if resp["code"] != 0:
+        if not resp or resp["code"] != 0:
             await unsubscribe_uid(uid, groupid)
             BOT_Status["init"] = True
-            return f"UP（{uid}）订阅失败：{resp['code']}，{resp['message']}"
-
+            return f"UP（{uid}）订阅失败"
     BOT_Status["init"] = True
     return f"成功在本群订阅 UP {up_name}（{uid}）"
 
@@ -74,8 +73,9 @@ async def unsubscribe_uid(uid, groupid):
     while BOT_Status["dynamic_updateing"]:
         await asyncio.sleep(0.1)
     BOT_Status["init"] = False
-    BOT_Status["skip"] += 2
-    BOT_Status["skip_uid"].append(uid)
+
+    # BOT_Status["skip"] += 2
+    # BOT_Status["skip_uid"].append(uid)
 
     if not uid_in_group_exists(uid, groupid):
         BOT_Status["init"] = True
@@ -83,7 +83,6 @@ async def unsubscribe_uid(uid, groupid):
         return f"本群未订阅该 UP（{uid}）"
     up_name = get_sub_data(uid, groupid).uname
     if len(get_sub_by_uid(uid)) == 1:
-        logger.info(f"正在从 BliBili 取消订阅 {uid}")
         await delete_uid(uid)
     else:
         logger.info(f"正在从取消订阅 {uid}")
@@ -97,16 +96,19 @@ async def delete_uid(uid):
     """直接删除订阅的某个 up"""
     logger.info(f"正在从 BliBili 取消订阅 {uid}")
     uid = str(uid)
-    resp = await relation_modify(uid, 2)
-    if resp["code"] != 0:
-        logger.info(f"取关 {uid} 失败：{resp['code']}，{resp['message']}")
-    else:
-        if uid_exists(uid):
-            delete_sub_by_uid(uid)
+    if BotConfig.Bilibili.use_login:
+        resp = await relation_modify(uid, 2)
+        if resp and resp["code"] == 0:
+            logger.info(f"取关 {uid} 成功")
         else:
-            logger.warning(f"{uid} 不存在于订阅列表中")
-        logger.info(f"成功从 BliBili 取消订阅 {uid}：{resp['code']}，{resp['message']}")
-    return resp
+            logger.error(f"取关 {uid} 失败")
+        return False
+    if uid_exists(uid):
+        delete_sub_by_uid(uid)
+    else:
+        logger.warning(f"{uid} 不存在于订阅列表中")
+    logger.info(f"成功从 BliBili 取消订阅 {uid}")
+    return True
 
 
 def set_name(uid, name):
@@ -145,3 +147,12 @@ def set_atall(uid, groupid, atall):
         return True
     else:
         return False
+
+
+async def delete_group(groupid):
+    """删除某个群的所有订阅"""
+    remove_list = []
+    for data in get_sub_by_group(groupid):
+        await unsubscribe_uid(data.uid, data.group)
+        remove_list.append(data.uid)
+    return remove_list

@@ -1,19 +1,20 @@
 from pathlib import Path
 from typing import Optional
-from playwright.async_api import Browser, async_playwright
+from playwright.async_api import BrowserContext, async_playwright
 
 from core.bot_config import BotConfig
 
 user_data_dir = Path("data").joinpath("browser")
 
 
-_browser: Optional[Browser] = None
+_browser: Optional[BrowserContext] = None
 
 
-async def init() -> Browser:
+async def init() -> BrowserContext:
     global _browser
     browser = await async_playwright().start()
-    _browser = await browser.chromium.launch_persistent_context(
+    chromium = browser.chromium
+    _browser = await chromium.launch_persistent_context(
         user_data_dir,
         headless=True,
         device_scale_factor=2 if BotConfig.Bilibili.mobile_style else 1.25,
@@ -22,7 +23,7 @@ async def init() -> Browser:
             "(KHTML, like Gecko) Chrome/100.0.4896.127 Mobile Safari/537.36"
         )
         if BotConfig.Bilibili.mobile_style
-        else None,
+        else "",
     )
     if not BotConfig.Bilibili.mobile_style:
         await _browser.add_cookies(
@@ -32,5 +33,5 @@ async def init() -> Browser:
     return _browser
 
 
-async def get_browser() -> Browser:
+async def get_browser() -> BrowserContext:
     return _browser or await init()

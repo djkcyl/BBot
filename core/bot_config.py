@@ -24,6 +24,13 @@ if bot_config_file.exists():
     if bot_config["master"] not in bot_config["admins"]:
         logger.warning("管理员内未添加主人，已自动添加")
         bot_config["admins"].append(bot_config["master"])
+    if bot_config["bilibili"]["concurrency"] > 50:
+        logger.warning("Bilibili gRPC 并发数超过50，已自动调整为50")
+        bot_config["bilibili"]["concurrency"] = 50
+    elif bot_config["bilibili"]["concurrency"] < 1:
+        logger.warning("Bilibili gRPC 并发数小于1，已自动调整为1")
+        bot_config["bilibili"]["concurrency"] = 1
+
 elif Path(sys.argv[0]).name != "_child.py":
     logger.error(f"未找到配置文件，已为您创建默认配置文件（{bot_config_file}），请修改后重新启动")
     bot_config_file.write_text(
@@ -46,9 +53,11 @@ class BotConfig:
         groups: list[int] = bot_config["debug"]["groups"]
 
     class Bilibili:
+        use_login: bool = bot_config["bilibili"]["use_login"]
         username: int = bot_config["bilibili"]["username"]
         password: str = bot_config["bilibili"]["password"]
         mobile_style: bool = bot_config["bilibili"]["mobile_style"]
+        concurrency: int = bot_config["bilibili"]["concurrency"]
 
     class Event:
         mute: bool = bot_config["event"]["mute"]
