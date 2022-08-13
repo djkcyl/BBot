@@ -7,7 +7,7 @@ debug:
   groups:
     - xxxxxxx
 bilibili:
-  use_login: true
+  use_login: false
   username: xxxxxxx
   password: xxxxxxx
   mobile_style: true
