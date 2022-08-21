@@ -1,12 +1,12 @@
 # 平台适配
 
-目前 bbot 仅适配了 QQ 平台，~~但有可能会适配其他平台~~。
+目前 BBot 仅适配了 QQ 平台，~~但有可能会适配其他平台~~。
 
 ## QQ
 
 QQ 平台的推送，我们使用的是 Mirai ，并通过 mirai-api-http 插件与之连接。
 
-详细的部署教程可查看 [graiaX 文档](https://graiax.cn/before/install_mirai.html) 进行部署，在此不多赘述。本节将会重点介绍文档中 [配置 Mirai Api Http 参数](https://graiax.cn/before/install_mirai.html#%E9%85%8D%E7%BD%AE-mirai-api-http-%E5%8F%82%E6%95%B0) 在 bbot 下如何配置。
+详细的部署教程可查看 [graiaX 文档](https://graiax.cn/before/install_mirai.html) 进行部署，在此不多赘述。本节将会重点介绍文档中 [配置 Mirai Api Http 参数](https://graiax.cn/before/install_mirai.html#%E9%85%8D%E7%BD%AE-mirai-api-http-%E5%8F%82%E6%95%B0) 在 BBot 下如何配置。
 
 我们先来查看一下文档中提供的默认配置、
 
@@ -30,7 +30,7 @@ adapterSettings:
     reservedSyncId: -1
 ```
 
-由于 bbot 使用的通讯协议为 http 协议，我们仅需要在适配器中注册 http 协议即可，无需注册 ws 协议。
+由于 BBot 使用的通讯协议为 http 协议，我们仅需要在适配器中注册 http 协议即可，无需注册 ws 协议。
 
 同时，`verify_key` 参数的设定可以需要和配置项中的 [`mirai/verify_key`](./config.md#miraiverifykey) 参数置保持一致。
 
@@ -43,7 +43,7 @@ adapters:
   - http
 debug: false
 enableVerify: true
-verifyKey: bbotVerifyKey # 需要匹配的对象
+verifyKey: BBotVerifyKey # 需要匹配的对象
 singleMode: false
 cacheSize: 4096
 adapterSettings:
@@ -51,14 +51,18 @@ adapterSettings:
     host: localhost # 需要匹配的对象
     port: 34986     # 需要匹配的对象
     cors: [*]
+  ws:
+    host: localhost # 需要匹配的对象，需要与 `http` 中的 `host` 保持一致
+    port: 34986     # 需要匹配的对象，需要与 `http` 中的 `port` 保持一致
+    reservedSyncId: -1
 ```
 
-与之对应的 bbot 配置文件中需要匹配的参数应如下设置：
+与之对应的 BBot 配置文件中需要匹配的参数应如下设置：
 
 ```yaml title=bot_config.yaml
 mirai:
   mirai_host: http://localhost:34986 # 需要匹配的对象
-  verify_key: bbotVerifyKey          # 需要匹配的对象
+  verify_key: BBotVerifyKey          # 需要匹配的对象
   account: xxxxxxx
 debug:
   enable: false

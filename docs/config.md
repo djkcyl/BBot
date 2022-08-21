@@ -54,7 +54,7 @@ admins:
 - **类型**: `int`
 - **默认值**: `xxxxxxx`
 
-略
+需要绑定的登录于 `mirai-api-http` 的 QQ 号。
 
 ## debug
 
@@ -69,44 +69,92 @@ debug 相关设置。
 
 ### debug/groups
 
-- **类型**: `set[int]`
+- **类型**: `list[int]`
 - **默认值**: `[xxxxxxx]`
 
 开启 `debug` 模式的群。
 
 ## bilibili
 
-bilibili 相关设置。
+BiliBili 相关设置。
 
 ### bilibili/use_login
 
 - **类型**: `bool`
 - **默认值**: `false`
 
-用户是否登录，若为 `false` 则 `username` 与 `password` 将被忽略，若为 `true` 将会尝试使用 `username` 与 `password` 进行登录。
+是否登录 BiliBili 账号，若为 `false` 则 `username` 与 `password` 将被忽略，若为 `true` 将会尝试使用 `username` 与 `password` 进行登录。
 
 ### bilibili/username
 
 - **类型**: `int`
 - **默认值**: `xxxxxxx`
 
-bilibili 用户名，若 `use_login` 为 `false` 将被忽略
+BiliBili 用户名，若 `use_login` 为 `false` 将被忽略。
 
 ### bilibili/password
 
 - **类型**: `str`
 - **默认值**: `xxxxxxx`
 
-bilibili 密码，若 `use_login` 为 `false` 将被忽略
+BiliBili 密码，若 `use_login` 为 `false` 将被忽略。
 
 ### bilibili/mobile_style
 
 - **类型**: `bool`
 - **默认值**: `true`
 
-是否采用手机模式进行渲染。
+是否采用手机的 Web 样式进行渲染。
 
 ### bilibili/concurrency
 
 - **类型**: `int`
 - **默认值**: `5`
+
+BiliBili 账号未登录的情况下发送 gRPC 请求的并发数量（1 ~ 50）。
+
+## event
+
+事件配置
+
+### event/mute
+
+- **类型**: `bool`
+- **默认值**: `true`
+
+是否向管理员发送被禁言的事件提醒。
+
+### event/permchange
+
+- **类型**: `bool`
+- **默认值**: `true`
+
+是否向管理员发送权限变更的事件提醒。
+
+## name
+
+- **类型**: `str`
+- **默认值**: `xxxxxxx`
+
+BBot 在群内自称的名称。
+
+## access_control
+
+- **类型**: `bool`
+- **默认值**: `true`
+
+权限控制，开启后将增加对群的白名单控制，BBot 将不在同意非白名单群的入群邀请。
+
+## master
+
+- **类型**: `int`
+- **默认值**: `xxxxxxx`
+
+主人 QQ 号。
+
+## admins
+
+- **类型**: `list[int]`
+- **默认值**: `[xxxxxxx]`
+
+管理员 QQ 号列表。
