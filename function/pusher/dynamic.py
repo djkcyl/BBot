@@ -77,7 +77,7 @@ async def main(app: Ariadne):
                     logger.debug(f"[Dynamic] Check dynamic {dynid}, {up_name}({up_id})")
                     try:
                         if (
-                            dynid <= BOT_Status["offset"]
+                            dynid <= BOT_Status.get("offset", dynid)
                             # or up_id in BOT_Status["skip_uid"]
                             or is_dyn_pushed(dynid)
                         ):
