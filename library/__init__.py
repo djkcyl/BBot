@@ -28,9 +28,9 @@ async def subscribe_uid(uid: Union[str, int], groupid: Union[str, int]):
     uid = str(uid)
     groupid = str(groupid)
     gp = GroupPermission(int(groupid))
+    BOT_Status["init"] = False
     while BOT_Status["dynamic_updateing"]:
         await asyncio.sleep(0.1)
-    BOT_Status["init"] = False
 
     # BOT_Status["skip"] += 2
     # BOT_Status["skip_uid"].append(uid)
@@ -102,7 +102,10 @@ async def delete_uid(uid):
             logger.info(f"取关 {uid} 成功")
         else:
             logger.error(f"取关 {uid} 失败")
-        return False
+        return
+    else:
+        BOT_Status["offset"].pop(uid, None)
+        del BOT_Status["liveing"][uid]
     if uid_exists(uid):
         delete_sub_by_uid(uid)
     else:
