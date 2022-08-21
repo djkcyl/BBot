@@ -22,7 +22,6 @@ import function.command.whitelist.add
 import function.command.whitelist.close
 import function.command.whitelist.open
 import function.command.whitelist.remove
-import function.console.stop
 import function.event.bot_launch
 import function.event.exception
 import function.event.invited_join_group
