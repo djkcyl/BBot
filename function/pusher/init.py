@@ -47,7 +47,6 @@ async def init_dyn_id(up_uid):
             delete_sub_by_uid(up_uid)
             logger.info(f"[BiliBili推送] UP {up_uid} 没有发布动态，已删除订阅")
     else:
-        BOT_Status["offset"][str(up_uid)] = None
         logger.warning(f"[BiliBili推送] UP {up_uid} 动态获取失败")
 
 
