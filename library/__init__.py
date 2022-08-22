@@ -101,8 +101,8 @@ async def delete_uid(uid):
         if resp and resp["code"] == 0:
             logger.info(f"取关 {uid} 成功")
         else:
-            logger.error(f"取关 {uid} 失败")
-        return
+            logger.error(f"取关 {uid} 失败：{resp}")
+            return False
     else:
         BOT_Status["offset"].pop(uid, None)
         del BOT_Status["liveing"][uid]
