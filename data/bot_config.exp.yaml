@@ -15,6 +15,7 @@ bilibili:
 event:
   mute: true
   permchange: true
+log_level: INFO
 name: xxxxxxx
 access_control: true
 master: xxxxxxx

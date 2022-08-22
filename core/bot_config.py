@@ -67,6 +67,7 @@ class BotConfig:
     master: int = bot_config["master"]
     admins: list[int] = bot_config["admins"]
     access_control: bool = bot_config["access_control"]
+    log_level: str = bot_config["log_level"]
 
 
 def open_access_control():

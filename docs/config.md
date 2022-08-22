@@ -24,6 +24,7 @@ bilibili:
 event:
   mute: true
   permchange: true
+log_level: INFO
 name: xxxxxxx
 access_control: true
 master: xxxxxxx
@@ -130,6 +131,13 @@ BiliBili 账号未登录的情况下发送 gRPC 请求的并发数量（1 ~ 50�
 - **默认值**: `true`
 
 是否向管理员发送权限变更的事件提醒。
+
+## log_level
+
+- **类型**: `str`
+- **默认值**: `INFO`
+
+控制台输出的日志等级，可选等级包含 `TRACE` `DEBUG` `INFO` `SUCCESS` `WARNING` `ERROR` `CRITICAL`，可参考 [loguru 官方文档](https://loguru.readthedocs.io/) 以获取更多信息。
 
 ## name
 
