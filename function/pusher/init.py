@@ -120,7 +120,7 @@ async def init(app: Ariadne):
                         f"[BiliBili推送] {uid.name}（{uid.uid}）在关注列表中，但不在数据库中，正在取消关注"
                     )
                     resp = await delete_uid(uid.uid)
-                    if resp and resp["code"] == 0:
+                    if resp:
                         await app.send_friend_message(
                             BotConfig.master,
                             MessageChain(
@@ -131,7 +131,7 @@ async def init(app: Ariadne):
                         continue
                     else:
                         logger.error(
-                            f"[BiliBili推送] {uid.name}（{uid.uid}）取消关注失败，请检查后重启 Bot：{resp}"
+                            f"[BiliBili推送] {uid.name}（{uid.uid}）取消关注失败，请检查后重启 Bot"
                         )
                         sys.exit(1)
 
