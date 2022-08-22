@@ -77,7 +77,7 @@ async def main(app: Ariadne):
                     logger.debug(f"[Dynamic] Check dynamic {dynid}, {up_name}({up_id})")
                     try:
                         if (
-                            dynid <= BOT_Status["offset"]
+                            dynid <= BOT_Status.get("offset", dynid)
                             # or up_id in BOT_Status["skip_uid"]
                             or is_dyn_pushed(dynid)
                         ):
@@ -271,7 +271,10 @@ async def check_uid(app: Ariadne, uid):
     resp = await grpc_dyn_get(uid)
     if resp:
         resp = [
-            x for x in resp.list if int(x.extend.dyn_id_str) > BOT_Status["offset"][uid]
+            x
+            for x in resp.list
+            if int(x.extend.dyn_id_str)
+            > BOT_Status["offset"].get(uid, int(x.extend.dyn_id_str))
         ]
         resp.reverse()
         for dyn in resp:
