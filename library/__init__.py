@@ -1,5 +1,6 @@
 import asyncio
 
+import contextlib
 from typing import Union
 from loguru import logger
 
@@ -105,7 +106,8 @@ async def delete_uid(uid):
             return False
     else:
         BOT_Status["offset"].pop(uid, None)
-        del BOT_Status["liveing"][uid]
+        with contextlib.suppress(KeyError):
+            del BOT_Status["liveing"][uid]
     if uid_exists(uid):
         delete_sub_by_uid(uid)
     else:
