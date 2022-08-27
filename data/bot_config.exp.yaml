@@ -1,23 +1,24 @@
 mirai:
-  mirai_host: http://xxxxxxx:xxxx
-  verify_key: xxxxxxx
-  account: xxxxxxx
+  mirai_host:          # need to be filled
+  verify_key:          # need to be filled
+  account:             # need to be filled
 debug:
   enable: false
   groups:
-    - xxxxxxx
+    - group_num        # need to be replaced or deleted
 bilibili:
   use_login: false
-  username: xxxxxxx
-  password: xxxxxxx
+  username: 
+  password: 
   mobile_style: true
   concurrency: 5
 event:
   mute: true
   permchange: true
 log_level: INFO
-name: xxxxxxx
+name: BBot's name
 access_control: true
-master: xxxxxxx
+master: Bot's Master   # need to be replaced
 admins:
-  - xxxxxxx
+  - admin_num          # need to be replaced or deleted
+  - admin_num          # need to be replaced or deleted
