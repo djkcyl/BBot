@@ -53,8 +53,9 @@ async def uid_extract(text: str, groupid: Union[int, str] = None):
                 "https://api.bilibili.com/x/web-interface/search/type",
                 params={"keyword": text_u, "search_type": "bili_user"},
             )
-        data = resp.json()["data"]
-        logger.debug(f"[UID Extract] Search result: {data}")
+        resp = resp.json()
+        logger.debug(f"[UID Extract] Search result: {resp}")
+        data = resp["data"]
         if data["numResults"]:
             for result in data["result"]:
                 if result["uname"] == text_u:

@@ -111,7 +111,9 @@ async def main(app: Ariadne):
         logger.debug(f"Get {sub_sum} uid, split to {len(check_list)} groups")
         for subid_group in check_list:
             logger.debug(f"Gathering {len(subid_group)} uid")
-            await asyncio.gather(*[check_uid(app, uid) for uid in subid_group])
+            await asyncio.gather(
+                *[check_uid(app, uid) for uid in subid_group], return_exceptions=True
+            )
 
     BOT_Status["last_finish"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     BOT_Status["dynamic_updateing"] = False
@@ -268,7 +270,11 @@ async def push(app: Ariadne, dyn):
 
 
 async def check_uid(app: Ariadne, uid):
-    resp = await grpc_dyn_get(uid)
+    try:
+        resp = await asyncio.wait_for(grpc_dyn_get(uid), timeout=10)
+    except asyncio.TimeoutError:
+        logger.error(f"[BiliBili推送] {uid} 获取动态失败！")
+        return
     if resp:
         resp = [
             x
