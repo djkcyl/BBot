@@ -6,14 +6,14 @@
 
 QQ 平台的推送，我们使用的是 Mirai ，并通过 mirai-api-http 插件与之连接。
 
-详细的部署教程可查看 [graiaX 文档](https://graiax.cn/before/install_mirai.html) 进行部署，在此不多赘述。本节将会重点介绍文档中 [配置 Mirai Api Http 参数](https://graiax.cn/before/install_mirai.html#%E9%85%8D%E7%BD%AE-mirai-api-http-%E5%8F%82%E6%95%B0) 在 BBot 下如何配置。
+详细的部署教程可查看 [GraiaX 文档](https://graiax.cn/before/install_mirai.html) 进行部署，在此不多赘述。本节将会重点介绍文档中 [配置 Mirai Api Http 参数](https://graiax.cn/before/install_mirai.html#%E9%85%8D%E7%BD%AE-mirai-api-http-%E5%8F%82%E6%95%B0) 在 BBot 下如何配置。
 
 我们先来查看一下文档中提供的默认配置、
 
 ```yaml
 adapters:
   - http
-  - ws
+  - ws # 注意不要忘了添加 ws ！！
 debug: false
 enableVerify: true
 verifyKey: GraiaxVerifyKey # 你可以自己设定，这里作为示范
