@@ -16,3 +16,4 @@ data/data.db
 error/
 data/browser
 package
+.vscode/
