@@ -1,15 +1,15 @@
 import re
 import httpx
 
-from typing import Union
 from loguru import logger
+from typing import Union, Optional
 
 from data import get_sub_by_group
 
 from .b23_extract import b23_extract
 
 
-async def uid_extract(text: str, groupid: Union[int, str] = None):
+async def uid_extract(text: str, groupid: Optional[Union[int, str]] = None):
     logger.debug(f"[UID Extract] Original Text: {text}")
     if up_list := get_sub_by_group(groupid or 0):
         logger.debug(f"[UID Extract] Group {groupid} has {len(up_list)} Subscribers")
