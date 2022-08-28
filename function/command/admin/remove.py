@@ -12,7 +12,7 @@ from graia.ariadne.message.parser.twilight import (
 )
 
 from core.control import Permission
-from core.bot_config import remove_admin
+from core.bot_config import BotConfig, save_config
 
 channel = Channel.current()
 
@@ -32,7 +32,9 @@ async def main(app: Ariadne, friend: Friend, adminid: RegexResult):
     if adminid.matched:
         say = adminid.result.display
         if say.isdigit():
-            if remove_admin(int(say)):
+            if int(say) in BotConfig.admins:
+                BotConfig.admins.remove(int(say))
+                save_config()
                 await app.send_friend_message(friend, MessageChain("成功取消该账号的管理员"))
             else:
                 await app.send_friend_message(friend, MessageChain("该账号不是管理员"))

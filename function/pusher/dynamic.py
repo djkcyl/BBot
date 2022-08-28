@@ -299,6 +299,7 @@ async def check_uid(app: Ariadne, uid):
                     ):
                         return
                 except ValueError:
+                    BOT_Status["offset"][up_id] = dynid
                     return
                 await push(app, dyn)
 

@@ -4,42 +4,15 @@ import contextlib
 
 from creart import it
 from pathlib import Path
-from loguru import logger
 from graia.saya import Saya
 from graia.ariadne.app import Ariadne
 from graia.scheduler import GraiaScheduler
 from graia.ariadne.entry import config, HttpClientConfig, WebsocketClientConfig
 
 from core.bot_config import BotConfig
-
-LOGPATH = Path("logs")
-LOGPATH.mkdir(exist_ok=True)
-logger.add(
-    LOGPATH.joinpath("latest.log"),
-    encoding="utf-8",
-    backtrace=True,
-    diagnose=True,
-    rotation="00:00",
-    retention="1 years",
-    compression="tar.xz",
-    colorize=False,
-    level="INFO",
-)
-
-logger.add(
-    LOGPATH.joinpath("debug.log"),
-    encoding="utf-8",
-    backtrace=True,
-    diagnose=True,
-    rotation="00:00",
-    retention="15 days",
-    compression="tar.xz",
-    colorize=False,
-    level="DEBUG",
-)
+from core.log import logger
 
 logger.info("BBot is starting...")
-
 
 try:
     host = BotConfig.Mirai.mirai_host
