@@ -1,28 +1,34 @@
 import json
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 import yaml
 from loguru import logger
-from pydantic import AnyHttpUrl, BaseSettings, validator
+from pydantic import AnyHttpUrl, BaseSettings, validator, Field
 
 # 数据模型类
 
-class _mirai(BaseSettings):
+class _Mirai(BaseSettings):
     account    : int
     verify_key : str
     mirai_host : AnyHttpUrl
 
-class _debug(BaseSettings):
+class _Debug(BaseSettings):
     groups : Optional[list[int]]
     enable : bool = False
 
     # 规范 groups 内容
     @validator('groups')
     def specification_groups(cls, groups):
-        if type(groups) == list:
+        # 若 groups 为 int, 转换为 [admins]
+        if type(groups) == int:
+            logger.warning(f'groups 格式为 int, 已重置为 list[groups]')
+            return [groups]
+        # 若 groups 为 list, 不转换
+        elif type(groups) == list:
             return groups
+        # 其他情况, 转换为 [None]
         else:
             logger.warning(f'debug.groups 为空或格式不为 list, 已重置为 list[None]')
             return [None]
@@ -44,7 +50,7 @@ class _debug(BaseSettings):
             raise ValueError(f'已启用 debug 但未填入合法的群号')
 
 
-class _bilibili(BaseSettings):
+class _Bilibili(BaseSettings):
     username     : Optional[int]
     password     : Optional[str]
     mobile_style : bool = True
@@ -78,27 +84,33 @@ class _bilibili(BaseSettings):
         else:
             return concurrency
 
-class _event(BaseSettings):
+class _Event(BaseSettings):
     mute       : bool = True
     permchange : bool = True
 
 class _BotConfig(BaseSettings):
-    mirai    : _mirai
-    debug    : _debug
-    bilibili : _bilibili
-    event    : _event
+    Mirai    : _Mirai
+    Debug    : _Debug
+    Bilibili : _Bilibili
+    Event    : _Event
     log_level      : str  = 'INFO'
     name           : str  = 'BBot'
     master         : int  = 123
-    admins         : list[int]
+    admins         : Optional[Union[list[int],int]]
     access_control : bool = True
 
     # 验证 admins 列表
     @validator('admins')
     def verify_admins(cls, admins, values):
-        if (type(admins) != list) or (not admins):
+        # 若 admins 为 int, 转化为 [admins]
+        if type(admins) == int:
+            logger.warning(f'admins 格式为 int, 已重置为 list[admins]')
+            admins = [admins]
+        # 若 admins 既不是 int 也不是 list, 或为空 list，转化为 [master]
+        elif (type(admins) != list) or (not admins):
             logger.warning(f'admins 为空或格式不为 list, 已重置为 list[master]')
             return [values['master']]
+        # 验证 admins 是否内含 master
         try:
             if values['master'] in admins:
                 return admins
@@ -123,7 +135,14 @@ bot_config_file = Path("data").joinpath("bot_config.yaml")
 bot_config_file.parent.mkdir(parents=True, exist_ok=True)
 ## 尝试读取配置项文件
 if bot_config_file.exists():
-    bot_config = yaml.load(bot_config_file.read_bytes(), Loader=yaml.FullLoader)
+    bot_config:dict = yaml.load(bot_config_file.read_bytes(), Loader=yaml.FullLoader)
+    ## 兼容旧配置, 将配置文件中的小写的配置项转为大写
+    for old_config in ['mirai','debug','bilibili','event']:
+        if old_config in bot_config.keys():
+            logger.warning(f'检测到旧版配置项, 转化为新版配置项: {old_config} => {old_config.capitalize()}')
+            bot_config[old_config.capitalize()] = bot_config[old_config]
+            del bot_config[old_config]
+## 未能读取到配置文件，新建配置文件
 elif Path(sys.argv[0]).name != "_child.py":
     logger.error(f"未找到配置文件，已为您创建默认配置文件（{bot_config_file}），请修改后重新启动")
     bot_config_file.write_text(
