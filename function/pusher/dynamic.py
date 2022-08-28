@@ -213,7 +213,9 @@ async def push(app: Ariadne, dyn):
                 continue
             if data.dynamic:
                 nick = (
-                    f"*{up_nick} " if (up_nick := data.nick) else f"UP {up_name}（{up_id}）"
+                    f"*{up_nick} "
+                    if (up_nick := data.nick)
+                    else f"UP {up_name}（{up_id}）"
                 )
                 msg = [
                     f"{nick}{type_text}\n",
