@@ -46,7 +46,7 @@ B，也代表 BiliBili，这个 Bot 将专注于哔哩哔哩的推送等服务
 - [x] 定时刷新 token，防止过期
 - [x] 针对 Windows 和 Linux 平台，增加 Release 打包版本
 - [x] 增加非登录式的推送更新逻辑
-- [x] 更换 BiliBili 请求库为~~更成熟~~的 [BiliReq](../../../../SK-415/bilireq)
+- [x] 更换 BiliBili 请求库为更成熟的 [BiliReq](../../../../SK-415/bilireq)
 - [ ] 增加不需要浏览器的动态信息获取方式
 - [ ] 增加简单的推送数据分析及报告
 - [ ] 丰富管理员指令
