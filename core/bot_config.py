@@ -90,6 +90,7 @@ class _BotConfig(BaseSettings):
     name: str = "BBot"
     master: int = 123
     admins: Optional[list[int]]
+    max_subsubscribe: int = 4
     access_control: bool = True
 
     # 验证 admins 列表

@@ -50,9 +50,9 @@ async def subscribe_uid(uid: Union[str, int], groupid: Union[str, int]):
     if uid_in_group_exists(uid, groupid):
         BOT_Status["init"] = True
         return f"本群已订阅 UP {up_name}（{uid}），请勿重复订阅"
-    if len(get_sub_by_group(groupid)) >= 4 and not gp.is_vip():
+    if len(get_sub_by_group(groupid)) >= BotConfig.max_subsubscribe and not gp.is_vip():
         BOT_Status["init"] = True
-        return "每个群聊最多仅可订阅 4 个 UP"
+        return f"每个群聊最多仅可订阅 {BotConfig.max_subsubscribe} 个 UP"
     need_sub = not uid_exists(uid)
     add_sub(uid, up_name, groupid)
     if need_sub and BotConfig.Bilibili.use_login:
