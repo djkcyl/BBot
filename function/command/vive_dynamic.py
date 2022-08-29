@@ -4,6 +4,7 @@ from graia.ariadne.model import Group
 from graia.ariadne.message.element import Image
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.event.message import GroupMessage
+from bilireq.grpc.dynamic import grpc_get_user_dynamics
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import (
     Twilight,
@@ -12,7 +13,6 @@ from graia.ariadne.message.parser.twilight import (
     WildcardMatch,
 )
 
-from library.grpc import grpc_dyn_get
 from library.uid_extract import uid_extract
 from core.control import Interval, Permission
 from library.dynamic_shot import get_dynamic_screenshot
@@ -36,7 +36,7 @@ async def main(app: Ariadne, group: Group, message: MessageChain, anything: Rege
             quote=message,
         )
 
-    res = await grpc_dyn_get(uid)
+    res = await grpc_get_user_dynamics(int(uid))
     if res.list:
         if len(res.list) > 1:
             if res.list[0].modules[0].module_author.is_top:

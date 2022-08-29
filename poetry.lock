@@ -70,7 +70,7 @@ tests_no_zope = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>
 
 [[package]]
 name = "bilireq"
-version = "0.2.0.post1"
+version = "0.2.1"
 description = ""
 category = "main"
 optional = false
@@ -221,22 +221,22 @@ uvicorn = ["uvicorn (>=0.17.6,<1.0.0)"]
 
 [[package]]
 name = "graia-ariadne"
-version = "0.8.2"
+version = "0.8.4"
 description = "Another elegant Python QQ Bot framework for mirai and mirai-api-http v2."
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 
 [package.dependencies]
-aiohttp = ">=3.7,<4.0"
-creart-graia = ">=0.1.4,<1.0.0"
-graia-amnesia = ">=0.5.2,<0.6.0"
+aiohttp = ">=3.8,<4.0"
+creart-graia = ">=0.1.5,<1.0.0"
+graia-amnesia = "0.5.8"
 graia-broadcast = ">=0.18,<1.0"
 graia-saya = {version = ">=0.0,<1.0", optional = true, markers = "extra == \"graia\""}
 graia-scheduler = {version = ">=0.0,<1.0", optional = true, markers = "extra == \"graia\""}
 launart = ">=0.6.0,<1.0.0"
-pydantic = ">=1.8,<2.0"
-typing-extensions = ">=4.0,<5.0"
+pydantic = ">=1.9,<2.0"
+typing-extensions = ">=4.3,<5.0"
 
 [package.extras]
 alconna = ["arclet-alconna-graia"]
@@ -464,17 +464,6 @@ pyee = "8.1.0"
 websockets = "10.1"
 
 [[package]]
-name = "prompt-toolkit"
-version = "3.0.26"
-description = "Library for building powerful interactive command lines in Python"
-category = "main"
-optional = false
-python-versions = ">=3.6.2"
-
-[package.dependencies]
-wcwidth = "*"
-
-[[package]]
 name = "protobuf"
 version = "3.20.1"
 description = "Protocol Buffers"
@@ -497,14 +486,6 @@ description = "Python style guide checker"
 category = "dev"
 optional = false
 python-versions = ">=3.6"
-
-[[package]]
-name = "pycryptodome"
-version = "3.15.0"
-description = "Cryptographic library for Python"
-category = "main"
-optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "pydantic"
@@ -640,14 +621,6 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
-name = "wcwidth"
-version = "0.2.5"
-description = "Measures the displayed width of unicode strings in a terminal"
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "websockets"
 version = "10.1"
 description = "An implementation of the WebSocket Protocol (RFC 6455 & 7692)"
@@ -681,7 +654,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "9d1dcad759a3189d86254aee7c7760ad9a29e12b023d44c2defeb81a0056bb95"
+content-hash = "b0120fa35df653d0703f265eb1d0769ddf74daf8842bafdff1041cd8275caf01"
 
 [metadata.files]
 aiohttp = []
@@ -689,7 +662,10 @@ aiosignal = []
 anyio = []
 async-timeout = []
 attrs = []
-bilireq = []
+bilireq = [
+    {file = "bilireq-0.2.1-py3-none-any.whl", hash = "sha256:5a3f85d8548e88411c7acb1a57ffd2fc709ba1590c02ea52c67a56a2a34f0194"},
+    {file = "bilireq-0.2.1.tar.gz", hash = "sha256:1de79c66330e7c021aca60845ad2d7ddf900c953f898820300559b78244b3270"},
+]
 black = []
 certifi = []
 charset-normalizer = []
@@ -711,8 +687,8 @@ graia-amnesia = [
     {file = "graia_amnesia-0.5.8-py3-none-any.whl", hash = "sha256:75f433a55f0b139782c77fa8f91413a933685a057cdab5646386144e6b68665d"},
 ]
 graia-ariadne = [
-    {file = "graia-ariadne-0.8.2.tar.gz", hash = "sha256:ea955ec4637d938172f809ee7ed7ee5c8b641bc355720ed65c54a8e8d3430dbe"},
-    {file = "graia_ariadne-0.8.2-py3-none-any.whl", hash = "sha256:1b692144c08005d53e904302bdcc884f592a6749e2a87637454682a9c7c1fc1a"},
+    {file = "graia-ariadne-0.8.4.tar.gz", hash = "sha256:9bcf5e9208182216de3803309af471825bc6566fca831e0ad7fc20d94cef11cc"},
+    {file = "graia_ariadne-0.8.4-py3-none-any.whl", hash = "sha256:6956bd1fadcd8f1a76eaa840bb70159f435f235ca21fdffb0106cd9fb2581b4a"},
 ]
 graia-broadcast = [
     {file = "graia-broadcast-0.18.2.tar.gz", hash = "sha256:07b0285d417021c795c3c4f4f12713311fcdec10d63f8e7a8ed7964e2f1b7a5a"},
@@ -864,44 +840,11 @@ playwright = [
     {file = "playwright-1.24.1-py3-none-win32.whl", hash = "sha256:5ad16b26f4ae2d539c580273bd323907e24a125dbf0f38460466608d1cb39c83"},
     {file = "playwright-1.24.1-py3-none-win_amd64.whl", hash = "sha256:7355d00cd2cb24265779b1cd9b18d9dcac17eea4a558d57ce20df650fc766f53"},
 ]
-prompt-toolkit = []
 protobuf = []
 pyasn1 = []
 pycodestyle = [
     {file = "pycodestyle-2.9.1-py2.py3-none-any.whl", hash = "sha256:d1735fc58b418fd7c5f658d28d943854f8a849b01a5d0a1e6f3f3fdd0166804b"},
     {file = "pycodestyle-2.9.1.tar.gz", hash = "sha256:2c9607871d58c76354b697b42f5d57e1ada7d261c261efac224b664affdc5785"},
-]
-pycryptodome = [
-    {file = "pycryptodome-3.15.0-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:ff7ae90e36c1715a54446e7872b76102baa5c63aa980917f4aa45e8c78d1a3ec"},
-    {file = "pycryptodome-3.15.0-cp27-cp27m-manylinux1_i686.whl", hash = "sha256:2ffd8b31561455453ca9f62cb4c24e6b8d119d6d531087af5f14b64bee2c23e6"},
-    {file = "pycryptodome-3.15.0-cp27-cp27m-manylinux1_x86_64.whl", hash = "sha256:2ea63d46157386c5053cfebcdd9bd8e0c8b7b0ac4a0507a027f5174929403884"},
-    {file = "pycryptodome-3.15.0-cp27-cp27m-manylinux2010_i686.whl", hash = "sha256:7c9ed8aa31c146bef65d89a1b655f5f4eab5e1120f55fc297713c89c9e56ff0b"},
-    {file = "pycryptodome-3.15.0-cp27-cp27m-manylinux2010_x86_64.whl", hash = "sha256:5099c9ca345b2f252f0c28e96904643153bae9258647585e5e6f649bb7a1844a"},
-    {file = "pycryptodome-3.15.0-cp27-cp27m-manylinux2014_aarch64.whl", hash = "sha256:2ec709b0a58b539a4f9d33fb8508264c3678d7edb33a68b8906ba914f71e8c13"},
-    {file = "pycryptodome-3.15.0-cp27-cp27m-win32.whl", hash = "sha256:fd2184aae6ee2a944aaa49113e6f5787cdc5e4db1eb8edb1aea914bd75f33a0c"},
-    {file = "pycryptodome-3.15.0-cp27-cp27m-win_amd64.whl", hash = "sha256:7e3a8f6ee405b3bd1c4da371b93c31f7027944b2bcce0697022801db93120d83"},
-    {file = "pycryptodome-3.15.0-cp27-cp27mu-manylinux1_i686.whl", hash = "sha256:b9c5b1a1977491533dfd31e01550ee36ae0249d78aae7f632590db833a5012b8"},
-    {file = "pycryptodome-3.15.0-cp27-cp27mu-manylinux1_x86_64.whl", hash = "sha256:0926f7cc3735033061ef3cf27ed16faad6544b14666410727b31fea85a5b16eb"},
-    {file = "pycryptodome-3.15.0-cp27-cp27mu-manylinux2010_i686.whl", hash = "sha256:2aa55aae81f935a08d5a3c2042eb81741a43e044bd8a81ea7239448ad751f763"},
-    {file = "pycryptodome-3.15.0-cp27-cp27mu-manylinux2010_x86_64.whl", hash = "sha256:c3640deff4197fa064295aaac10ab49a0d55ef3d6a54ae1499c40d646655c89f"},
-    {file = "pycryptodome-3.15.0-cp27-cp27mu-manylinux2014_aarch64.whl", hash = "sha256:045d75527241d17e6ef13636d845a12e54660aa82e823b3b3341bcf5af03fa79"},
-    {file = "pycryptodome-3.15.0-cp35-abi3-macosx_10_9_x86_64.whl", hash = "sha256:9ee40e2168f1348ae476676a2e938ca80a2f57b14a249d8fe0d3cdf803e5a676"},
-    {file = "pycryptodome-3.15.0-cp35-abi3-manylinux1_i686.whl", hash = "sha256:4c3ccad74eeb7b001f3538643c4225eac398c77d617ebb3e57571a897943c667"},
-    {file = "pycryptodome-3.15.0-cp35-abi3-manylinux1_x86_64.whl", hash = "sha256:1b22bcd9ec55e9c74927f6b1f69843cb256fb5a465088ce62837f793d9ffea88"},
-    {file = "pycryptodome-3.15.0-cp35-abi3-manylinux2010_i686.whl", hash = "sha256:57f565acd2f0cf6fb3e1ba553d0cb1f33405ec1f9c5ded9b9a0a5320f2c0bd3d"},
-    {file = "pycryptodome-3.15.0-cp35-abi3-manylinux2010_x86_64.whl", hash = "sha256:4b52cb18b0ad46087caeb37a15e08040f3b4c2d444d58371b6f5d786d95534c2"},
-    {file = "pycryptodome-3.15.0-cp35-abi3-manylinux2014_aarch64.whl", hash = "sha256:092a26e78b73f2530b8bd6b3898e7453ab2f36e42fd85097d705d6aba2ec3e5e"},
-    {file = "pycryptodome-3.15.0-cp35-abi3-win32.whl", hash = "sha256:e244ab85c422260de91cda6379e8e986405b4f13dc97d2876497178707f87fc1"},
-    {file = "pycryptodome-3.15.0-cp35-abi3-win_amd64.whl", hash = "sha256:c77126899c4b9c9827ddf50565e93955cb3996813c18900c16b2ea0474e130e9"},
-    {file = "pycryptodome-3.15.0-pp27-pypy_73-macosx_10_9_x86_64.whl", hash = "sha256:9eaadc058106344a566dc51d3d3a758ab07f8edde013712bc8d22032a86b264f"},
-    {file = "pycryptodome-3.15.0-pp27-pypy_73-manylinux1_x86_64.whl", hash = "sha256:ff287bcba9fbeb4f1cccc1f2e90a08d691480735a611ee83c80a7d74ad72b9d9"},
-    {file = "pycryptodome-3.15.0-pp27-pypy_73-manylinux2010_x86_64.whl", hash = "sha256:60b4faae330c3624cc5a546ba9cfd7b8273995a15de94ee4538130d74953ec2e"},
-    {file = "pycryptodome-3.15.0-pp27-pypy_73-win32.whl", hash = "sha256:a8f06611e691c2ce45ca09bbf983e2ff2f8f4f87313609d80c125aff9fad6e7f"},
-    {file = "pycryptodome-3.15.0-pp36-pypy36_pp73-macosx_10_9_x86_64.whl", hash = "sha256:b9cc96e274b253e47ad33ae1fccc36ea386f5251a823ccb50593a935db47fdd2"},
-    {file = "pycryptodome-3.15.0-pp36-pypy36_pp73-manylinux1_x86_64.whl", hash = "sha256:ecaaef2d21b365d9c5ca8427ffc10cebed9d9102749fd502218c23cb9a05feb5"},
-    {file = "pycryptodome-3.15.0-pp36-pypy36_pp73-manylinux2010_x86_64.whl", hash = "sha256:d2a39a66057ab191e5c27211a7daf8f0737f23acbf6b3562b25a62df65ffcb7b"},
-    {file = "pycryptodome-3.15.0-pp36-pypy36_pp73-win32.whl", hash = "sha256:9c772c485b27967514d0df1458b56875f4b6d025566bf27399d0c239ff1b369f"},
-    {file = "pycryptodome-3.15.0.tar.gz", hash = "sha256:9135dddad504592bcc18b0d2d95ce86c3a5ea87ec6447ef25cfedea12d6018b8"},
 ]
 pydantic = []
 pyee = []
@@ -925,7 +868,6 @@ typing-extensions = [
     {file = "typing_extensions-4.3.0-py3-none-any.whl", hash = "sha256:25642c956049920a5aa49edcdd6ab1e06d7e5d467fc00e0506c44ac86fbfca02"},
     {file = "typing_extensions-4.3.0.tar.gz", hash = "sha256:e6d2677a32f47fc7eb2795db1dd15c1f34eff616bcaf2cfb5e997f854fa1c4a6"},
 ]
-wcwidth = []
 websockets = []
 win32-setctime = []
 yarl = []

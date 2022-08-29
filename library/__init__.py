@@ -3,10 +3,12 @@ import asyncio
 import contextlib
 from typing import Union
 from loguru import logger
+from bilireq.grpc.dynamic import grpc_get_user_dynamics
 
 from core import BOT_Status
 from core.bot_config import BotConfig
 from core.group_config import GroupPermission
+from library.bilibili_request import relation_modify
 from data import (
     add_sub,
     uid_exists,
@@ -19,9 +21,6 @@ from data import (
     unsub_uid_by_group,
     uid_in_group_exists,
 )
-
-from .grpc import grpc_dyn_get
-from .bilibili_request import relation_modify
 
 
 async def subscribe_uid(uid: Union[str, int], groupid: Union[str, int]):
@@ -39,7 +38,7 @@ async def subscribe_uid(uid: Union[str, int], groupid: Union[str, int]):
     if not uid:
         BOT_Status["init"] = True
         return "Bot 状态异常，订阅失败，请稍后再试"
-    r = await grpc_dyn_get(uid)
+    r = await grpc_get_user_dynamics(int(uid))
     if not r:
         BOT_Status["init"] = True
         return f"该 UP（{uid}）状态异常，订阅失败"
@@ -100,7 +99,7 @@ async def delete_uid(uid):
     if BotConfig.Bilibili.use_login:
         resp = await relation_modify(uid, 2)
         if resp and resp["code"] == 0:
-            logger.info(f"取关 {uid} 成功")
+            logger.info(f"取关 {uid} api 操作成功")
         else:
             logger.error(f"取关 {uid} 失败：{resp}")
             return False

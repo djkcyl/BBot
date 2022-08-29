@@ -3,7 +3,6 @@ import asyncio
 import contextlib
 
 from creart import it
-from pathlib import Path
 from graia.saya import Saya
 from graia.ariadne.app import Ariadne
 from graia.scheduler import GraiaScheduler

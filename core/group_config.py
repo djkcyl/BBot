@@ -30,18 +30,14 @@ class GroupPermission:
         if self.group_id in whitelist:
             return False
         whitelist.append(self.group_id)
-        grouplist_file.write_text(
-            json.dumps({"white": whitelist, "vip": vipgroup}, indent=2)
-        )
+        grouplist_file.write_text(json.dumps({"white": whitelist, "vip": vipgroup}, indent=2))
         return True
 
     def remove_from_whitelist(self):
         if self.group_id not in whitelist:
             return False
         whitelist.remove(self.group_id)
-        grouplist_file.write_text(
-            json.dumps({"white": whitelist, "vip": vipgroup}, indent=2)
-        )
+        grouplist_file.write_text(json.dumps({"white": whitelist, "vip": vipgroup}, indent=2))
         return True
 
     def is_vip(self):
@@ -51,16 +47,12 @@ class GroupPermission:
         if self.group_id in vipgroup:
             return False
         vipgroup.append(self.group_id)
-        grouplist_file.write_text(
-            json.dumps({"white": whitelist, "vip": vipgroup}, indent=2)
-        )
+        grouplist_file.write_text(json.dumps({"white": whitelist, "vip": vipgroup}, indent=2))
         return True
 
     def remove_from_vips(self):
         if self.group_id not in vipgroup:
             return False
         vipgroup.remove(self.group_id)
-        grouplist_file.write_text(
-            json.dumps({"white": whitelist, "vip": vipgroup}, indent=2)
-        )
+        grouplist_file.write_text(json.dumps({"white": whitelist, "vip": vipgroup}, indent=2))
         return True

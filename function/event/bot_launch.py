@@ -49,9 +49,7 @@ async def main(app: Ariadne):
         for group in BotConfig.Debug.groups:
             debug_group = await app.get_group(group)
             debug_msg.append(
-                f"{debug_group.id}（{debug_group.name}）"
-                if debug_group
-                else f"{group}（当前未加入该群）"
+                f"{debug_group.id}（{debug_group.name}）" if debug_group else f"{group}（当前未加入该群）"
             )
         await app.send_friend_message(
             BotConfig.master,

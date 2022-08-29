@@ -11,13 +11,14 @@ from graia.ariadne.message.element import Image, AtAll
 from graia.scheduler.saya.schema import SchedulerSchema
 from graia.scheduler.timers import every_custom_seconds
 from graia.ariadne.exception import UnknownTarget, AccountMuted
+from bilireq.live import get_rooms_info_by_uids
 
 from core import BOT_Status
 from core.bot_config import BotConfig
 from library.time_tools import calc_time_total
+from library.bilibili_request import get_b23_url
 from library import delete_group, delete_uid, set_name
 from data import insert_live_push, get_all_uid, get_sub_by_uid
-from library.bilibili_request import get_b23_url, get_status_info_by_uids
 
 channel = Channel.current()
 
@@ -35,9 +36,9 @@ async def main(app: Ariadne):
     for up in BOT_Status["liveing"].copy():
         if up not in sub_list:
             del BOT_Status["liveing"][up]
-    status_infos = await get_status_info_by_uids(sub_list)
+    status_infos = await get_rooms_info_by_uids(sub_list)
     if status_infos:
-        for up, live_data in status_infos["data"].items():
+        for up, live_data in status_infos.items():
             up_id = up
             up_name = live_data["uname"]
             # 检测订阅配置里是否有该 up
@@ -85,9 +86,7 @@ async def main(app: Ariadne):
                             ]
 
                             if data.atall:  # 判断是否开启@全体推送
-                                bot_perm = (
-                                    group.account_perm if group else MemberPerm.Member
-                                )
+                                bot_perm = group.account_perm if group else MemberPerm.Member
                                 if bot_perm in [
                                     MemberPerm.Administrator,
                                     MemberPerm.Owner,
@@ -107,9 +106,7 @@ async def main(app: Ariadne):
                                     f"[BiliBili推送] 推送失败，找不到该群 {data.group}，已删除该群订阅的 {len(delete)} 个 UP"
                                 )
                             except AccountMuted:
-                                group = (
-                                    f"{group.name}（{group.id}）" if group else data.group
-                                )
+                                group = f"{group.name}（{group.id}）" if group else data.group
                                 logger.warning(f"[BiliBili推送] 推送失败，账号在 {group} 被禁言")
 
                     insert_live_push(
@@ -149,9 +146,7 @@ async def main(app: Ariadne):
                                 )
                             except AccountMuted:
                                 group = await app.get_group(int(data.group))
-                                group = (
-                                    f"{group.name}（{group.id}）" if group else data.group
-                                )
+                                group = f"{group.name}（{group.id}）" if group else data.group
                                 logger.warning(f"[BiliBili推送] 推送失败，账号在 {group} 被禁言")
 
                             await asyncio.sleep(1)

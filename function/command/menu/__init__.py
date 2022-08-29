@@ -5,11 +5,9 @@ from graia.ariadne.message.element import Image
 from graia.ariadne.event.message import GroupMessage
 from graia.ariadne.message.chain import MessageChain
 from graia.saya.builtins.broadcast.schema import ListenerSchema
-from graia.ariadne.message.parser.twilight import (
-    Twilight,
-    RegexMatch,
-)
+from graia.ariadne.message.parser.twilight import Twilight, RegexMatch
 
+from core.bot_config import BotConfig
 from library.text2image import text2image
 from core.control import Interval, Permission
 
@@ -43,8 +41,11 @@ async def main(app: Ariadne, group: Group):
         " 6. 设定|删除 昵称 <uid> [昵称]\n"
         " 7. 开启|关闭 @全体成员 <uid>\n"
         "=================================================================\n"
-        "BBot 采用 gRPC 接口进行动态检查，关注后目标 UP 将粉丝数 +1，收到动态更新后 BBot 将会对动态点赞。"
+        "BBot 采用 gRPC 接口进行动态检查。"
     )
+
+    if BotConfig.Bilibili.use_login:
+        help += "关注后目标 UP 将粉丝数 +1，收到动态更新后 BBot 将会对动态点赞。"
 
     await app.send_group_message(
         group,

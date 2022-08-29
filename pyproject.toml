@@ -1,24 +1,20 @@
 [tool.poetry]
 name = "bbot-graia"
-version = "0.3.0"
+version = "0.4.0"
 description = "一个用于 QQ 群内高效推送哔哩哔哩 UP 动态及直播的机器人"
 authors = ["djkcyl <cyl@cyllive.cn>"]
 license = "AGPL3.0"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-graia-ariadne = {extras = ["graia"], version = "^0.8.2"}
-grpcio = "^1.48.0"
+graia-ariadne = {version = "^0.8.4", extras = ["graia"]}
 httpx = "^0.23.0"
 peewee = "^3.15.1"
-prompt-toolkit = "3.0.26"
 playwright = "^1.24.1"
 pyyaml = "^6.0"
 qrcode = "^7.3.1"
 pillow = "^9.2.0"
-pycryptodome = "^3.15.0"
-protobuf = "3.20.1"
-bilireq = "^0.2.0"
+bilireq = "^0.2.1"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^5.0.4"
@@ -27,3 +23,6 @@ black = {version = "^22.6.0", allow-prereleases = true}
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 96

@@ -37,9 +37,7 @@ async def bilibili_main(
     if video_info:
         if video_info["code"] != 0:
             await Interval.manual(member.id)
-            return await app.send_group_message(
-                group, MessageChain([Plain("视频不存在或解析失败")])
-            )
+            return await app.send_group_message(group, MessageChain([Plain("视频不存在或解析失败")]))
         else:
             await Interval.manual(int(video_info["data"]["aid"]))
         try:
@@ -57,9 +55,7 @@ async def bilibili_main(
             )
         except Exception:
             logger.exception("视频解析 API 调用出错")
-            await app.send_group_message(
-                group, MessageChain("视频解析 API 调用出错"), quote=source
-            )
+            await app.send_group_message(group, MessageChain("视频解析 API 调用出错"), quote=source)
 
 
 async def video_info_get(id):

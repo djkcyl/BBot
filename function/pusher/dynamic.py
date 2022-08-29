@@ -5,23 +5,30 @@ from datetime import datetime
 from graia.saya import Channel
 from graia.ariadne.app import Ariadne
 from graia.ariadne.model import MemberPerm
+from bilireq.utils import ResponseCodeError
 from graia.ariadne.message.element import AtAll
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.connection.util import UploadMethod
 from graia.scheduler.saya.schema import SchedulerSchema
 from graia.scheduler.timers import every_custom_seconds
+from bilireq.grpc.dynamic import grpc_get_user_dynamics
 from graia.ariadne.exception import UnknownTarget, AccountMuted
+from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2 import (
+    FoldType,
+    DynamicItem,
+    DynamicType,
+    DynModuleType,
+)
 
 from core import BOT_Status
 from core.bot_config import BotConfig
 from library import delete_group, delete_uid, set_name
 from library.dynamic_shot import get_dynamic_screenshot
-from library.bilibili_request import get_b23_url, dynamic_like
-from library.grpc import grpc_dyn_get, grpc_dynall_get, grpc_details_get
-from library.grpc.bilibili.app.dynamic.v2.dynamic_pb2 import (
-    FoldType,
-    DynamicType,
-    DynModuleType,
+from library.bilibili_request import (
+    get_b23_url,
+    dynamic_like,
+    grpc_get_dynamic_details,
+    grpc_get_followed_dynamics_noads,
 )
 from data import (
     uid_exists,
@@ -58,7 +65,7 @@ async def main(app: Ariadne):
     logger.debug("[Dynamic] Start to get dynamic list")
     if BotConfig.Bilibili.use_login:
         try:
-            dynall = await asyncio.wait_for(grpc_dynall_get(), timeout=10)
+            dynall = await asyncio.wait_for(grpc_get_followed_dynamics_noads(), timeout=10)
         except asyncio.TimeoutError:
             logger.debug("[Dynamic] Get dynamic list failed")
             BOT_Status["dynamic_updateing"] = False
@@ -126,17 +133,13 @@ async def debug():
     logger.debug(BOT_Status)
 
 
-async def push(app: Ariadne, dyn):
+async def push(app: Ariadne, dyn: DynamicItem):
     """推送动态"""
     up_id = str(dyn.modules[0].module_author.author.mid)
     up_name = dyn.modules[0].module_author.author.name
     dynid = dyn.extend.dyn_id_str
     dyn_desc = " ".join(
-        [
-            x.module_desc.text
-            for x in dyn.modules
-            if x.module_type == DynModuleType.module_desc
-        ]
+        [x.module_desc.text for x in dyn.modules if x.module_type == DynModuleType.module_desc]
     )
 
     logger.debug(f"[Dynamic] Start to push dynamic {dynid}")
@@ -195,7 +198,8 @@ async def push(app: Ariadne, dyn):
             fold = dyn.modules[module_type_list.index(DynModuleType.module_fold)]
             if fold.module_fold.fold_type == FoldType.FoldTypeUnite:
                 fold_ids = fold.module_fold.fold_ids
-                for dynamic in await grpc_details_get(fold_ids):
+                details = await grpc_get_dynamic_details(fold_ids)
+                for dynamic in details.list:
                     try:
                         dyn_id = dyn.extend.dyn_id_str
                         if (
@@ -212,11 +216,7 @@ async def push(app: Ariadne, dyn):
             if BotConfig.Debug.enable and int(data.group) not in BotConfig.Debug.groups:
                 continue
             if data.dynamic:
-                nick = (
-                    f"*{up_nick} "
-                    if (up_nick := data.nick)
-                    else f"UP {up_name}（{up_id}）"
-                )
+                nick = f"*{up_nick} " if (up_nick := data.nick) else f"UP {up_name}（{up_id}）"
                 msg = [
                     f"{nick}{type_text}\n",
                     dyn_img,
@@ -253,11 +253,11 @@ async def push(app: Ariadne, dyn):
                     logger.error(f"[BiliBili推送] {dynid} | 推送失败，未知错误")
                     logger.exception(e)
         if BotConfig.Bilibili.use_login:
-            like = await dynamic_like(dynid)
-            if not like or like["code"] != 0:
-                logger.error(f"[BiliBili推送] {dynid} | 动态点赞失败：{like}")
-            else:
+            try:
+                await dynamic_like(dynid)
                 logger.info(f"[BiliBili推送] {dynid} | 动态点赞成功")
+            except ResponseCodeError as e:
+                logger.error(f"[BiliBili推送] {dynid} | 动态点赞失败：{e}")
         insert_dynamic_push(
             up_id,
             up_name,
@@ -273,7 +273,7 @@ async def push(app: Ariadne, dyn):
 
 async def check_uid(app: Ariadne, uid):
     try:
-        resp = await asyncio.wait_for(grpc_dyn_get(uid), timeout=10)
+        resp = await asyncio.wait_for(grpc_get_user_dynamics(int(uid)), timeout=10)
     except asyncio.TimeoutError:
         logger.error(f"[BiliBili推送] {uid} 获取动态失败！")
         return
@@ -287,7 +287,7 @@ async def check_uid(app: Ariadne, uid):
         resp.reverse()
         for dyn in resp:
             if dyn.modules[0].module_author.is_top:
-                return
+                continue
             try:
                 up_id = str(dyn.modules[0].module_author.author.mid)
                 up_name = dyn.modules[0].module_author.author.name

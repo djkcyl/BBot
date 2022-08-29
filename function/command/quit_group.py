@@ -21,9 +21,7 @@ inc = it(InterruptControl)
 
 
 class ConfirmWaiter(Waiter.create([GroupMessage], block_propagation=True)):
-    def __init__(
-        self, group: Union[Group, int], member: Union[Member, int], verify: str
-    ):
+    def __init__(self, group: Union[Group, int], member: Union[Member, int], verify: str):
         self.group = group if isinstance(group, int) else group.id
         self.member = member if isinstance(member, int) else member.id
         self.verify = verify
@@ -38,7 +36,9 @@ class ConfirmWaiter(Waiter.create([GroupMessage], block_propagation=True)):
             elif msg == "/quit cancel":
                 return False
             else:
-                await app.send_group_message(self.group, "请输入正确的验证码，或者发送 /quit cancel 来取消")
+                await app.send_group_message(
+                    self.group, MessageChain("请输入正确的验证码，或者发送 /quit cancel 来取消")
+                )
 
 
 @channel.use(
@@ -50,9 +50,7 @@ class ConfirmWaiter(Waiter.create([GroupMessage], block_propagation=True)):
 )
 async def main(app: Ariadne, group: Group, member: Member):
     verify_code = generate_verify_code()
-    await app.send_group_message(
-        group, MessageChain(f"正在请求退出本群，请在30秒内输入验证码 {verify_code}")
-    )
+    await app.send_group_message(group, MessageChain(f"正在请求退出本群，请在30秒内输入验证码 {verify_code}"))
     try:
         res = await inc.wait(
             ConfirmWaiter(group, member, verify_code),

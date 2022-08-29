@@ -1,11 +1,11 @@
-import json
 import sys
-from pathlib import Path
-from typing import Optional, Union
-
+import json
 import yaml
+
+from pathlib import Path
 from loguru import logger
-from pydantic import AnyHttpUrl, BaseSettings, validator, Field
+from typing import Optional
+from pydantic import AnyHttpUrl, BaseSettings, validator
 
 # 数据模型类
 
@@ -89,7 +89,7 @@ class _BotConfig(BaseSettings):
     log_level: str = "INFO"
     name: str = "BBot"
     master: int = 123
-    admins: Optional[Union[list[int], int]]
+    admins: Optional[list[int]]
     access_control: bool = True
 
     # 验证 admins 列表
@@ -122,22 +122,24 @@ def save_config():
 
 
 # 读取配置
-## 设定路径
+# 设定路径
 bot_config_file = Path("data").joinpath("bot_config.yaml")
 bot_config_file.parent.mkdir(parents=True, exist_ok=True)
-## 尝试读取配置项文件
+# 尝试读取配置项文件
 if bot_config_file.exists():
     bot_config: dict = yaml.load(bot_config_file.read_bytes(), Loader=yaml.FullLoader)
-    ## 兼容旧配置, 将配置文件中的小写的配置项转为大写
+    # 兼容旧配置, 将配置文件中的小写的配置项转为大写
     for old_config in ["mirai", "debug", "bilibili", "event"]:
         if old_config in bot_config:
-            logger.warning(
-                f"检测到旧版配置项, 转化为新版配置项: {old_config} => {old_config.capitalize()}"
-            )
+            logger.warning(f"检测到旧版配置项, 转化为新版配置项: {old_config} => {old_config.capitalize()}")
             bot_config[old_config.capitalize()] = bot_config[old_config]
             del bot_config[old_config]
-    ## 以配置项文件生成BotConfig，并保存
-    BotConfig = _BotConfig.parse_obj(bot_config)
+    # 以配置项文件生成BotConfig，并保存
+    try:
+        BotConfig = _BotConfig.parse_obj(bot_config)
+    except Exception as e:
+        logger.error(f"读取配置文件失败: \n{e}")
+        sys.exit(1)
     save_config()
 
 elif Path(sys.argv[0]).name != "_child.py":
