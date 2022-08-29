@@ -54,7 +54,7 @@ async def main(app: Ariadne):
         await app.send_friend_message(
             BotConfig.master,
             MessageChain(
-                "，当前为 Debug 模式，将仅接受\n",
+                "当前为 Debug 模式，将仅接受\n",
                 "\n".join(debug_msg),
                 f"\n以及 {master.nickname}（{master.id}） 的消息",
             ),
