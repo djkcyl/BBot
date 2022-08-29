@@ -28,6 +28,7 @@ name: BBot           # bot 的自称
 access_control: true # 是否开启白名单模式
 master:              # **需要** 填入 bot 主人的 qq 号
 admins:              # 可以填入 bot 管理员的 qq 号, list 和 int 均可
+max_subsubscribe: 4  # 非 vip 群聊最大可订阅数量
 ```
 
 >Warning
