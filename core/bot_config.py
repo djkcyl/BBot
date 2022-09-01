@@ -103,6 +103,8 @@ class _BotConfig(BaseSettings, extra=Extra.ignore):
             logger.warning("admins 为空或格式不为 list, 已重置为 list[master]")
             return [values["master"]]
         try:
+            if "master" not in values:
+                return admins
             if values["master"] in admins:
                 return admins
         except KeyError:
@@ -138,8 +140,22 @@ if bot_config_file.exists():
     # 以配置项文件生成BotConfig，并保存
     try:
         BotConfig = _BotConfig.parse_obj(bot_config)
+    # 常见的由Pydantic找出的错误
+    except ValueError as e:
+        err_info = []
+        pos_maxlen = 0
+        for err in json.loads(e.json()):
+            err_pos = ".".join(err["loc"])
+            err_msg = err["msg"]
+            pos_maxlen = max(pos_maxlen, len(err_pos))
+            err_info.append([err_pos, err_msg])
+        logger.critical("以下配置项填写错误: ")
+        for err in err_info:
+            logger.critical(f"{err[0].ljust(pos_maxlen)} => {err[1]}")
+        logger.critical("请检查配置文件(data/bot_group.yaml)中上述配置内容")
+        sys.exit(1)
     except Exception as e:
-        logger.error(f"读取配置文件失败: \n{e}")
+        logger.exception(e)
         sys.exit(1)
     save_config()
 
