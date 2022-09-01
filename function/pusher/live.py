@@ -36,7 +36,12 @@ async def main(app: Ariadne):
     for up in BOT_Status["liveing"].copy():
         if up not in sub_list:
             del BOT_Status["liveing"][up]
-    status_infos = await get_rooms_info_by_uids(sub_list)
+    try:
+        status_infos = await get_rooms_info_by_uids(sub_list)
+    except Exception as e:
+        logger.error(f"获取直播间状态失败: {e}")
+        BOT_Status["live_updateing"] = False
+        return
     if status_infos:
         for up, live_data in status_infos.items():
             up_id = up
