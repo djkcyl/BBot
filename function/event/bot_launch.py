@@ -9,6 +9,7 @@ from graia.saya.builtins.broadcast.schema import ListenerSchema
 
 from core.bot_config import BotConfig
 from library.browser import get_browser
+from library.bilibili_request import hc
 
 channel = Channel.current()
 
@@ -28,6 +29,10 @@ async def main(app: Ariadne):
         logger.error("[BiliBili推送] 浏览器启动失败")
         logger.error(e)
         sys.exit(1)
+
+    logger.info("[BiliBili推送] 正在获取首页 Cookie")
+    await hc.get("https://bilibili.com/", follow_redirects=True)
+    logger.debug(hc.cookies)
 
     logger.info("Graia 成功启动")
     groupList = await app.get_group_list()

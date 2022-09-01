@@ -133,6 +133,7 @@ async def debug():
 
 async def push(app: Ariadne, dyn: DynamicItem):
     """推送动态"""
+
     up_id = str(dyn.modules[0].module_author.author.mid)
     up_name = dyn.modules[0].module_author.author.name
     dynid = dyn.extend.dyn_id_str
@@ -145,6 +146,23 @@ async def push(app: Ariadne, dyn: DynamicItem):
         logger.info(
             f"[BiliBili推送] {dynid} | {up_name} 更新了动态，共有 {len(get_sub_by_uid(up_id))} 个群订阅了该 UP"
         )
+        # 判断折叠动态
+        module_type_list = [i.module_type for i in dyn.modules]
+        if DynModuleType.module_fold in module_type_list:
+            logger.debug(f"[Dynamic] {dynid} is folded")
+            fold = dyn.modules[module_type_list.index(DynModuleType.module_fold)]
+            if fold.module_fold.fold_type == FoldType.FoldTypeUnite:
+                fold_ids = fold.module_fold.fold_ids
+                logger.debug(f"[Dynamic] fold_ids: {fold_ids}")
+                details = await grpc_get_dynamic_details(fold_ids)
+                for dynamic in details.list:
+                    try:
+                        if is_dyn_pushed(dyn.extend.dyn_id_str):
+                            logger.debug(f"[Dynamic] {dynid} is pushed, skip")
+                            continue
+                    except ValueError:
+                        continue
+                    await push(app, dynamic)
 
         logger.debug(f"[Dynamic] Geting screenshot of {dynid}")
         shot_image = await get_dynamic_screenshot(dynid)
@@ -189,24 +207,6 @@ async def push(app: Ariadne, dyn: DynamicItem):
                 await get_b23_url(f"https://t.bilibili.com/{dynid}"),
             ),
         )
-
-        # 判断折叠动态
-        module_type_list = [i.module_type for i in dyn.modules]
-        if DynModuleType.module_fold in module_type_list:
-            logger.debug(f"[Dynamic] {dynid} is folded")
-            fold = dyn.modules[module_type_list.index(DynModuleType.module_fold)]
-            if fold.module_fold.fold_type == FoldType.FoldTypeUnite:
-                fold_ids = fold.module_fold.fold_ids
-                logger.debug(f"[Dynamic] {dynid} is folded, fold_ids: {fold_ids}")
-                details = await grpc_get_dynamic_details(fold_ids)
-                for dynamic in details.list:
-                    try:
-                        dyn_id = dyn.extend.dyn_id_str
-                        if int(dyn_id) <= BOT_Status["offset"] or is_dyn_pushed(dyn_id):
-                            continue
-                    except ValueError:
-                        continue
-                    await push(app, dynamic)
 
         for data in get_sub_by_uid(up_id):
             if BotConfig.Debug.enable and int(data.group) not in BotConfig.Debug.groups:

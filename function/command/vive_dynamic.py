@@ -15,6 +15,7 @@ from graia.ariadne.message.parser.twilight import (
 
 from library.uid_extract import uid_extract
 from core.control import Interval, Permission
+from library.bilibili_request import get_b23_url
 from library.dynamic_shot import get_dynamic_screenshot
 
 channel = Channel.current()
@@ -47,6 +48,12 @@ async def main(app: Ariadne, group: Group, message: MessageChain, anything: Rege
             dyn_id = res.list[0].extend.dyn_id_str
         shot_image = await get_dynamic_screenshot(dyn_id)
         return await app.send_group_message(
-            group, MessageChain(Image(data_bytes=shot_image)), quote=message
+            group,
+            MessageChain(
+                Image(data_bytes=shot_image),
+                "\n",
+                await get_b23_url(f"https://t.bilibili.com/{dyn_id}"),
+            ),
+            quote=message,
         )
     await app.send_group_message(group, MessageChain("该 UP 未发布任何动态"), quote=message)

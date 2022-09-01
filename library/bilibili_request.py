@@ -1,3 +1,5 @@
+import httpx
+
 from typing import Union
 from bilireq.utils import post
 from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2_grpc import DynamicStub
@@ -10,6 +12,8 @@ from bilireq.grpc.utils import grpc_request
 from bilireq.grpc.dynamic import grpc_get_followed_dynamics
 
 from core import Bili_Auth
+
+hc = httpx.AsyncClient()
 
 
 async def relation_modify(uid: Union[str, int], act: int):
@@ -66,6 +70,15 @@ async def get_b23_url(burl: str) -> str:
         "share_mode": 3,
     }
     return (await post(url, data=data))["content"]
+
+
+async def search_user(keyword: str):
+    """
+    搜索用户
+    """
+    url = "https://api.bilibili.com/x/web-interface/search/type"
+    data = {"keyword": keyword, "search_type": "bili_user"}
+    return (await hc.get(url, params=data)).json()["data"]
 
 
 async def grpc_get_followed_dynamics_noads():

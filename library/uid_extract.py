@@ -1,5 +1,4 @@
 import re
-import httpx
 
 from loguru import logger
 from typing import Union, Optional
@@ -7,6 +6,7 @@ from typing import Union, Optional
 from data import get_sub_by_group
 
 from .b23_extract import b23_extract
+from .bilibili_request import search_user
 
 
 async def uid_extract(text: str, groupid: Optional[Union[int, str]] = None):
@@ -48,16 +48,10 @@ async def uid_extract(text: str, groupid: Optional[Union[int, str]] = None):
         if text_u != text:
             logger.debug(f"[UID Extract] Text is a Quoted Digit: {text_u}")
         logger.debug(f"[UID Extract] Searching UID in BiLiBili: {text_u}")
-        async with httpx.AsyncClient() as client:
-            resp = await client.get(
-                "https://api.bilibili.com/x/web-interface/search/type",
-                params={"keyword": text_u, "search_type": "bili_user"},
-            )
-        resp = resp.json()
+        resp = await search_user(text_u)
         logger.debug(f"[UID Extract] Search result: {resp}")
-        data = resp["data"]
-        if data["numResults"]:
-            for result in data["result"]:
+        if resp["numResults"]:
+            for result in resp["result"]:
                 if result["uname"] == text_u:
                     logger.debug(f"[UID Extract] Found User: {result}")
                     return str(result["mid"])
