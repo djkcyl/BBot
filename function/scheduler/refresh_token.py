@@ -22,28 +22,33 @@ login_cache_file = Path("data/login_cache.json")
 @channel.use(SchedulerSchema(crontabify("0 0 1 * *")))
 async def main(app: Ariadne):
     logger.info("[BiliBili推送] 开始刷新 token")
-    BOT_Status["init"] = False
+    if BotConfig.Bilibili.use_login:
+        BOT_Status["init"] = False
 
-    while BOT_Status["live_updateing"] or BOT_Status["dynamic_updateing"]:
-        await asyncio.sleep(0.1)
+        while BOT_Status["live_updateing"] or BOT_Status["dynamic_updateing"]:
+            await asyncio.sleep(0.1)
 
-    try:
-        resp = await refresh_token()
-        Bili_Auth.update(resp)
-        logger.debug(await Bili_Auth.get_info())
-        login_cache_file.write_text(json.dumps(dict(Bili_Auth), indent=2, ensure_ascii=False))
-        logger.success(f"[BiliBili推送] 刷新 token 成功，token：{resp['token_info']}")
-        await app.send_friend_message(
-            BotConfig.master,
-            MessageChain(
-                f"[BiliBili推送] 刷新 token 成功\n{json.dumps(resp['token_info'], indent=2)}"
-            ),
-        )
-    except ResponseCodeError as e:
-        logger.error(f"[BiliBili推送] 刷新 token 失败，{e}")
-        await app.send_friend_message(
-            BotConfig.master,
-            MessageChain(f"[BiliBili推送] 刷新 token 失败，Bot 已关机，{e}"),
-        )
-        app.stop()
-    BOT_Status["init"] = True
+        try:
+            resp = await refresh_token(auth=Bili_Auth)
+            Bili_Auth.update(resp)
+            logger.debug(await Bili_Auth.get_info())
+            login_cache_file.write_text(
+                json.dumps(dict(Bili_Auth), indent=2, ensure_ascii=False)
+            )
+            logger.success(f"[BiliBili推送] 刷新 token 成功，token：{resp['token_info']}")
+            await app.send_friend_message(
+                BotConfig.master,
+                MessageChain(
+                    f"[BiliBili推送] 刷新 token 成功\n{json.dumps(resp['token_info'], indent=2)}"
+                ),
+            )
+        except ResponseCodeError as e:
+            logger.error(f"[BiliBili推送] 刷新 token 失败，{e}")
+            await app.send_friend_message(
+                BotConfig.master,
+                MessageChain(f"[BiliBili推送] 刷新 token 失败，Bot 已关机，{e}"),
+            )
+            app.stop()
+        BOT_Status["init"] = True
+    else:
+        logger.info("[BiliBili推送] 未启用登录，跳过 token 刷新")
