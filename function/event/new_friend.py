@@ -1,6 +1,8 @@
+from loguru import logger
 from typing import Optional
 from graia.saya import Channel
 from graia.ariadne.app import Ariadne
+from graia.ariadne.exception import UnknownTarget
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.event.mirai import NewFriendRequestEvent
 from graia.saya.builtins.broadcast.schema import ListenerSchema
@@ -18,17 +20,20 @@ async def main(app: Ariadne, event: NewFriendRequestEvent):
     source_group: Optional[int] = event.source_group
     groupname = await app.get_group(source_group) if source_group else None
     groupname = groupname.name if groupname else "未知"
-    for qq in BotConfig.admins:
-        await app.send_friend_message(
-            qq,
-            MessageChain(
-                "收到添加好友事件",
-                f"\nQQ：{event.supplicant}",
-                f"\n昵称：{event.nickname}",
-                f"\n来自群：{groupname}({source_group})" if source_group else "\n来自好友搜索",
-                "\n状态：已通过申请\n",
-                event.message or "无附加信息",
-            ),
-        )
+    for admin in BotConfig.admins:
+        try:
+            await app.send_friend_message(
+                admin,
+                MessageChain(
+                    "收到添加好友事件",
+                    f"\nQQ：{event.supplicant}",
+                    f"\n昵称：{event.nickname}",
+                    f"\n来自群：{groupname}({source_group})" if source_group else "\n来自好友搜索",
+                    "\n状态：已通过申请\n",
+                    event.message or "无附加信息",
+                ),
+            )
+        except UnknownTarget:
+            logger.warning(f"由于未添加 {admin} 为好友，无法发送通知")
 
     await event.accept()

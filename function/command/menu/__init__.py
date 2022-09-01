@@ -20,7 +20,7 @@ channel = Channel.current()
         inline_dispatchers=[
             Twilight(
                 [
-                    RegexMatch(r"([/.。?？!！])?(帮助|菜单|help|menu)([/.。?？!！])?"),
+                    RegexMatch(r"([/.。?？!！])?(帮助|菜单|功能|help|menu)([/.。?？!！])?"),
                 ]
             )
         ],
