@@ -226,7 +226,7 @@ async def init(app: Ariadne):
         sub_num = len(subid_list)
         if sub_num == 0:
             await asyncio.sleep(1)
-            logger.info("[BiliBili推送] 未订阅任何 UP ，初始化结束")
+            logger.success("[BiliBili推送] 未订阅任何 UP ，初始化结束")
             BOT_Status["init"] = True
             return
         await asyncio.sleep(1)
@@ -235,7 +235,7 @@ async def init(app: Ariadne):
             BOT_Status["offset"] = int(resp[-1].extend.dyn_id_str)
             logger.info(f"[BiliBili推送] 动态初始化完成，offset：{BOT_Status['offset']}")
 
-            logger.info(f"[BiliBili推送] 将对 {sub_num} 个 UP 进行监控")
+            logger.success(f"[BiliBili推送] 将对 {sub_num} 个 UP 进行监控，初始化完成")
             await asyncio.sleep(1)
             await app.send_friend_message(
                 BotConfig.master,
@@ -250,7 +250,7 @@ async def init(app: Ariadne):
         BOT_Status["offset"] = {}
         if sub_sum == 0:
             await asyncio.sleep(1)
-            logger.info("[BiliBili推送] 未订阅任何 UP ，初始化结束")
+            logger.success("[BiliBili推送] 未订阅任何 UP ，初始化结束")
             BOT_Status["init"] = True
             return
         # 把所有账号分组，每组发送一次请求
@@ -262,7 +262,7 @@ async def init(app: Ariadne):
         for group in group_list:
             logger.debug(f"Gathering {len(group)} uid")
             await asyncio.gather(*[init_dyn_id(uid) for uid in group])
-        logger.info(f"[BiliBili推送] 将对 {sub_sum} 个 UP 进行监控，动态初始化完成")
+        logger.success(f"[BiliBili推送] 将对 {sub_sum} 个 UP 进行监控，初始化完成")
         await app.send_friend_message(
             BotConfig.master,
             MessageChain(f"[BiliBili推送] 将对 {sub_sum} 个 UP 进行监控，初始化完成"),
