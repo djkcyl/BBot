@@ -5,18 +5,18 @@ import yaml
 from pathlib import Path
 from loguru import logger
 from typing import Optional
-from pydantic import AnyHttpUrl, BaseSettings, validator
+from pydantic import AnyHttpUrl, BaseSettings, Extra, validator
 
 # 数据模型类
 
 
-class _Mirai(BaseSettings):
+class _Mirai(BaseSettings, extra=Extra.ignore):
     account: int
     verify_key: str
     mirai_host: AnyHttpUrl
 
 
-class _Debug(BaseSettings):
+class _Debug(BaseSettings, extra=Extra.ignore):
     groups: Optional[list[int]]
     enable: bool = False
 
@@ -45,7 +45,7 @@ class _Debug(BaseSettings):
             raise ValueError("已启用 debug 但未填入合法的群号") from e
 
 
-class _Bilibili(BaseSettings):
+class _Bilibili(BaseSettings, extra=Extra.ignore):
     username: Optional[int]
     password: Optional[str]
     mobile_style: bool = True
@@ -76,12 +76,12 @@ class _Bilibili(BaseSettings):
             return concurrency
 
 
-class _Event(BaseSettings):
+class _Event(BaseSettings, extra=Extra.ignore):
     mute: bool = True
     permchange: bool = True
 
 
-class _BotConfig(BaseSettings):
+class _BotConfig(BaseSettings, extra=Extra.ignore):
     Mirai: _Mirai
     Debug: _Debug
     Bilibili: _Bilibili
@@ -90,6 +90,7 @@ class _BotConfig(BaseSettings):
     name: str = "BBot"
     master: int = 123
     admins: Optional[list[int]]
+    max_subsubscribe: int = 4
     access_control: bool = True
 
     # 验证 admins 列表
