@@ -8,7 +8,7 @@ from bilireq.grpc.dynamic import grpc_get_user_dynamics
 from core import BOT_Status
 from core.bot_config import BotConfig
 from core.group_config import GroupPermission
-from library.bilibili_request import relation_modify
+from library.bilibili_request import relation_modify, grpc_get_followed_dynamics_noads
 from data import (
     add_sub,
     uid_exists,
@@ -32,9 +32,6 @@ async def subscribe_uid(uid: Union[str, int], groupid: Union[str, int]):
     while BOT_Status["dynamic_updateing"]:
         await asyncio.sleep(0.1)
 
-    # BOT_Status["skip"] += 2
-    # BOT_Status["skip_uid"].append(uid)
-
     if not uid:
         BOT_Status["init"] = True
         return "Bot 状态异常，订阅失败，请稍后再试"
@@ -43,7 +40,13 @@ async def subscribe_uid(uid: Union[str, int], groupid: Union[str, int]):
         BOT_Status["init"] = True
         return f"该 UP（{uid}）状态异常，订阅失败"
     try:
-        up_name = r.list[0].modules[0].module_author.author.name
+        if len(r.list) == 1:
+            dyn = r.list[0]
+        elif r.list[0].modules[0].module_author.is_top:
+            dyn = r.list[1]
+        else:
+            dyn = r.list[0]
+        up_name = dyn.modules[0].module_author.author.name
     except IndexError:
         BOT_Status["init"] = True
         return f"该 UP（{uid}）未发送任何动态，订阅失败"
@@ -55,12 +58,26 @@ async def subscribe_uid(uid: Union[str, int], groupid: Union[str, int]):
         return f"每个群聊最多仅可订阅 {BotConfig.max_subsubscribe} 个 UP"
     need_sub = not uid_exists(uid)
     add_sub(uid, up_name, groupid)
+
     if need_sub and BotConfig.Bilibili.use_login:
         resp = await relation_modify(uid, 1)
         if not resp or resp["code"] != 0:
             await unsubscribe_uid(uid, groupid)
             BOT_Status["init"] = True
             return f"UP（{uid}）订阅失败"
+        resp = await grpc_get_followed_dynamics_noads()
+
+        if resp:
+            BOT_Status["offset"] = int(resp[0].extend.dyn_id_str)
+        else:
+            await unsubscribe_uid(uid, groupid)
+            BOT_Status["init"] = True
+            return f"UP（{uid}）订阅失败"
+    else:
+        BOT_Status["offset"][uid] = int(dyn.extend.dyn_id_str)
+
+    if dyn.modules[0].module_author.author.live.live_state == 1:
+        BOT_Status["liveing"][uid] = None
     BOT_Status["init"] = True
     return f"成功在本群订阅 UP {up_name}（{uid}）"
 
@@ -73,9 +90,6 @@ async def unsubscribe_uid(uid, groupid):
     while BOT_Status["dynamic_updateing"]:
         await asyncio.sleep(0.1)
     BOT_Status["init"] = False
-
-    # BOT_Status["skip"] += 2
-    # BOT_Status["skip_uid"].append(uid)
 
     if not uid_in_group_exists(uid, groupid):
         BOT_Status["init"] = True
