@@ -11,15 +11,15 @@ from graia.ariadne.message.chain import MessageChain
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.element import Image, Plain, Voice, FlashImage, Source
 
-from core.control import Interval
 from library.b23_extract import b23_extract
+from core.control import Interval, Permission
 from library.bilibili_request import get_b23_url
 from library.draw_bili_image import binfo_image_create
 
 channel = Channel.current()
 
 
-@channel.use(ListenerSchema(listening_events=[GroupMessage]))
+@channel.use(ListenerSchema(listening_events=[GroupMessage], decorators=[Permission.require()]))
 async def bilibili_main(
     app: Ariadne, group: Group, member: Member, message: MessageChain, source: Source
 ):

@@ -83,11 +83,7 @@ async def main(app: Ariadne):
                     dynid = int(dyn.extend.dyn_id_str)
                     logger.debug(f"[Dynamic] Check dynamic {dynid}, {up_name}({up_id})")
                     try:
-                        if (
-                            dynid <= BOT_Status.get("offset", dynid)
-                            # or up_id in BOT_Status["skip_uid"]
-                            or is_dyn_pushed(dynid)
-                        ):
+                        if dynid <= BOT_Status.get("offset", dynid) or is_dyn_pushed(dynid):
                             continue
                     except ValueError:
                         continue
@@ -95,11 +91,6 @@ async def main(app: Ariadne):
                         continue
                 except ScreenshotError:
                     return
-
-            # if BOT_Status["skip"]:
-            #     BOT_Status["skip"] -= 1
-            #     if not BOT_Status["skip"]:
-            #         BOT_Status["skip_uid"] = []
 
             # 将当前检测到的第一条动态 id 设置为最新的动态 id
             if BOT_Status["offset"] > int(dynall[-1].extend.dyn_id_str):
@@ -202,11 +193,7 @@ async def push(app: Ariadne, dyn: DynamicItem):
                 for dynamic in details.list:
                     try:
                         dyn_id = dyn.extend.dyn_id_str
-                        if (
-                            int(dyn_id) <= BOT_Status["offset"]
-                            # or up_id in BOT_Status["skip_uid"]
-                            or is_dyn_pushed(dyn_id)
-                        ):
+                        if int(dyn_id) <= BOT_Status["offset"] or is_dyn_pushed(dyn_id):
                             continue
                     except ValueError:
                         continue
@@ -231,8 +218,9 @@ async def push(app: Ariadne, dyn: DynamicItem):
                         MemberPerm.Owner,
                     ]:
                         msg = [AtAll(), " "] + msg
-                    # else:
-                    #     msg = ["@全体成员 "] + msg
+                    else:
+                        msg = ["@全体成员 "] + msg
+                        msg.append(f"\n\n注：{BotConfig.name} 没有权限@全体成员")
                 try:
                     print(f"[Dynamic] Send dynamic {dynid} to {data.group}")
                     await app.send_group_message(
