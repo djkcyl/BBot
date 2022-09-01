@@ -8,7 +8,7 @@ from bilireq.grpc.dynamic import grpc_get_user_dynamics
 from core import BOT_Status
 from core.bot_config import BotConfig
 from core.group_config import GroupPermission
-from library.bilibili_request import relation_modify, grpc_get_followed_dynamics_noads
+from library.bilibili_request import relation_modify
 from data import (
     add_sub,
     uid_exists,
