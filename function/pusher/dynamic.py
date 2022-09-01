@@ -231,7 +231,7 @@ async def push(app: Ariadne, dyn: DynamicItem):
                         msg = ["@全体成员 "] + msg
                         msg.append(f"\n\n注：{BotConfig.name} 没有权限@全体成员")
                 try:
-                    print(f"[Dynamic] Send dynamic {dynid} to {data.group}")
+                    logger.debug(f"[Dynamic] Send dynamic {dynid} to {data.group}")
                     await app.send_group_message(
                         int(data.group),
                         MessageChain(msg),

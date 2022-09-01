@@ -24,6 +24,7 @@ app_config = config(
 )
 
 app = Ariadne(app_config)
+app.config(install_log=True)
 app.create(GraiaScheduler)
 saya = it(Saya)
 

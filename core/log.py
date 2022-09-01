@@ -1,7 +1,9 @@
 import sys
-from pathlib import Path
+import richuru
 
+from pathlib import Path
 from loguru import logger
+
 from core.bot_config import BotConfig
 
 # read log_level and verify
@@ -46,6 +48,8 @@ logger.add(
 
 # add stdout logger
 logger.add(sys.stdout, backtrace=True, diagnose=True, colorize=True, level=log_level)
+
+richuru.install()
 
 logger.success(f"成功重载 logger，当前日志等级为 {log_level}")
 
