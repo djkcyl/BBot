@@ -108,9 +108,6 @@ async def delete_uid(uid):
         resp = await relation_modify(uid, 2)
         if resp and resp["code"] == 0:
             logger.info(f"取关 {uid} api 操作成功")
-            resp = await grpc_get_followed_dynamics_noads()
-            if resp:
-                BOT_Status["offset"] = int(resp[0].extend.dyn_id_str)
         else:
             logger.error(f"取关 {uid} 失败：{resp}")
             return False
