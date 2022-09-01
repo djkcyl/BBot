@@ -75,6 +75,9 @@ async def subscribe_uid(uid: Union[str, int], groupid: Union[str, int]):
             return f"UP（{uid}）订阅失败"
     else:
         BOT_Status["offset"][uid] = int(dyn.extend.dyn_id_str)
+
+    if dyn.modules[0].module_author.author.live.live_state == 1:
+        BOT_Status["liveing"][uid] = None
     BOT_Status["init"] = True
     return f"成功在本群订阅 UP {up_name}（{uid}）"
 
