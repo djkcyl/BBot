@@ -75,8 +75,15 @@ async def main(app: Ariadne):
         logger.debug("[Dynamic] Start to check dynamic")
         if dynall:
             logger.debug(f"[Dynamic] Get {len(dynall)} dynamics")
+            new_dyn = [
+                x
+                for x in dynall
+                if int(x.extend.dyn_id_str) > BOT_Status.get("offset", int(x.extend.dyn_id_str))
+                and not is_dyn_pushed(int(x.extend.dyn_id_str))
+            ]
+            logger.debug(f"[Dynamic] {len(new_dyn)} new dynamics")
             # 轮询动态列表
-            for dyn in dynall:
+            for dyn in new_dyn:
                 try:
                     up_id = str(dyn.modules[0].module_author.author.mid)
                     up_name = dyn.modules[0].module_author.author.name
@@ -186,9 +193,11 @@ async def push(app: Ariadne, dyn: DynamicItem):
         # 判断折叠动态
         module_type_list = [i.module_type for i in dyn.modules]
         if DynModuleType.module_fold in module_type_list:
+            logger.debug(f"[Dynamic] {dynid} is folded")
             fold = dyn.modules[module_type_list.index(DynModuleType.module_fold)]
             if fold.module_fold.fold_type == FoldType.FoldTypeUnite:
                 fold_ids = fold.module_fold.fold_ids
+                logger.debug(f"[Dynamic] {dynid} is folded, fold_ids: {fold_ids}")
                 details = await grpc_get_dynamic_details(fold_ids)
                 for dynamic in details.list:
                     try:
