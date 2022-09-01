@@ -1,4 +1,3 @@
-import sys
 import asyncio
 import contextlib
 
@@ -10,20 +9,19 @@ from graia.ariadne.entry import config, HttpClientConfig, WebsocketClientConfig
 
 from core.bot_config import BotConfig
 from core.log import logger
+from core.announcement import base_telemetry
 
 logger.info("BBot is starting...")
 
-try:
-    host = BotConfig.Mirai.mirai_host
-    app_config = config(
-        BotConfig.Mirai.account,
-        BotConfig.Mirai.verify_key,
-        HttpClientConfig(host),
-        WebsocketClientConfig(host),
-    )
-except (AssertionError, TypeError):
-    logger.critical("请检查配置文件（data/bot_group.yaml）是否有误")
-    sys.exit(1)
+base_telemetry()
+
+host = BotConfig.Mirai.mirai_host
+app_config = config(
+    BotConfig.Mirai.account,
+    BotConfig.Mirai.verify_key,
+    HttpClientConfig(host),
+    WebsocketClientConfig(host),
+)
 
 app = Ariadne(app_config)
 app.create(GraiaScheduler)
