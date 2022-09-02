@@ -120,7 +120,8 @@ class NoAliasDumper(yaml.SafeDumper):
 
 def save_config():
     bot_config_file.write_text(
-        yaml.dump(json.loads(BotConfig.json()), Dumper=NoAliasDumper, sort_keys=False)
+        yaml.dump(json.loads(BotConfig.json()), Dumper=NoAliasDumper, sort_keys=False),
+        encoding="utf-8",
     )
 
 
@@ -165,6 +166,7 @@ elif Path(sys.argv[0]).name != "_child.py":
         Path(__file__)
         .parent.parent.joinpath("data")
         .joinpath("bot_config.exp.yaml")
-        .read_text()
+        .read_text(encoding="utf-8"),
+        encoding="utf-8",
     )
     sys.exit(1)
