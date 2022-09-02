@@ -1,4 +1,3 @@
-import sys
 import richuru
 
 from pathlib import Path
@@ -16,9 +15,7 @@ if log_level not in ["TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "C
 LOGPATH = Path("logs")
 LOGPATH.mkdir(exist_ok=True)
 
-# remove all default logger
-logger.warning("开始重载 logger")
-logger.remove()
+richuru.install(level=log_level)
 
 # add latest logger
 logger.add(
@@ -45,11 +42,6 @@ logger.add(
     colorize=False,
     level="DEBUG",
 )
-
-# add stdout logger
-logger.add(sys.stdout, backtrace=True, diagnose=True, colorize=True, level=log_level)
-
-richuru.install()
 
 logger.success(f"成功重载 logger，当前日志等级为 {log_level}")
 
