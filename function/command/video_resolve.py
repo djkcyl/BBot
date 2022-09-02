@@ -11,15 +11,15 @@ from graia.ariadne.message.chain import MessageChain
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.element import Image, Plain, Voice, FlashImage, Source
 
-from core.control import Interval
 from library.b23_extract import b23_extract
+from core.control import Interval, Permission
 from library.bilibili_request import get_b23_url
 from library.draw_bili_image import binfo_image_create
 
 channel = Channel.current()
 
 
-@channel.use(ListenerSchema(listening_events=[GroupMessage]))
+@channel.use(ListenerSchema(listening_events=[GroupMessage], decorators=[Permission.require()]))
 async def bilibili_main(
     app: Ariadne, group: Group, member: Member, message: MessageChain, source: Source
 ):
@@ -37,9 +37,7 @@ async def bilibili_main(
     if video_info:
         if video_info["code"] != 0:
             await Interval.manual(member.id)
-            return await app.send_group_message(
-                group, MessageChain([Plain("视频不存在或解析失败")])
-            )
+            return await app.send_group_message(group, MessageChain([Plain("视频不存在或解析失败")]))
         else:
             await Interval.manual(int(video_info["data"]["aid"]))
         try:
@@ -57,9 +55,7 @@ async def bilibili_main(
             )
         except Exception:
             logger.exception("视频解析 API 调用出错")
-            await app.send_group_message(
-                group, MessageChain("视频解析 API 调用出错"), quote=source
-            )
+            await app.send_group_message(group, MessageChain("视频解析 API 调用出错"), quote=source)
 
 
 async def video_info_get(id):

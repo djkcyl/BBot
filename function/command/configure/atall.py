@@ -40,11 +40,7 @@ async def main(app: Ariadne, group: Group, act: RegexResult, uid: RegexResult):
             acts = act.result.display
             if acts == "开启":
                 if group.account_perm in [MemberPerm.Administrator, MemberPerm.Owner]:
-                    msg = (
-                        f"{uid} @全体开启成功"
-                        if set_atall(uid, group.id, True)
-                        else "该群未关注此 UP"
-                    )
+                    msg = f"{uid} @全体开启成功" if set_atall(uid, group.id, True) else "该群未关注此 UP"
                 else:
                     msg = "Bot 权限不足，无法开启@全体，请赋予 Bot 管理员权限或更高"
             elif acts == "关闭":

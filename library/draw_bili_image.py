@@ -62,9 +62,7 @@ def binfo_image_create(video_info: dict, b23_url: str):
     bg_y += title_bg_y
 
     # 简介
-    dynamic = (
-        "该视频没有简介" if video_info["data"]["desc"] == "" else video_info["data"]["desc"]
-    )
+    dynamic = "该视频没有简介" if video_info["data"]["desc"] == "" else video_info["data"]["desc"]
     dynamic_font = ImageFont.truetype(font_semibold, 18)
     dynamic_cut_str = "\n".join(get_cut_str(dynamic, 58))
     _, dynamic_text_y = dynamic_font.getsize_multiline(dynamic_cut_str)
@@ -128,12 +126,8 @@ def binfo_image_create(video_info: dict, b23_url: str):
             )
     else:
         up_mid = video_info["data"]["owner"]["mid"]
-        up_data = client.get(
-            f"https://api.bilibili.com/x/space/acc/info?mid={up_mid}"
-        ).json()
-        up_stat = client.get(
-            f"https://api.bilibili.com/x/relation/stat?vmid={up_mid}"
-        ).json()
+        up_data = client.get(f"https://api.bilibili.com/x/space/acc/info?mid={up_mid}").json()
+        up_stat = client.get(f"https://api.bilibili.com/x/relation/stat?vmid={up_mid}").json()
         up_list = [
             {
                 "name": up_data["data"]["name"],
@@ -192,9 +186,7 @@ def binfo_image_create(video_info: dict, b23_url: str):
         draw.text((160, 25 + (i * 120)), up["name"], up["color"], name_font)
         name_size_x, _ = name_font.getsize(up["name"])
         # 等级
-        draw.text(
-            (160 + name_size_x + 10, 16 + (i * 120)), up_level, level_color, icon_font
-        )
+        draw.text((160 + name_size_x + 10, 16 + (i * 120)), up_level, level_color, icon_font)
         # 身份
         up_title_size_x, up_title_size_y = up_title_font.getsize(up["up_title"])
         draw.rectangle(
@@ -240,9 +232,7 @@ def binfo_image_create(video_info: dict, b23_url: str):
     video.paste(dynamic_bg, (20, 390 + title_bg_y + 20))
     video.paste(info_bg, (20, 390 + title_bg_y + 20 + dynamic_bg_y + 20))
     video.paste(up_bg, (20, 390 + title_bg_y + 20 + dynamic_bg_y + 10 + info_bg_y))
-    video.paste(
-        baner_bg, (0, 390 + title_bg_y + 20 + dynamic_bg_y + 10 + info_bg_y + up_bg_y)
-    )
+    video.paste(baner_bg, (0, 390 + title_bg_y + 20 + dynamic_bg_y + 10 + info_bg_y + up_bg_y))
 
     image = BytesIO()
     video.save(image, "JPEG")

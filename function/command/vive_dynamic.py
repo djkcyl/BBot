@@ -4,6 +4,7 @@ from graia.ariadne.model import Group
 from graia.ariadne.message.element import Image
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.event.message import GroupMessage
+from bilireq.grpc.dynamic import grpc_get_user_dynamics
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import (
     Twilight,
@@ -12,9 +13,9 @@ from graia.ariadne.message.parser.twilight import (
     WildcardMatch,
 )
 
-from library.grpc import grpc_dyn_get
 from library.uid_extract import uid_extract
 from core.control import Interval, Permission
+from library.bilibili_request import get_b23_url
 from library.dynamic_shot import get_dynamic_screenshot
 
 channel = Channel.current()
@@ -36,7 +37,7 @@ async def main(app: Ariadne, group: Group, message: MessageChain, anything: Rege
             quote=message,
         )
 
-    res = await grpc_dyn_get(uid)
+    res = await grpc_get_user_dynamics(int(uid))
     if res.list:
         if len(res.list) > 1:
             if res.list[0].modules[0].module_author.is_top:
@@ -47,6 +48,12 @@ async def main(app: Ariadne, group: Group, message: MessageChain, anything: Rege
             dyn_id = res.list[0].extend.dyn_id_str
         shot_image = await get_dynamic_screenshot(dyn_id)
         return await app.send_group_message(
-            group, MessageChain(Image(data_bytes=shot_image)), quote=message
+            group,
+            MessageChain(
+                Image(data_bytes=shot_image),
+                "\n",
+                await get_b23_url(f"https://t.bilibili.com/{dyn_id}"),
+            ),
+            quote=message,
         )
     await app.send_group_message(group, MessageChain("该 UP 未发布任何动态"), quote=message)

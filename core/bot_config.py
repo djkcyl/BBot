@@ -1,22 +1,22 @@
-import json
 import sys
-from pathlib import Path
-from typing import Optional, Union
-
+import json
 import yaml
+
+from pathlib import Path
 from loguru import logger
-from pydantic import AnyHttpUrl, BaseSettings, validator, Field
+from typing import Optional
+from pydantic import AnyHttpUrl, BaseSettings, Extra, validator
 
 # 数据模型类
 
 
-class _Mirai(BaseSettings):
+class _Mirai(BaseSettings, extra=Extra.ignore):
     account: int
     verify_key: str
     mirai_host: AnyHttpUrl
 
 
-class _Debug(BaseSettings):
+class _Debug(BaseSettings, extra=Extra.ignore):
     groups: Optional[list[int]]
     enable: bool = False
 
@@ -45,7 +45,7 @@ class _Debug(BaseSettings):
             raise ValueError("已启用 debug 但未填入合法的群号") from e
 
 
-class _Bilibili(BaseSettings):
+class _Bilibili(BaseSettings, extra=Extra.ignore):
     username: Optional[int]
     password: Optional[str]
     mobile_style: bool = True
@@ -76,12 +76,12 @@ class _Bilibili(BaseSettings):
             return concurrency
 
 
-class _Event(BaseSettings):
+class _Event(BaseSettings, extra=Extra.ignore):
     mute: bool = True
     permchange: bool = True
 
 
-class _BotConfig(BaseSettings):
+class _BotConfig(BaseSettings, extra=Extra.ignore):
     Mirai: _Mirai
     Debug: _Debug
     Bilibili: _Bilibili
@@ -89,7 +89,8 @@ class _BotConfig(BaseSettings):
     log_level: str = "INFO"
     name: str = "BBot"
     master: int = 123
-    admins: Optional[Union[list[int], int]]
+    admins: Optional[list[int]]
+    max_subsubscribe: int = 4
     access_control: bool = True
 
     # 验证 admins 列表
@@ -102,6 +103,8 @@ class _BotConfig(BaseSettings):
             logger.warning("admins 为空或格式不为 list, 已重置为 list[master]")
             return [values["master"]]
         try:
+            if "master" not in values:
+                return admins
             if values["master"] in admins:
                 return admins
         except KeyError:
@@ -122,22 +125,38 @@ def save_config():
 
 
 # 读取配置
-## 设定路径
+# 设定路径
 bot_config_file = Path("data").joinpath("bot_config.yaml")
 bot_config_file.parent.mkdir(parents=True, exist_ok=True)
-## 尝试读取配置项文件
+# 尝试读取配置项文件
 if bot_config_file.exists():
     bot_config: dict = yaml.load(bot_config_file.read_bytes(), Loader=yaml.FullLoader)
-    ## 兼容旧配置, 将配置文件中的小写的配置项转为大写
+    # 兼容旧配置, 将配置文件中的小写的配置项转为大写
     for old_config in ["mirai", "debug", "bilibili", "event"]:
         if old_config in bot_config:
-            logger.warning(
-                f"检测到旧版配置项, 转化为新版配置项: {old_config} => {old_config.capitalize()}"
-            )
+            logger.warning(f"检测到旧版配置项, 转化为新版配置项: {old_config} => {old_config.capitalize()}")
             bot_config[old_config.capitalize()] = bot_config[old_config]
             del bot_config[old_config]
-    ## 以配置项文件生成BotConfig，并保存
-    BotConfig = _BotConfig.parse_obj(bot_config)
+    # 以配置项文件生成BotConfig，并保存
+    try:
+        BotConfig = _BotConfig.parse_obj(bot_config)
+    # 常见的由Pydantic找出的错误
+    except ValueError as e:
+        err_info = []
+        pos_maxlen = 0
+        for err in json.loads(e.json()):
+            err_pos = ".".join(err["loc"])
+            err_msg = err["msg"]
+            pos_maxlen = max(pos_maxlen, len(err_pos))
+            err_info.append([err_pos, err_msg])
+        logger.critical("以下配置项填写错误: ")
+        for err in err_info:
+            logger.critical(f"{err[0].ljust(pos_maxlen)} => {err[1]}")
+        logger.critical("请检查配置文件(data/bot_group.yaml)中上述配置内容")
+        sys.exit(1)
+    except Exception as e:
+        logger.exception(e)
+        sys.exit(1)
     save_config()
 
 elif Path(sys.argv[0]).name != "_child.py":

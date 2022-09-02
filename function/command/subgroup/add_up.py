@@ -39,10 +39,8 @@ ADD_ERROR_MSG = """增加失败, 请正确输入!
             Twilight(
                 [
                     RegexMatch(r"(添加|增加)(主播|[uU][pP])到订阅组"),
-                    "group_name"
-                    @ ArgumentMatch("--name", optional=True, nargs="*", type=str),
-                    "sublist"
-                    @ ArgumentMatch("--uids", optional=True, nargs="*", type=int),
+                    "group_name" @ ArgumentMatch("--name", optional=True, nargs="*", type=str),
+                    "sublist" @ ArgumentMatch("--uids", optional=True, nargs="*", type=int),
                 ],
             )
         ],
@@ -64,9 +62,7 @@ async def main(app: Ariadne, friend: Friend, group_name: ArgResult, sublist: Arg
         sg = SubGroup(group_name)
         if sg.is_in_group_names():
             if sg.add_to_subGroups(uid_list):
-                await app.send_friend_message(
-                    friend, MessageChain(f"添加到订阅组 [{group_name}] 成功")
-                )
+                await app.send_friend_message(friend, MessageChain(f"添加到订阅组 [{group_name}] 成功"))
             else:
                 await app.send_friend_message(
                     friend,

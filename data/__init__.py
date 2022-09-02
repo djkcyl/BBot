@@ -135,9 +135,7 @@ def get_sub_by_uid(uid: Union[str, int]) -> list[SubList]:
 def uid_in_group_exists(uid: Union[str, int], group: Union[str, int]) -> bool:
     "检查uid是否在该群订阅中"
     return bool(
-        SubList.select()
-        .where(SubList.uid == str(uid), SubList.group == str(group))
-        .exists()
+        SubList.select().where(SubList.uid == str(uid), SubList.group == str(group)).exists()
     )
 
 
@@ -159,9 +157,7 @@ def uid_exists(uid: Union[str, int]) -> bool:
 def uid_in_group(uid: Union[str, int], group: Union[str, int]) -> bool:
     "检查uid是否在该群订阅中"
     return bool(
-        SubList.select()
-        .where(SubList.uid == str(uid), SubList.group == str(group))
-        .exists()
+        SubList.select().where(SubList.uid == str(uid), SubList.group == str(group)).exists()
     )
 
 

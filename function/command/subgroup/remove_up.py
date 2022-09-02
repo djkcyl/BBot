@@ -39,8 +39,7 @@ REMOVE_ERROR_MSG = """删除失败, 请正确输入!
             Twilight(
                 [
                     RegexMatch(r"从订阅组(删除|移除)(主播|[uU][pP])"),
-                    "group_name"
-                    @ ArgumentMatch("--name", optional=True, nargs="*", type=str),
+                    "group_name" @ ArgumentMatch("--name", optional=True, nargs="*", type=str),
                     "uid" @ ArgumentMatch("--uid", optional=True, nargs="*", type=int),
                 ],
             )

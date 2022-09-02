@@ -4,6 +4,7 @@ from loguru import logger
 from graia.saya import Channel
 from graia.ariadne.app import Ariadne
 from graia.ariadne.model import Group
+from graia.ariadne.exception import UnknownTarget
 from graia.ariadne.message.chain import MessageChain
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.event.mirai import (
@@ -37,13 +38,16 @@ async def main(app: Ariadne, group: Group):
     logger.info(
         f"[BiliBili推送] 检测到退群事件 > {group.name}({group.id})，已删除该群订阅的 {len(remove_list)} 个 UP"
     )
-    for qq in BotConfig.admins:
-        await app.send_friend_message(
-            qq,
-            MessageChain(
-                "收到退出群聊事件",
-                f"\n群号：{group.id}",
-                f"\n群名：{group.name}",
-                f"\n已移出白名单并删除该群订阅的 {len(remove_list)} 个 UP",
-            ),
-        )
+    for admin in BotConfig.admins:
+        try:
+            await app.send_friend_message(
+                admin,
+                MessageChain(
+                    "收到退出群聊事件",
+                    f"\n群号：{group.id}",
+                    f"\n群名：{group.name}",
+                    f"\n已移出白名单并删除该群订阅的 {len(remove_list)} 个 UP",
+                ),
+            )
+        except UnknownTarget:
+            logger.warning(f"由于未添加 {admin} 为好友，无法发送通知")

@@ -1,5 +1,7 @@
+from loguru import logger
 from graia.saya import Channel
 from graia.ariadne.app import Ariadne
+from graia.ariadne.exception import UnknownTarget
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.event.mirai import BotJoinGroupEvent
 from graia.saya.builtins.broadcast.schema import ListenerSchema
@@ -22,20 +24,26 @@ async def main(app: Ariadne, joingroup: BotJoinGroupEvent):
         msg.append(f"邀请者：{joingroup.inviter.name}（{joingroup.inviter.id}）")
     if gp.can_join():
         for admin in BotConfig.admins:
-            await app.send_friend_message(
-                admin,
-                MessageChain(
-                    msg,
-                    "已自动加入",
-                ),
-            )
+            try:
+                await app.send_friend_message(
+                    admin,
+                    MessageChain(
+                        msg,
+                        "已自动加入",
+                    ),
+                )
+            except UnknownTarget:
+                logger.warning(f"由于未添加 {admin} 为好友，无法发送通知")
     else:
         await app.quit_group(group)
         for admin in BotConfig.admins:
-            await app.send_friend_message(
-                admin,
-                MessageChain(
-                    msg,
-                    "该群不在白名单中，已自动退出",
-                ),
-            )
+            try:
+                await app.send_friend_message(
+                    admin,
+                    MessageChain(
+                        msg,
+                        "该群不在白名单中，已自动退出",
+                    ),
+                )
+            except UnknownTarget:
+                logger.warning(f"由于未添加 {admin} 为好友，无法发送通知")

@@ -9,6 +9,7 @@ from graia.saya.builtins.broadcast.schema import ListenerSchema
 
 from core.bot_config import BotConfig
 from library.browser import get_browser
+from library.bilibili_request import hc
 
 channel = Channel.current()
 
@@ -28,6 +29,10 @@ async def main(app: Ariadne):
         logger.error("[BiliBili推送] 浏览器启动失败")
         logger.error(e)
         sys.exit(1)
+
+    logger.info("[BiliBili推送] 正在获取首页 Cookie")
+    await hc.get("https://bilibili.com/", follow_redirects=True)
+    logger.debug(hc.cookies)
 
     logger.info("Graia 成功启动")
     groupList = await app.get_group_list()
@@ -49,14 +54,12 @@ async def main(app: Ariadne):
         for group in BotConfig.Debug.groups:
             debug_group = await app.get_group(group)
             debug_msg.append(
-                f"{debug_group.id}（{debug_group.name}）"
-                if debug_group
-                else f"{group}（当前未加入该群）"
+                f"{debug_group.id}（{debug_group.name}）" if debug_group else f"{group}（当前未加入该群）"
             )
         await app.send_friend_message(
             BotConfig.master,
             MessageChain(
-                "，当前为 Debug 模式，将仅接受\n",
+                "当前为 Debug 模式，将仅接受\n",
                 "\n".join(debug_msg),
                 f"\n以及 {master.nickname}（{master.id}） 的消息",
             ),

@@ -33,8 +33,6 @@ async def main(app: Ariadne, group: Group, anything: RegexResult):
         for group in await app.get_group_list():
             if group.id in sended:
                 continue
-            await app.send_group_message(
-                group, MessageChain(f"公告 - {group.id}：\n{msg}")
-            )
+            await app.send_group_message(group, MessageChain(f"公告 - {group.id}：\n{msg}"))
             sended.append(group.id)
             await asyncio.sleep(2)
