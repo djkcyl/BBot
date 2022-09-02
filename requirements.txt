@@ -26,9 +26,9 @@ idna==3.3; python_version >= "3.8" and python_version < "4.0" and python_full_ve
 launart==0.6.0; python_version >= "3.8" and python_version < "4.0"
 loguru==0.6.0; python_version >= "3.8" and python_version < "4.0"
 multidict==6.0.2; python_version >= "3.8" and python_version < "4.0"
-peewee==3.15.1
+peewee==3.15.2
 pillow==9.2.0; python_version >= "3.7"
-playwright==1.24.1; python_version >= "3.7"
+playwright==1.25.2; python_version >= "3.7"
 protobuf==3.20.1; python_version >= "3.7" and python_version < "4.0"
 pyasn1==0.4.8; python_version >= "3.7" and python_version < "4"
 pydantic==1.9.1; python_version >= "3.8" and python_version < "4.0" and python_full_version >= "3.6.1"
