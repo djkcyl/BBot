@@ -246,9 +246,8 @@ async def push(app: Ariadne, dyn: DynamicItem):
                     group = await app.get_group(int(data.group))
                     group = f"{group.name}（{group.id}）" if group else data.group
                     logger.warning(f"[BiliBili推送] {dynid} | 推送失败，账号在 {group} 被禁言")
-                except Exception as e:
-                    logger.error(f"[BiliBili推送] {dynid} | 推送失败，未知错误")
-                    logger.exception(e)
+                except Exception:
+                    logger.exception(f"[BiliBili推送] {dynid} | 推送失败，未知错误")
         if BotConfig.Bilibili.use_login:
             try:
                 await dynamic_like(dynid)

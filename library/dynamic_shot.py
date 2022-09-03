@@ -69,13 +69,12 @@ async def get_dynamic_screenshot(id):
             image = await page.screenshot(clip=clip, full_page=True, type="jpeg", quality=98)
             await page.close()
             return image
-        except Exception as e:
+        except Exception:
             url = page.url
             if "bilibili.com/404" in url:
                 logger.error(f"[Bilibili] {id} 动态不存在，正在重试")
             else:
-                logger.error(f"[BiliBili推送] {id} 动态截图失败，正在重试：")
-                logger.exception(e)
+                logger.exception(f"[BiliBili推送] {id} 动态截图失败，正在重试：")
                 await page.screenshot(
                     path=f"{error_path}/{id}_{i}_{st}.jpg",
                     full_page=True,
