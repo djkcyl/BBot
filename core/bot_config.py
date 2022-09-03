@@ -100,6 +100,8 @@ class _BotConfig(BaseSettings, extra=Extra.ignore):
             logger.warning("admins 格式为 int, 已重置为 list[admins]")
             admins = [admins]
         elif type(admins) != list or not admins:
+            if "master" not in values:
+                raise ValueError("未查询到合法的 master")
             logger.warning("admins 为空或格式不为 list, 已重置为 list[master]")
             return [values["master"]]
         try:
@@ -157,6 +159,7 @@ if bot_config_file.exists():
         sys.exit(1)
     except Exception as e:
         logger.exception(e)
+        logger.critical("读取配置文件时出现未知错误, 请检查配置文件是否填写正确")
         sys.exit(1)
     save_config()
 
