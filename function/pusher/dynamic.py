@@ -142,6 +142,7 @@ async def push(app: Ariadne, dyn: DynamicItem):
     )
 
     logger.debug(f"[Dynamic] Start to push dynamic {dynid}")
+
     if uid_exists(up_id):
         logger.info(
             f"[BiliBili推送] {dynid} | {up_name} 更新了动态，共有 {len(get_sub_by_uid(up_id))} 个群订阅了该 UP"
@@ -157,7 +158,7 @@ async def push(app: Ariadne, dyn: DynamicItem):
                 details = await grpc_get_dynamic_details(fold_ids)
                 for dynamic in details.list:
                     try:
-                        if is_dyn_pushed(dyn.extend.dyn_id_str):
+                        if is_dyn_pushed(dynamic.extend.dyn_id_str):
                             logger.debug(f"[Dynamic] {dynid} is pushed, skip")
                             continue
                     except ValueError:
