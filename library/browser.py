@@ -16,6 +16,7 @@ async def init() -> BrowserContext:
     chromium = browser.chromium
     _browser = await chromium.launch_persistent_context(
         user_data_dir,
+        args=[],
         headless=True,
         device_scale_factor=2 if BotConfig.Bilibili.mobile_style else 1.25,
         user_agent=(
