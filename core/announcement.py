@@ -4,13 +4,28 @@ from typing import Dict, List
 
 from loguru import logger
 
-RAW_TOML = pathlib.Path("pyproject.toml").read_text(encoding="utf-8")
+DEFUALT_PROJECT_VERSION = "*0.4.3"
+DEFUALT_ARIADNE_VERSION = "*0.8.4"
+ALLOW_VERSION_CHECK = True
 
-PROJECT_VERSION = RAW_TOML.split("version = ")[1].split("\n")[0].strip('"')
+try:
+    if not ALLOW_VERSION_CHECK:
+        raise FileNotFoundError()
+    RAW_TOML = pathlib.Path("pyproject.toml").read_text(encoding="utf-8")
 
-ARIADNE_VERSION = (
-    RAW_TOML.split("version = ")[2].split(", extras")[0].split("\n")[0].strip('"').strip("^")
-)
+    PROJECT_VERSION = RAW_TOML.split("version = ")[1].split("\n")[0].strip('"')
+
+    ARIADNE_VERSION = (
+        RAW_TOML.split("version = ")[2]
+        .split(", extras")[0]
+        .split("\n")[0]
+        .strip('"')
+        .strip("^")
+    )
+except FileNotFoundError:
+    PROJECT_VERSION = DEFUALT_PROJECT_VERSION
+    ARIADNE_VERSION = DEFUALT_ARIADNE_VERSION
+    ALLOW_VERSION_CHECK = False
 
 BBOT_ASCII_LOGO = rf"""
                      //
@@ -60,17 +75,18 @@ def get_dist_map() -> Dict[str, str]:
 def base_telemetry() -> None:
     """执行基础遥测检查"""
     output: List[str] = [""]
-    dist_map: Dict[str, str] = get_dist_map()
-    output.extend(
-        " ".join(
-            [
-                f"[magenta]{name}[/]:",
-                f"[green]{version}[/]",
-            ]
+    if ALLOW_VERSION_CHECK:
+        dist_map: Dict[str, str] = get_dist_map()
+        output.extend(
+            " ".join(
+                [
+                    f"[magenta]{name}[/]:",
+                    f"[green]{version}[/]",
+                ]
+            )
+            for name, version in dist_map.items()
         )
-        for name, version in dist_map.items()
-    )
-    output.sort()
+        output.sort()
     output.insert(0, f"[cyan]{BBOT_ASCII_LOGO}[/]")
     rich_output = "\n".join(output)
     logger.opt(colors=True).info(
