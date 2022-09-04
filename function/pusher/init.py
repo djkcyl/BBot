@@ -182,14 +182,14 @@ async def init(app: Ariadne):
                 )
                 sys.exit(1)
 
-        elif f := len(followed_list) != 0:
+        elif (f := len(followed_list)) != 0:
             if sys.argv.pop() != "--ignore-sub":
                 logger.critical(
                     f"[Bilibili推送] 该账号已关注 {f} 个用户，为避免产生问题，已停止运行，请先手动取消关注或添加启动参数 --ignore-sub"
                 )
                 sys.exit(1)
             else:
-                logger.warning(f"[Bilibili推送] 该账号已关注 {f} 个用户，正在尝试取消关注")
+                logger.warning(f"[Bilibili推送] 该账号已关注 {f} 个用户，正在尝试自动处理")
                 Path("data").joinpath(".lock").write_text(str(BotConfig.Bilibili.username))
         else:
             Path("data").joinpath(".lock").write_text(str(BotConfig.Bilibili.username))
