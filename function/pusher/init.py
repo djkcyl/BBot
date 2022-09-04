@@ -173,25 +173,26 @@ async def init(app: Ariadne):
         resp = await grpc_get_followed_dynamic_users(auth=Bili_Auth)
         followed_list = resp.items
 
-        # 检测在数据库但不在B站关注列表的uid
-        for up in subid_list:
-            for uid in followed_list:
-                if up == str(uid.uid):
-                    break
+        if Path("data").joinpath(".lock").exists():
+            if Path("data").joinpath(".lock").read_text(encoding="utf-8") != str(
+                BotConfig.Bilibili.username
+            ):
+                logger.critical(
+                    "[Bilibili推送] 检测到上次登录的账号与当前账号不一致，如需继续使用，请先手动删除数据库和 data/.lock 文件"
+                )
+                sys.exit(1)
+
+        elif (f := len(followed_list)) != 0:
+            if sys.argv.pop() != "--ignore-sub":
+                logger.critical(
+                    f"[Bilibili推送] 该账号已关注 {f} 个用户，为避免产生问题，已停止运行，请先手动取消关注或添加启动参数 --ignore-sub"
+                )
+                sys.exit(1)
             else:
-                logger.warning(f"[BiliBili推送] {up} 不在 BliBili 关注列表中，正在修复")
-                resp = await relation_modify(up, 1)
-                if resp["code"] != 0:
-                    await delete_uid(up)
-                    logger.error(f"[BiliBili推送] {up} BliBili 订阅修复失败，请检查后重启 Bot：{resp}")
-                    await app.send_friend_message(
-                        BotConfig.master,
-                        MessageChain(f"[BiliBili推送] UP {up} BliBili 订阅修复失败，请检查后重启 Bot：{resp}"),
-                    )
-                    sys.exit(1)
-                else:
-                    logger.info(f"[BiliBili推送] {up} BliBili 订阅修复成功")
-                await asyncio.sleep(1)
+                logger.warning(f"[Bilibili推送] 该账号已关注 {f} 个用户，正在尝试自动处理")
+                Path("data").joinpath(".lock").write_text(str(BotConfig.Bilibili.username))
+        else:
+            Path("data").joinpath(".lock").write_text(str(BotConfig.Bilibili.username))
 
         # 检测在B站关注列表但不在数据库的uid
         if followed_list:
@@ -220,6 +221,27 @@ async def init(app: Ariadne):
                 if uid.live_info.status:
                     logger.info(f"[BiliBili推送] {uid.name} 已开播")
                     BOT_Status["liveing"][str(uid.uid)] = None
+
+        # 检测在数据库但不在B站关注列表的uid
+        for up in subid_list:
+            for uid in followed_list:
+                if up == str(uid.uid):
+                    break
+            else:
+                logger.warning(f"[BiliBili推送] {up} 不在 BliBili 关注列表中，正在修复")
+                resp = await relation_modify(up, 1)
+                if resp["code"] != 0:
+                    await delete_uid(up)
+                    logger.error(f"[BiliBili推送] {up} BliBili 订阅修复失败，请检查后重启 Bot：{resp}")
+                    await app.send_friend_message(
+                        BotConfig.master,
+                        MessageChain(f"[BiliBili推送] UP {up} BliBili 订阅修复失败，请检查后重启 Bot：{resp}"),
+                    )
+                    sys.exit(1)
+                else:
+                    logger.info(f"[BiliBili推送] {up} BliBili 订阅修复成功")
+                await asyncio.sleep(1)
+
         logger.info(f"[BiliBili推送] 直播初始化完成，当前 {len(BOT_Status['liveing'])} 个 UP 正在直播")
 
         # 动态初始化

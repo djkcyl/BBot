@@ -17,3 +17,4 @@ error/
 data/browser
 package
 .vscode/
+data/.lock

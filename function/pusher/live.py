@@ -38,8 +38,8 @@ async def main(app: Ariadne):
             del BOT_Status["liveing"][up]
     try:
         status_infos = await get_rooms_info_by_uids(sub_list)
-    except Exception as e:
-        logger.error(f"获取直播间状态失败: {e}")
+    except Exception:
+        logger.exception("获取直播间状态失败:")
         BOT_Status["live_updateing"] = False
         return
     if status_infos:
@@ -48,7 +48,6 @@ async def main(app: Ariadne):
             up_name = live_data["uname"]
             # 检测订阅配置里是否有该 up
             if up_id in sub_list:
-                set_name(up_id, up_name)
                 # if up_id in BOT_Status["skip_uid"]:
                 #     continue
                 # 如果存在直播信息则为已开播
@@ -67,6 +66,7 @@ async def main(app: Ariadne):
                         await Image(url=live_data["cover_from_user"]).get_bytes(),
                         UploadMethod.Group,
                     )
+                    set_name(up_id, up_name)
                     logger.info(f"[BiliBili推送] {up_name} 开播了 - {room_area} - {title}")
 
                     # 发送推送消息
@@ -126,6 +126,7 @@ async def main(app: Ariadne):
                         else "。"
                     )
                     del BOT_Status["liveing"][up_id]
+                    set_name(up_id, up_name)
                     logger.info(f"[BiliBili推送] {up_name} 已下播{live_time}")
                     for data in get_sub_by_uid(up_id):
                         if (

@@ -18,8 +18,8 @@ error_path.mkdir(parents=True, exist_ok=True)
 async def get_dynamic_screenshot(id):
     st = int(time.time())
     browser = await get_browser()
-    page = await browser.new_page()
     for i in range(3):
+        page = await browser.new_page()
         try:
             page.on("requestfinished", network_request)
             page.on("requestfailed", network_requestfailed)
@@ -28,26 +28,21 @@ async def get_dynamic_screenshot(id):
                 await page.set_viewport_size({"width": 400, "height": 780})
                 with contextlib.suppress(TimeoutError):
                     await page.goto(url, wait_until="networkidle", timeout=20000)
-                content = await page.content()
-                content = content.replace(
-                    '<div class="dyn-header__right">'
-                    '<div data-pos="follow" class="dyn-header__following">'
-                    '<span class="dyn-header__following__icon"></span>'
-                    '<span class="dyn-header__following__text">关注</span></div></div>',
-                    "",
+                if "bilibili.com/404" in url:
+                    logger.warning(f"[Bilibili] {id} 动态不存在，稍后再试")
+                    break
+                await page.add_script_tag(
+                    content=(
+                        # 去除打开app按钮
+                        "document.getElementsByClassName('launch-app-btn').forEach(v=>v.remove());"
+                        # 去除关注按钮
+                        "document.getElementsByClassName('dyn-header__following').forEach(v=>v.remove());"
+                        # 修复字体与换行问题
+                        "const dyn=document.getElementsByClassName('dyn-card')[0];"
+                        "dyn.style.fontFamily='Noto Sans CJK SC, sans-serif';"
+                        "dyn.style.overflowWrap='break-word'"
+                    )
                 )
-                content = content.replace(
-                    '<div class="dyn-card">',
-                    '<div class="dyn-card" '
-                    'style="font-family: sans-serif; overflow-wrap: break-word;">',
-                )
-                content = content.replace(
-                    '<div class="launch-app-btn dynamic-float-openapp dynamic-float-btn">'
-                    '<div class="m-dynamic-float-openapp">'
-                    "<span>打开APP，查看更多精彩内容</span></div> <!----></div>",
-                    "",
-                )
-                await page.set_content(content)
                 card = await page.query_selector(".dyn-card")
                 assert card
                 clip = await card.bounding_box()
@@ -57,11 +52,14 @@ async def get_dynamic_screenshot(id):
                 await page.set_viewport_size({"width": 2560, "height": 1080})
                 with contextlib.suppress(TimeoutError):
                     await page.goto(url, wait_until="networkidle", timeout=20000)
+                if "bilibili.com/404" in url:
+                    logger.warning(f"[Bilibili] {id} 动态不存在，稍后再试")
+                    break
                 card = await page.query_selector(".card")
                 assert card
                 clip = await card.bounding_box()
                 assert clip
-                bar = await page.query_selector(".text-bar")
+                bar = await page.query_selector(".bili-dyn-action__icon")
                 assert bar
                 bar_bound = await bar.bounding_box()
                 assert bar_bound
@@ -69,13 +67,12 @@ async def get_dynamic_screenshot(id):
             image = await page.screenshot(clip=clip, full_page=True, type="jpeg", quality=98)
             await page.close()
             return image
-        except Exception as e:
+        except Exception:
             url = page.url
             if "bilibili.com/404" in url:
                 logger.error(f"[Bilibili] {id} 动态不存在，正在重试")
             else:
-                logger.error(f"[BiliBili推送] {id} 动态截图失败，正在重试：")
-                logger.exception(e)
+                logger.exception(f"[BiliBili推送] {id} 动态截图失败，正在重试：")
                 await page.screenshot(
                     path=f"{error_path}/{id}_{i}_{st}.jpg",
                     full_page=True,
