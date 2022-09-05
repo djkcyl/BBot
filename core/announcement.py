@@ -1,10 +1,10 @@
-import importlib.metadata
-import pathlib
-from typing import Dict, List
-
+from pathlib import Path
 from loguru import logger
+from typing import Dict, List
+from importlib import metadata
 
-RAW_TOML = pathlib.Path("pyproject.toml").read_text(encoding="utf-8")
+
+RAW_TOML = Path(__file__).parent.parent.joinpath("pyproject.toml").read_text(encoding="utf-8")
 
 PROJECT_VERSION = RAW_TOML.split("version = ")[1].split("\n")[0].strip('"')
 
@@ -49,10 +49,10 @@ def get_dist_map() -> Dict[str, str]:
     """获取与项目相关的发行字典"""
     monitored_libs = get_monitored_libs()
     dist_map: Dict[str, str] = {}
-    for dist in importlib.metadata.distributions():
+    for dist in metadata.distributions():
         name: str = dist.metadata["Name"]
-        version: str = dist.version
         if name.lower() in monitored_libs.keys():
+            version: str = dist.version
             dist_map[name] = max(version, dist_map.get(name, ""))
     return dist_map
 

@@ -1,7 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import copy_metadata
 
-datas = [('data/font', 'data/font'), ('data/bot_config.exp.yaml', 'data')]
+datas = [('data/font', 'data/font'), ('data/bot_config.exp.yaml', 'data'), ('pyproject.toml', './')]
 datas += copy_metadata('graia-ariadne')
 datas += copy_metadata('graia-amnesia')
 datas += copy_metadata('graia-saya')
