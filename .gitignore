@@ -18,3 +18,4 @@ data/browser
 package
 .vscode/
 data/.lock
+venv/
