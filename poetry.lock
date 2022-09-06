@@ -70,7 +70,7 @@ tests_no_zope = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>
 
 [[package]]
 name = "bilireq"
-version = "0.2.1"
+version = "0.2.2"
 description = ""
 category = "main"
 optional = false
@@ -703,7 +703,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "171df74963b8efbe14560f40f713c869bdea8ab036630317b0dea3b103a96d32"
+content-hash = "dd1e9f41fca336e3087ed43776ea8d7bd32affadddc74640496955d86062165c"
 
 [metadata.files]
 aiohttp = []
@@ -712,8 +712,8 @@ anyio = []
 async-timeout = []
 attrs = []
 bilireq = [
-    {file = "bilireq-0.2.1-py3-none-any.whl", hash = "sha256:5a3f85d8548e88411c7acb1a57ffd2fc709ba1590c02ea52c67a56a2a34f0194"},
-    {file = "bilireq-0.2.1.tar.gz", hash = "sha256:1de79c66330e7c021aca60845ad2d7ddf900c953f898820300559b78244b3270"},
+    {file = "bilireq-0.2.2-py3-none-any.whl", hash = "sha256:0c82908eb908b766a602709b413dfcea076ce34ad7d3c3d70970884c13f31a15"},
+    {file = "bilireq-0.2.2.tar.gz", hash = "sha256:fbd93654e33a40e0a99e7ccc291f3c663feec39996aa639ab2a21f24d6fe3f70"},
 ]
 black = []
 certifi = []

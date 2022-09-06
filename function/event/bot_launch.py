@@ -26,8 +26,7 @@ async def main(app: Ariadne):
         version = await page.evaluate("() => navigator.appVersion")
         logger.info(f"[BiliBili推送] 浏览器启动完成，当前版本 {version}")
     except Exception as e:
-        logger.error("[BiliBili推送] 浏览器启动失败")
-        logger.error(e)
+        logger.error(f"[BiliBili推送] 浏览器启动失败{e}")
         sys.exit(1)
 
     logger.info("[BiliBili推送] 正在获取首页 Cookie")
