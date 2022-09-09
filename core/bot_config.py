@@ -140,10 +140,10 @@ if bot_config_file.exists():
             logger.warning(f"检测到旧版配置项, 转化为新版配置项: {old_config} => {old_config.capitalize()}")
             bot_config[old_config.capitalize()] = bot_config[old_config]
             del bot_config[old_config]
-    # 以配置项文件生成BotConfig，并保存
+    # 以配置项文件生成 BotConfig，并保存
     try:
         BotConfig = _BotConfig.parse_obj(bot_config)
-    # 常见的由Pydantic找出的错误
+    # 常见的由 Pydantic 找出的错误
     except ValueError as e:
         err_info = []
         pos_maxlen = 0

@@ -1,40 +1,27 @@
-import asyncio
-import contextlib
+import sys
+import psutil
 
-from creart import it
-from graia.saya import Saya
-from graia.ariadne.app import Ariadne
-from graia.scheduler import GraiaScheduler
-from graia.ariadne.entry import config, HttpClientConfig, WebsocketClientConfig
+from pathlib import Path
 
-from core.bot_config import BotConfig
-from core.log import logger
-from core.announcement import base_telemetry
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+    s = psutil.Process().parent()
+    if s.name() == "explorer.exe" or s.parent().name() == "explorer.exe":
+        Path("start.bat").write_text(
+            """@echo off
+title BBot for Ariadne
+@REM 自动搜索路径里名称包含 bbot 的 exe 并执行
+for /f "tokens=*" %%a in ('dir /b /s /a-d bbot*.exe') do (
+    echo 正在运行 %%a
+    %%a
+    pause
+    exit
+)"""
+        )
+        print("请在命令行中运行 .exe 文件")
+        print("Please run .exe file in command line")
+        print("已生成 start.bat 文件")
+        print("Generated start.bat file")
+        input("按回车键退出 Press Enter to exit")
+        sys.exit(1)
 
-logger.info("BBot is starting...")
-
-base_telemetry()
-
-host = BotConfig.Mirai.mirai_host
-app_config = config(
-    BotConfig.Mirai.account,
-    BotConfig.Mirai.verify_key,
-    HttpClientConfig(host),
-    WebsocketClientConfig(host),
-)
-
-app = Ariadne(app_config)
-app.config(install_log=True)
-app.create(GraiaScheduler)
-saya = it(Saya)
-
-
-with saya.module_context():
-
-    saya.require("function")
-
-import function  # noqa: E402 F401
-
-with contextlib.suppress(KeyboardInterrupt, asyncio.exceptions.CancelledError):
-    app.launch_blocking()
-logger.info("BBot is shutting down...")
+import bot

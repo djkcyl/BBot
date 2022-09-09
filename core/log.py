@@ -43,6 +43,19 @@ logger.add(
     level="DEBUG",
 )
 
+# add warning logger
+logger.add(
+    LOGPATH.joinpath("warning.log"),
+    encoding="utf-8",
+    backtrace=True,
+    diagnose=True,
+    rotation="00:00",
+    retention="15 days",
+    compression="tar.xz",
+    colorize=False,
+    level="WARNING",
+)
+
 logger.success(f"成功重载 logger，当前日志等级为 {log_level}")
 
 # logger.trace("TRACE 等级将会输出至控制台")

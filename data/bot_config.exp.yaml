@@ -1,6 +1,6 @@
 # 警告: 在 bot 第一次成功运行后配置文件将会被规范化, 此文件中的注释均会被清除, 
 # 并且配置项顺序可能会出现变动, 若需要查看配置项的详细信息可参考配置文档
-# https://github.com/djkcyl/BBot-Graia/blob/master/docs/config.md
+# https://github.com/djkcyl/BBot-Graia/wiki/fill-config
 
 Mirai:
   mirai_host:        # **需要** 填入 mirai-api-http 的监听地址
@@ -27,4 +27,4 @@ max_subsubscribe: 4  # 非 vip 群聊最大可订阅数量
 
 # 警告: 在 bot 第一次成功运行后配置文件将会被规范化, 此文件中的注释均会被清除, 
 # 并且配置项顺序可能会出现变动, 若需要查看配置项的详细信息可参考配置文档
-# https://github.com/djkcyl/BBot-Graia/blob/master/docs/config.md
+# https://github.com/djkcyl/BBot-Graia/wiki/fill-config
