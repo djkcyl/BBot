@@ -110,7 +110,7 @@ async def main(app: Ariadne):
     else:
         # 把uid分组，每组发送一次请求
         check_list = [
-            subid_list[i: i + BotConfig.Bilibili.concurrency]
+            subid_list[i : i + BotConfig.Bilibili.concurrency]
             for i in range(0, sub_sum, BotConfig.Bilibili.concurrency)
         ]
         logger.debug(f"Get {sub_sum} uid, split to {len(check_list)} groups")

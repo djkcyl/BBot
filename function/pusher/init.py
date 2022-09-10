@@ -39,7 +39,6 @@ class CodeWaiter(Waiter.create([FriendMessage], block_propagation=True)):
                 return int(msg)
             else:
                 await app.send_friend_message(BotConfig.master, "请输入正确的验证码")
-    pass
 
 
 async def init_dyn_id(up_uid):
@@ -278,7 +277,7 @@ async def init(app: Ariadne):
             return
         # 把所有账号分组，每组发送一次请求
         group_list = [
-            subid_list[i: i + BotConfig.Bilibili.concurrency]
+            subid_list[i : i + BotConfig.Bilibili.concurrency]
             for i in range(0, sub_sum, BotConfig.Bilibili.concurrency)
         ]
         logger.debug(f"Get {sub_sum} uid, split to {len(group_list)} groups")

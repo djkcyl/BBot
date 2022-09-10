@@ -37,7 +37,6 @@ channel = Channel.current()
 async def main(
     app: Ariadne, group: Group, act: RegexResult, uid: RegexResult, nick: RegexResult
 ):
-    msg = ""
     if uid.matched:
         uid = await uid_extract(uid.result.display, group.id)
         if uid:
