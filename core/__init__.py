@@ -1,11 +1,11 @@
 from bilireq.auth import Auth
 
 BOT_Status = {
-    "liveing": {},
+    "living": {},
     "offset": None,
     "init": False,
-    "dynamic_updateing": False,
-    "live_updateing": False,
+    "dynamic_updating": False,
+    "live_updating": False,
 }
 
 Bili_Auth = Auth()

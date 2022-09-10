@@ -31,16 +31,16 @@ async def main(app: Ariadne):
         return
     sub_list = get_all_uid()
 
-    BOT_Status["live_updateing"] = True
+    BOT_Status["live_updating"] = True
 
-    for up in BOT_Status["liveing"].copy():
+    for up in BOT_Status["living"].copy():
         if up not in sub_list:
-            del BOT_Status["liveing"][up]
+            del BOT_Status["living"][up]
     try:
         status_infos = await get_rooms_info_by_uids(sub_list)
-    except Exception:
+    except Exception: # noqa
         logger.exception("获取直播间状态失败:")
-        BOT_Status["live_updateing"] = False
+        BOT_Status["live_updating"] = False
         return
     if status_infos:
         for up, live_data in status_infos.items():
@@ -53,9 +53,9 @@ async def main(app: Ariadne):
                 # 如果存在直播信息则为已开播
                 if live_data["live_status"] == 1:
                     # 判断是否在正在直播列表中
-                    if up_id in BOT_Status["liveing"]:
+                    if up_id in BOT_Status["living"]:
                         continue
-                    BOT_Status["liveing"][up_id] = live_data["live_time"]  # 设定开播时间
+                    BOT_Status["living"][up_id] = live_data["live_time"]  # 设定开播时间
                     # 获取直播信息
                     room_id = live_data["room_id"]
                     title = live_data["title"]
@@ -117,15 +117,15 @@ async def main(app: Ariadne):
                     insert_live_push(
                         up_id, True, len(get_sub_by_uid(up_id)), title, area_parent, area
                     )
-                elif up_id in BOT_Status["liveing"]:
+                elif up_id in BOT_Status["living"]:
                     live_time = (
                         "，本次直播时长 "
-                        + calc_time_total(time.time() - BOT_Status["liveing"][up_id])
+                        + calc_time_total(time.time() - BOT_Status["living"][up_id])
                         + "。"
-                        if BOT_Status["liveing"][up_id]
+                        if BOT_Status["living"][up_id]
                         else "。"
                     )
-                    del BOT_Status["liveing"][up_id]
+                    del BOT_Status["living"][up_id]
                     set_name(up_id, up_name)
                     logger.info(f"[BiliBili推送] {up_name} 已下播{live_time}")
                     for data in get_sub_by_uid(up_id):
@@ -161,4 +161,4 @@ async def main(app: Ariadne):
                 logger.warning(f"[BiliBili推送] 未找到订阅 UP {up_name}（{up_id}）的群，正在退订！")
                 await delete_uid(up_id)
 
-    BOT_Status["live_updateing"] = False
+    BOT_Status["live_updating"] = False

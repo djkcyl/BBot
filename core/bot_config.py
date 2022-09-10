@@ -41,8 +41,8 @@ class _Debug(BaseSettings, extra=Extra.ignore):
             if values["groups"]:
                 return enable
             raise KeyError
-        except KeyError as e:
-            raise ValueError("已启用 debug 但未填入合法的群号") from e
+        except KeyError as key_err:
+            raise ValueError("已启用 debug 但未填入合法的群号") from key_err
 
 
 class _Bilibili(BaseSettings, extra=Extra.ignore):
@@ -60,12 +60,12 @@ class _Bilibili(BaseSettings, extra=Extra.ignore):
         try:
             if values["username"] and values["password"]:
                 return use_login
-        except KeyError as e:
-            raise ValueError("已启用登录但未填入合法的用户名与密码") from e
+        except KeyError as key_err:
+            raise ValueError("已启用登录但未填入合法的用户名与密码") from key_err
 
     # 验证 Bilibili gRPC 并发数
     @validator("concurrency")
-    def limit_concurrency(cls, concurrency, values):
+    def limit_concurrency(cls, concurrency):
         if concurrency > 50:
             logger.warning("gRPC 并发数超过 50，已自动调整为 50")
             return 50

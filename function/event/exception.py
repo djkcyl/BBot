@@ -16,7 +16,7 @@ from library.text2image import text2image
 channel = Channel.current()
 
 
-async def make_msg_for_unknow_exception(event: ExceptionThrowed):
+async def make_msg_for_unknown_exception(event: ExceptionThrowed):
     with StringIO() as fp:
         traceback.print_tb(event.exception.__traceback__, file=fp)
         tb = fp.getvalue()
@@ -35,7 +35,7 @@ async def main(event: ExceptionThrowed):
     if isinstance(event.event, ExceptionThrowed):
         return
     app = Ariadne.current()
-    eimg = await make_msg_for_unknow_exception(event)
+    eimg = await make_msg_for_unknown_exception(event)
     return await app.send_friend_message(
         BotConfig.master,
         eimg,

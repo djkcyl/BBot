@@ -36,7 +36,7 @@ class Permission:
         """
         获取用户的权限
 
-        :param user: 用户实例或QQ号
+        :param member: 用户实例或QQ号
         :return: 等级，整数
         """
 

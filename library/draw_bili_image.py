@@ -6,7 +6,7 @@ from pathlib import Path
 from qrcode.image.pil import PilImage
 from PIL import Image, ImageFont, ImageDraw
 
-from .strings import get_cut_str, numf
+from .strings import get_cut_str, num_fmt
 
 font_path = Path(__file__).parent.parent.joinpath("data").joinpath("font")
 font_semibold = str(font_path.joinpath("sarasa-mono-sc-semibold.ttf"))
@@ -41,14 +41,14 @@ def binfo_image_create(video_info: dict, b23_url: str):
     minutes, seconds = divmod(video_info["data"]["duration"], 60)
     hours, minutes = divmod(minutes, 60)
     video_time = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-    tiem_font = ImageFont.truetype(font_bold, 30)
+    time_font = ImageFont.truetype(font_bold, 30)
     draw = ImageDraw.Draw(pic)
-    draw.text((10, 305), video_time, "white", tiem_font)
+    draw.text((10, 305), video_time, "white", time_font)
 
     # 分区
     tname = video_info["data"]["tname"]
-    tname_x, _ = tiem_font.getsize(tname)
-    draw.text((560 - tname_x - 10, 305), tname, "white", tiem_font)
+    tname_x, _ = time_font.getsize(tname)
+    draw.text((560 - tname_x - 10, 305), tname, "white", time_font)
 
     # 标题
     title = video_info["data"]["title"]
@@ -78,11 +78,11 @@ def binfo_image_create(video_info: dict, b23_url: str):
     icon_color = (247, 145, 185)
     info_font = ImageFont.truetype(font_bold, 26)
 
-    view = numf(video_info["data"]["stat"]["view"])  # 播放 \uE6E6
-    danmaku = numf(video_info["data"]["stat"]["danmaku"])  # 弹幕 \uE6E7
-    favorite = numf(video_info["data"]["stat"]["favorite"])  # 收藏 \uE6E1
-    coin = numf(video_info["data"]["stat"]["coin"])  # 投币 \uE6E4
-    like = numf(video_info["data"]["stat"]["like"])  # 点赞 \uE6E0
+    view = num_fmt(video_info["data"]["stat"]["view"])  # 播放 \uE6E6
+    danmaku = num_fmt(video_info["data"]["stat"]["danmaku"])  # 弹幕 \uE6E7
+    favorite = num_fmt(video_info["data"]["stat"]["favorite"])  # 收藏 \uE6E1
+    coin = num_fmt(video_info["data"]["stat"]["coin"])  # 投币 \uE6E4
+    like = num_fmt(video_info["data"]["stat"]["like"])  # 点赞 \uE6E0
 
     info_bg = Image.new("RGB", (560, 170), "#F5F5F7")
     draw = ImageDraw.Draw(info_bg)
@@ -204,7 +204,7 @@ def binfo_image_create(video_info: dict, b23_url: str):
         # 粉丝量
         draw.text(
             (162, 66 + (i * 120)),
-            "粉丝 " + numf(up["follower"]),
+            "粉丝 " + num_fmt(up["follower"]),
             "#474747",
             follower_font,
         )
@@ -212,14 +212,14 @@ def binfo_image_create(video_info: dict, b23_url: str):
     bg_y += up_bg_y
 
     # 底部栏
-    baner_bg = Image.new("RGB", (600, 170), icon_color)
-    draw = ImageDraw.Draw(baner_bg)
+    banner_bg = Image.new("RGB", (600, 170), icon_color)
+    draw = ImageDraw.Draw(banner_bg)
     # 二维码
     qr = qrcode.QRCode(border=1)
     qr.add_data(b23_url)
     qr_image = qr.make_image(PilImage, fill_color=icon_color, back_color="#F5F5F7")
     qr_image = qr_image.resize((140, 140))
-    baner_bg.paste(qr_image, (50, 10))
+    banner_bg.paste(qr_image, (50, 10))
     # Logo
     # LOGO \uE725
     logo_font = ImageFont.truetype(font_vanfont, 100)
@@ -232,7 +232,7 @@ def binfo_image_create(video_info: dict, b23_url: str):
     video.paste(dynamic_bg, (20, 390 + title_bg_y + 20))
     video.paste(info_bg, (20, 390 + title_bg_y + 20 + dynamic_bg_y + 20))
     video.paste(up_bg, (20, 390 + title_bg_y + 20 + dynamic_bg_y + 10 + info_bg_y))
-    video.paste(baner_bg, (0, 390 + title_bg_y + 20 + dynamic_bg_y + 10 + info_bg_y + up_bg_y))
+    video.paste(banner_bg, (0, 390 + title_bg_y + 20 + dynamic_bg_y + 10 + info_bg_y + up_bg_y))
 
     image = BytesIO()
     video.save(image, "JPEG")

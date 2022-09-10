@@ -57,7 +57,7 @@ async def main(app: Ariadne):
         await asyncio.sleep(5)
         return
 
-    BOT_Status["dynamic_updateing"] = True
+    BOT_Status["dynamic_updating"] = True
     BOT_Status["last_update"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # 动态更新检测
@@ -68,7 +68,7 @@ async def main(app: Ariadne):
             dynall = await asyncio.wait_for(grpc_get_followed_dynamics_noads(), timeout=10)
         except asyncio.TimeoutError:
             logger.debug("[Dynamic] Get dynamic list failed")
-            BOT_Status["dynamic_updateing"] = False
+            BOT_Status["dynamic_updating"] = False
             return
 
         # 判断请求是否拿到数据
@@ -105,12 +105,12 @@ async def main(app: Ariadne):
 
             BOT_Status["offset"] = int(dynall[-1].extend.dyn_id_str)
         else:
-            logger.error("[Dynamic] Geted dynamic is empty")
+            logger.error("[Dynamic] Gotten dynamic is empty")
             logger.error(dynall)
     else:
         # 把uid分组，每组发送一次请求
         check_list = [
-            subid_list[i : i + BotConfig.Bilibili.concurrency]
+            subid_list[i: i + BotConfig.Bilibili.concurrency]
             for i in range(0, sub_sum, BotConfig.Bilibili.concurrency)
         ]
         logger.debug(f"Get {sub_sum} uid, split to {len(check_list)} groups")
@@ -121,8 +121,8 @@ async def main(app: Ariadne):
             )
 
     BOT_Status["last_finish"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    BOT_Status["dynamic_updateing"] = False
-    logger.debug("[Dynamic] Updateing finished")
+    BOT_Status["dynamic_updating"] = False
+    logger.debug("[Dynamic] Updating finished")
     await asyncio.sleep(0.5)
 
 
@@ -165,7 +165,7 @@ async def push(app: Ariadne, dyn: DynamicItem):
                         continue
                     await push(app, dynamic)
 
-        logger.debug(f"[Dynamic] Geting screenshot of {dynid}")
+        logger.debug(f"[Dynamic] Getting screenshot of {dynid}")
         shot_image = await get_dynamic_screenshot(dynid)
 
         if shot_image:
@@ -177,8 +177,8 @@ async def push(app: Ariadne, dyn: DynamicItem):
             err_msg = f"[BiliBili推送] {dynid} | {up_name} 更新了动态，截图失败"
             logger.error(err_msg)
             await app.send_friend_message(BotConfig.master, MessageChain(err_msg))
-            BOT_Status["dynamic_updateing"] = False
-            logger.debug("[Dynamic] Stop updateing")
+            BOT_Status["dynamic_updating"] = False
+            logger.debug("[Dynamic] Stop updating")
             raise ScreenshotError()
 
         if set_name(up_id, up_name):
@@ -247,7 +247,7 @@ async def push(app: Ariadne, dyn: DynamicItem):
                     group = await app.get_group(int(data.group))
                     group = f"{group.name}（{group.id}）" if group else data.group
                     logger.warning(f"[BiliBili推送] {dynid} | 推送失败，账号在 {group} 被禁言")
-                except Exception:
+                except Exception: # noqa
                     logger.exception(f"[BiliBili推送] {dynid} | 推送失败，未知错误")
         if BotConfig.Bilibili.use_login:
             try:

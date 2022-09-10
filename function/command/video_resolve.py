@@ -53,21 +53,21 @@ async def bilibili_main(
                     f"\n{b23_url}",
                 ),
             )
-        except Exception:
+        except Exception: # noqa
             logger.exception("视频解析 API 调用出错")
             await app.send_group_message(group, MessageChain("视频解析 API 调用出错"), quote=source)
 
 
-async def video_info_get(id):
+async def video_info_get(vid_id):
     async with httpx.AsyncClient() as client:
-        if id[:2] == "av":
+        if vid_id[:2] == "av":
             video_info = await client.get(
-                f"http://api.bilibili.com/x/web-interface/view?aid={id[2:]}"
+                f"https://api.bilibili.com/x/web-interface/view?aid={vid_id[2:]}"
             )
             video_info = video_info.json()
-        elif id[:2] == "BV":
+        elif vid_id[:2] == "BV":
             video_info = await client.get(
-                f"http://api.bilibili.com/x/web-interface/view?bvid={id}"
+                f"https://api.bilibili.com/x/web-interface/view?bvid={vid_id}"
             )
             video_info = video_info.json()
         else:
