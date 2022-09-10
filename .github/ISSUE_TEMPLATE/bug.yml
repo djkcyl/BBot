@@ -1,0 +1,146 @@
+name: Bug 反馈
+description: 如果你发现了一个 Bug，请在这里进行反馈
+title: "[Bug]："
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请先确保你完整阅读了项目的 [Wiki](https://github.com/djkcyl/BBot-Graia/wiki)。
+
+        请善用 GitHub 的 Issue 搜索功能，确保你的问题不是已知或已解决的问题。
+
+        > 注：上游错误请不要在此处提交，请自行提交到相应的 Issue。
+
+        如果您在检查了所有的配置等后依然出现错误，请在下方填写错误报告，并且提供以下信息：
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 需要由您确认的事项
+      description: 请确保你已经阅读了上述内容，并且确认你的问题不是已知或已解决的问题。
+      options:
+        - label: 我已阅读了项目的 Wiki，并且成功安装了所需的所有依赖。
+          required: true
+        - label: 我已经使用 GitHub 的 Issue 搜索功能，并且确认我的问题并未被提出或解决。
+          required: true
+        - label: 我已经确认我的问题不是上游错误。
+          required: true
+        - label: 是否为 Release 的一键启动包。
+          required: false
+
+  - type: dropdown
+    id: system
+    attributes:
+      label: 系统
+      description: 请提供你运行 BBot 的系统。
+      options:
+        - Windows
+        - Linux
+        - macOS
+        - 其他
+    validations:
+      required: true
+
+  - type: dropdown
+    id: idc
+    attributes:
+      label: IDC
+      description: 请提供你所使用的网络环境。
+      options:
+        - 电信
+        - 联通
+        - 移动
+        - 教育网
+        - 腾讯云
+        - 阿里云
+        - 华为云
+        - 其他
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python 版本
+      description: 请提供你运行 BBot 的 Python 版本。
+      placeholder: 例如：3.9.1。如为 Release 的一键启动包，请填写 `Release`。
+    validations:
+      required: true
+
+  - type: input
+    id: bbot-version
+    attributes:
+      label: BBot 版本
+      description: 请提供你运行的 BBot 版本。
+      placeholder: 例如：v1.0.0 或 commit hash
+    validations:
+      required: true
+
+  - type: input
+    id: mirai-version
+    attributes:
+      label: Mirai 版本号
+      description: 在此处填写你的 Mirai 版本号。
+      placeholder: 例如：v2.12.2
+    validations:
+      required: true
+
+  - type: input
+    id: mirai-api-http-version
+    attributes:
+      label: Mirai API HTTP 版本号
+      description: 在此处填写你的 Mirai API HTTP 版本号。
+      placeholder: 例如：v2.6.2
+    validations:
+      required: true
+
+  - type: textarea
+    id: issue-description
+    attributes:
+      label: 问题简述
+      description: 在下方详细写出你遇到的问题，以及问题是如何发生的，例如你的操作步骤等。
+    validations:
+      required: true
+
+  - type: textarea
+    id: mirai-config
+    attributes:
+      label: Mirai 配置
+      description: 请完整复制 Mirai 的配置文件，并且将其粘贴到此处，请自行处理隐私信息。
+      render: YAML
+    validations:
+      required: true
+
+  - type: textarea
+    id: bbot-config
+    attributes:
+      label: BBot 配置
+      description: 请完整复制 BBot 的配置文件，并且将其粘贴到此处，请自行处理隐私信息。
+      render: YAML
+    validations:
+      required: true
+
+  - type: textarea
+    id: mirai-log
+    attributes:
+      label: 在此处填写 Mirai 日志
+      description: 请完整复制 Mirai 的控制台日志，并且将其粘贴到此处。
+      render: Text
+    validations:
+      required: true
+
+  - type: textarea
+    id: abot-log
+    attributes:
+      label: 在此处填写 BBot 日志
+      description: 请完整复制 BBot 的控制台日志，并且将其粘贴到此处。
+      render: Text
+    validations:
+      required: true
+
+  - type: textarea
+    id: other-info
+    attributes:
+      label: 其他信息
+      description: 在此处填写其他你认为有用的信息，例如截图、压缩的日志文件等。
