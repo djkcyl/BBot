@@ -57,7 +57,7 @@ async def init_dyn_id(up_uid):
             BOT_Status["offset"][str(up_uid)] = dyn_id
             if dyn.modules[0].module_author.author.live.is_living == 1:
                 logger.info(f"[BiliBili推送] {up_name}（{up_uid}） 已开播")
-                BOT_Status["liveing"][str(up_uid)] = None
+                BOT_Status["living"][str(up_uid)] = None
             logger.info(f"[BiliBili推送] UP {up_name}（{up_uid}） | {dyn_id}")
         else:
             delete_sub_by_uid(up_uid)
@@ -220,7 +220,7 @@ async def init(app: Ariadne):
                 # 顺便检测直播状态
                 if uid.live_info.status:
                     logger.info(f"[BiliBili推送] {uid.name} 已开播")
-                    BOT_Status["liveing"][str(uid.uid)] = None
+                    BOT_Status["living"][str(uid.uid)] = None
 
         # 检测在数据库但不在B站关注列表的uid
         for up in subid_list:
@@ -242,7 +242,7 @@ async def init(app: Ariadne):
                     logger.info(f"[BiliBili推送] {up} BliBili 订阅修复成功")
                 await asyncio.sleep(1)
 
-        logger.info(f"[BiliBili推送] 直播初始化完成，当前 {len(BOT_Status['liveing'])} 个 UP 正在直播")
+        logger.info(f"[BiliBili推送] 直播初始化完成，当前 {len(BOT_Status['living'])} 个 UP 正在直播")
 
         # 动态初始化
         sub_num = len(subid_list)

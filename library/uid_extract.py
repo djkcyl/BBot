@@ -47,7 +47,7 @@ async def uid_extract(text: str, groupid: Optional[Union[int, str]] = None):
         text_u = text.strip(""""'“”‘’""")
         if text_u != text:
             logger.debug(f"[UID Extract] Text is a Quoted Digit: {text_u}")
-        logger.debug(f"[UID Extract] Searching UID in BiLiBili: {text_u}")
+        logger.debug(f"[UID Extract] Searching UID in BiliBili: {text_u}")
         resp = await search_user(text_u)
         logger.debug(f"[UID Extract] Search result: {resp}")
         if resp["numResults"]:

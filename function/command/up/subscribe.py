@@ -41,7 +41,7 @@ async def main(app: Ariadne, group: Group, anything: RegexResult):
     message = anything.result.display
     uid = await uid_extract(message)
     if uid:
-        if BOT_Status["dynamic_updateing"]:
+        if BOT_Status["dynamic_updating"]:
             await app.send_group_message(
                 group,
                 MessageChain("正在订阅，请稍后..."),

@@ -29,7 +29,7 @@ async def subscribe_uid(uid: Union[str, int], groupid: Union[str, int]):
     groupid = str(groupid)
     gp = GroupPermission(int(groupid))
     BOT_Status["init"] = False
-    while BOT_Status["dynamic_updateing"]:
+    while BOT_Status["dynamic_updating"]:
         await asyncio.sleep(0.1)
 
     if not uid:
@@ -71,7 +71,7 @@ async def subscribe_uid(uid: Union[str, int], groupid: Union[str, int]):
         BOT_Status["offset"][uid] = int(dyn.extend.dyn_id_str)
 
     if dyn.modules[0].module_author.author.live.live_state == 1:
-        BOT_Status["liveing"][uid] = None
+        BOT_Status["living"][uid] = None
     BOT_Status["init"] = True
     return f"成功在本群订阅 UP {up_name}（{uid}）"
 
@@ -81,7 +81,7 @@ async def unsubscribe_uid(uid, groupid):
     uid = str(uid)
     groupid = str(groupid)
     logger.info(f"正在群 {groupid} 取消订阅 {uid}")
-    while BOT_Status["dynamic_updateing"]:
+    while BOT_Status["dynamic_updating"]:
         await asyncio.sleep(0.1)
     BOT_Status["init"] = False
 
@@ -114,7 +114,7 @@ async def delete_uid(uid):
     else:
         BOT_Status["offset"].pop(uid, None)
         with contextlib.suppress(KeyError):
-            del BOT_Status["liveing"][uid]
+            del BOT_Status["living"][uid]
     if uid_exists(uid):
         delete_sub_by_uid(uid)
     else:

@@ -34,11 +34,11 @@ def write_to_json():
 class SubGroup:
     group_name: str
 
-    def __init__(self, group_name: str):
+    def __init__(self, in_group_name: str):
         """
         init
         """
-        self.group_name = group_name
+        self.group_name = in_group_name
 
     def is_in_group_names(self) -> bool:
         """

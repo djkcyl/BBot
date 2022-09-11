@@ -15,7 +15,7 @@ error_path = Path("data").joinpath("error")
 error_path.mkdir(parents=True, exist_ok=True)
 
 
-async def get_dynamic_screenshot(id):
+async def get_dynamic_screenshot(dynid):
     st = int(time.time())
     browser = await get_browser()
     for i in range(3):
@@ -24,12 +24,12 @@ async def get_dynamic_screenshot(id):
             page.on("requestfinished", network_request)
             page.on("requestfailed", network_requestfailed)
             if BotConfig.Bilibili.mobile_style:
-                url = f"https://m.bilibili.com/dynamic/{id}"
+                url = f"https://m.bilibili.com/dynamic/{dynid}"
                 await page.set_viewport_size({"width": 400, "height": 780})
                 with contextlib.suppress(TimeoutError):
                     await page.goto(url, wait_until="networkidle", timeout=20000)
                 if "bilibili.com/404" in url:
-                    logger.warning(f"[Bilibili] {id} 动态不存在，稍后再试")
+                    logger.warning(f"[Bilibili] {dynid} 动态不存在，稍后再试")
                     break
                 await page.add_script_tag(
                     content=(
@@ -48,12 +48,12 @@ async def get_dynamic_screenshot(id):
                 clip = await card.bounding_box()
                 assert clip
             else:
-                url = f"https://t.bilibili.com/{id}"
+                url = f"https://t.bilibili.com/{dynid}"
                 await page.set_viewport_size({"width": 2560, "height": 1080})
                 with contextlib.suppress(TimeoutError):
                     await page.goto(url, wait_until="networkidle", timeout=20000)
                 if "bilibili.com/404" in url:
-                    logger.warning(f"[Bilibili] {id} 动态不存在，稍后再试")
+                    logger.warning(f"[Bilibili] {dynid} 动态不存在，稍后再试")
                     break
                 card = await page.query_selector(".card")
                 assert card
@@ -67,14 +67,14 @@ async def get_dynamic_screenshot(id):
             image = await page.screenshot(clip=clip, full_page=True, type="jpeg", quality=98)
             await page.close()
             return image
-        except Exception:
+        except Exception: # noqa
             url = page.url
             if "bilibili.com/404" in url:
-                logger.error(f"[Bilibili] {id} 动态不存在，正在重试")
+                logger.error(f"[Bilibili] {dynid} 动态不存在，正在重试")
             else:
-                logger.exception(f"[BiliBili推送] {id} 动态截图失败，正在重试：")
+                logger.exception(f"[BiliBili推送] {dynid} 动态截图失败，正在重试：")
                 await page.screenshot(
-                    path=f"{error_path}/{id}_{i}_{st}.jpg",
+                    path=f"{error_path}/{dynid}_{i}_{st}.jpg",
                     full_page=True,
                     type="jpeg",
                     quality=80,

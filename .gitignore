@@ -17,5 +17,6 @@ error/
 data/browser
 package
 .vscode/
+.idea/
 data/.lock
 venv/

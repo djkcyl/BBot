@@ -47,7 +47,7 @@ async def main(
                     msg = "昵称过长，设定失败"
                 else:
                     msg = f"{uid} 昵称设定成功" if set_nick(uid, group.id, nicks) else "该群未关注此 UP"
-            elif acts == "删除":
+            else:
                 msg = f"{uid} 昵称删除成功" if set_nick(uid, group.id, None) else "该群未关注此 UP"
         else:
             msg = "请输入正确的 UID"

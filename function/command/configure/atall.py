@@ -43,7 +43,7 @@ async def main(app: Ariadne, group: Group, act: RegexResult, uid: RegexResult):
                     msg = f"{uid} @全体开启成功" if set_atall(uid, group.id, True) else "该群未关注此 UP"
                 else:
                     msg = "Bot 权限不足，无法开启@全体，请赋予 Bot 管理员权限或更高"
-            elif acts == "关闭":
+            else:
                 msg = f"{uid} @全体关闭成功" if set_atall(uid, group.id, False) else "该群未关注此 UP"
         else:
             msg = "请输入正确的 UID"
