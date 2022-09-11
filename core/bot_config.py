@@ -148,7 +148,7 @@ if bot_config_file.exists():
         err_info = []
         pos_maxlen = 0
         for err in json.loads(e.json()):
-            err_pos = ".".join(err["loc"])
+            err_pos = ".".join([str(x) for x in err["loc"]])
             err_msg = err["msg"]
             pos_maxlen = max(pos_maxlen, len(err_pos))
             err_info.append([err_pos, err_msg])
