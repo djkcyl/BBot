@@ -29,7 +29,7 @@ channel = Channel.current()
 )
 async def main(app: Ariadne, group: Group):
 
-    help = (
+    help_text = (
         "BBot 功能菜单：\n"
         "=================================================================\n"
         " 0. /quit\n"
@@ -45,9 +45,9 @@ async def main(app: Ariadne, group: Group):
     )
 
     if BotConfig.Bilibili.use_login:
-        help += "关注后目标 UP 将粉丝数 +1，收到动态更新后 BBot 将会对动态点赞。"
+        help_text += "关注后目标 UP 将粉丝数 +1，收到动态更新后 BBot 将会对动态点赞。"
 
     await app.send_group_message(
         group,
-        MessageChain(Image(data_bytes=await text2image(help))),
+        MessageChain(Image(data_bytes=await text2image(help_text))),
     )

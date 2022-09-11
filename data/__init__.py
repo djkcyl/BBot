@@ -41,7 +41,7 @@ class LivePush(BaseModel):
     room_name = CharField(null=True)
     room_area_parent = CharField(null=True)
     room_area = CharField(null=True)
-    statu = BooleanField()
+    status = BooleanField()
     push_groups = IntegerField()
     push_time = DateTimeField(default=datetime.now)
 
@@ -75,7 +75,7 @@ def insert_dynamic_push(
     dyn_text: str,
     push_groups: int,
 ):
-    "在动态推送表中插入一条记录"
+    """在动态推送表中插入一条记录"""
     DynamicPush(
         uid=str(uid),
         uname=uname,
@@ -88,84 +88,84 @@ def insert_dynamic_push(
 
 def insert_live_push(
     uid: Union[str, int],
-    statu: bool,
+    status: bool,
     push_groups: int,
     room_name: str = None,
     room_area_parent: str = None,
     room_area: str = None,
 ):
-    "在直播推送表中插入一条记录"
+    """在直播推送表中插入一条记录"""
     LivePush(
         uid=uid,
         room_name=room_name,
         room_area_parent=room_area_parent,
         room_area=room_area,
-        statu=statu,
+        status=status,
         push_groups=push_groups,
     ).save()
 
 
 def is_dyn_pushed(pushid: Union[str, int]) -> bool:
-    "查询某个动态是否推送过"
+    """查询某个动态是否推送过"""
     return bool(DynamicPush.select().where(DynamicPush.dyn_id == str(pushid)).exists())
 
 
 def add_sub(uid: Union[str, int], uname: str, group: Union[str, int]):
-    "添加订阅"
+    """添加订阅"""
     SubList(uid=str(uid), uname=uname, group=group).save()
 
 
 def get_all_uid() -> list[str]:
-    "获取所有uid"
+    """获取所有uid"""
     return [i.uid for i in SubList.select(SubList.uid).distinct()]
 
 
 def get_sub_by_group(group: Union[str, int]) -> list[SubList]:
-    "根据群组获取订阅列表"
+    """根据群组获取订阅列表"""
     return list(
         SubList.select().where(SubList.group == group).order_by(Cast(SubList.uid, "int"))
     )
 
 
 def get_sub_by_uid(uid: Union[str, int]) -> list[SubList]:
-    "根据uid获取订阅该uid的群"
+    """根据uid获取订阅该uid的群"""
     return list(SubList.select().where(SubList.uid == str(uid)).order_by(SubList.group))
 
 
 def uid_in_group_exists(uid: Union[str, int], group: Union[str, int]) -> bool:
-    "检查uid是否在该群订阅中"
+    """检查uid是否在该群订阅中"""
     return bool(
         SubList.select().where(SubList.uid == str(uid), SubList.group == str(group)).exists()
     )
 
 
 def get_sub_data(uid: Union[str, int], group: Union[str, int]) -> SubList:
-    "获取订阅数据"
+    """获取订阅数据"""
     return SubList.get(SubList.uid == str(uid), SubList.group == str(group))
 
 
 def set_uid_name(uid: Union[str, int], uname: str):
-    "设置用户名"
+    """设置用户名"""
     SubList.update(uname=uname).where(SubList.uid == str(uid)).execute()
 
 
 def uid_exists(uid: Union[str, int]) -> bool:
-    "检查uid是否存在数据库中"
+    """检查uid是否存在数据库中"""
     return bool(SubList.select().where(SubList.uid == str(uid)).exists())
 
 
 def uid_in_group(uid: Union[str, int], group: Union[str, int]) -> bool:
-    "检查uid是否在该群订阅中"
+    """检查uid是否在该群订阅中"""
     return bool(
         SubList.select().where(SubList.uid == str(uid), SubList.group == str(group)).exists()
     )
 
 
 def unsub_uid_by_group(uid: Union[str, int], group: Union[str, int]):
-    "取消该uid在该群的订阅"
+    """取消该uid在该群的订阅"""
     SubList.delete().where(SubList.uid == str(uid), SubList.group == str(group)).execute()
 
 
 def delete_sub_by_uid(uid: Union[str, int]):
-    "删除该uid的所有订阅"
+    """删除该uid的所有订阅"""
     SubList.delete().where(SubList.uid == str(uid)).execute()

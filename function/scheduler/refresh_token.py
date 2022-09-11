@@ -25,7 +25,7 @@ async def main(app: Ariadne):
     if BotConfig.Bilibili.use_login:
         BOT_Status["init"] = False
 
-        while BOT_Status["live_updateing"] or BOT_Status["dynamic_updateing"]:
+        while BOT_Status["live_updating"] or BOT_Status["dynamic_updating"]:
             await asyncio.sleep(0.1)
 
         try:

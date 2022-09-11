@@ -2,7 +2,6 @@ import asyncio
 
 from graia.saya import Channel
 from graia.ariadne.app import Ariadne
-from graia.ariadne.model import Group
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.event.message import GroupMessage
 from graia.saya.builtins.broadcast.schema import ListenerSchema
@@ -25,14 +24,14 @@ channel = Channel.current()
         decorators=[Permission.require(Permission.MASTER), Interval.require(20)],
     )
 )
-async def main(app: Ariadne, group: Group, anything: RegexResult):
+async def main(app: Ariadne, anything: RegexResult):
 
     if anything.matched:
         msg = anything.result.display
-        sended = []
+        sent = []
         for group in await app.get_group_list():
-            if group.id in sended:
+            if group.id in sent:
                 continue
             await app.send_group_message(group, MessageChain(f"公告 - {group.id}：\n{msg}"))
-            sended.append(group.id)
+            sent.append(group.id)
             await asyncio.sleep(2)

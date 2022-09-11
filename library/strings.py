@@ -3,7 +3,7 @@ import string
 import random
 
 
-def numf(num: int):
+def num_fmt(num: int):
     if num < 10000:
         return str(num)
     elif num < 100000000:
@@ -12,14 +12,14 @@ def numf(num: int):
         return ("%.2f" % (num / 100000000)) + "亿"
 
 
-def get_cut_str(str, cut):
+def get_cut_str(str_in, cut):
     """
     自动断行，用于 Pillow 等不会自动换行的场景
     """
     punc = """，,、。.？?）》】“"‘'；;：:！!·`~%^& """
     si = 0
     i = 0
-    next_str = str
+    next_str = str_in
     str_list = []
 
     while re.search(r"\n\n\n\n\n", next_str):
@@ -33,7 +33,7 @@ def get_cut_str(str, cut):
             next_str = next_str[1:]
         elif s == "\n":
             str_list.append(next_str[: i - 1])
-            next_str = next_str[i - 1 :]
+            next_str = next_str[i - 1:]
             si = 0
             i = 0
             continue
@@ -61,19 +61,18 @@ def get_cut_str(str, cut):
     return non_wrap_str
 
 
-def getCutStr(str, cut):
+def getCutStr(str_in, cut):
+    cut_str = str_in
     si = 0
     i = 0
-    for s in str:
+    for s in str_in:
         si += 2 if "\u4e00" <= s <= "\u9fff" else 1
         i += 1
         if si > cut:
-            cutStr = f"{str[:i]}...."
+            cut_str = f"{str_in[:i]}...."
             break
-        else:
-            cutStr = str
 
-    return cutStr
+    return cut_str
 
 
 def generate_verify_code():

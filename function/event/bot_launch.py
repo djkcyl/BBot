@@ -34,8 +34,8 @@ async def main(app: Ariadne):
     logger.debug(hc.cookies)
 
     logger.info("Graia 成功启动")
-    groupList = await app.get_group_list()
-    groupNum = len(groupList)
+    group_list = await app.get_group_list()
+    group_num = len(group_list)
     master = await app.get_friend(BotConfig.master)
     if not master:
         logger.error(f"当前未添加主人好友（{BotConfig.master}），请手动添加")
@@ -43,8 +43,8 @@ async def main(app: Ariadne):
     await app.send_friend_message(
         BotConfig.master,
         MessageChain(
-            "BBot-Graia成功启动。",
-            f"\n当前 {BotConfig.name} 共加入了 {groupNum} 个群",
+            "BBot-Graia 成功启动。",
+            f"\n当前 {BotConfig.name} 共加入了 {group_num} 个群",
         ),
     )
 

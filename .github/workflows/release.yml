@@ -17,7 +17,7 @@ jobs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
       version: ${{ steps.get_version.outputs.version }}
     steps:
-      - name: Prepare enviroment
+      - name: Prepare environment
         uses: actions/checkout@v2
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -49,7 +49,7 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Prepare enviroment
+      - name: Prepare environment
         uses: actions/checkout@v2
 
       - name: Setup Python
