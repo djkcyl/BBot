@@ -79,3 +79,7 @@ More...
 - [HarukaBot](../../../../SK-415/HarukaBot) 学习对象
 - [bilibili-API-collect](../../../../SocialSisterYi/bilibili-API-collect) 易姐收集的各种 BiliBili Api 及其提供的 gRPC Api 调用方案
 - [ABot-Graia](../../../../djkcyl/ABot-Graia) 永远怀念最好的 ABot 🙏
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/djkcyl/BBot-Graia.svg)](https://starchart.cc/djkcyl/BBot-Graia)
