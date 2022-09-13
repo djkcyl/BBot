@@ -81,7 +81,8 @@ More...
 - [HarukaBot](../../../../SK-415/HarukaBot) 学习对象
 - [bilibili-API-collect](../../../../SocialSisterYi/bilibili-API-collect) 易姐收集的各种 BiliBili Api 及其提供的 gRPC Api 调用方案
 - [ABot-Graia](../../../../djkcyl/ABot-Graia) 永远怀念最好的 ABot 🙏
-- 项目 Logo 画师：[八萬](https://space.bilibili.com/8027000)
+- [Well404](https://space.bilibili.com/33138220/) 为本项目编写文档以及部署教程[视频](https://www.bilibili.com/video/BV16B4y137sx)
+- [八萬](https://space.bilibili.com/8027000) 项目 Logo 画师
 
 ## Stargazers over time
 
