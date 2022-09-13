@@ -29,6 +29,8 @@ B，也代表 BiliBili，这个 Bot 将专注于哔哩哔哩的推送等服务
 
 </div>
 
+项目 Logo 画师：[八萬](https://space.bilibili.com/8027000)
+
 ## BBot 现在能干什么
 
 - 订阅 UP 主 ~~废话~~
