@@ -1,8 +1,19 @@
 <div align="center">
 
-![BBot-Graia](https://socialify.git.ci/djkcyl/BBot-Graia/image?description=1&font=Inter&forks=1&logo=http%3A%2F%2Fa60.oss.aunly.cn%2Fbbot%2Flogo.png&owner=1&pattern=Diagonal%20Stripes&stargazers=1&theme=Dark)
+![BBot-Graia](https://socialify.git.ci/djkcyl/BBot-Graia/image?description=1&font=Inter&logo=http%3A%2F%2Fa60.oss.aunly.cn%2Fbbot%2Flogo.png&owner=1&pattern=Circuit%20Board&theme=Dark)
   
 # BBot for Ariadne
+![GitHub Repo stars](https://img.shields.io/github/stars/djkcyl/BBot-Graia?style=social)
+![GitHub forks](https://img.shields.io/github/forks/djkcyl/BBot-Graia?style=social)
+
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/djkcyl/BBot-Graia/Release)
+![GitHub all releases](https://img.shields.io/github/downloads/djkcyl/BBot-Graia/total)
+[![License](https://img.shields.io/github/license/djkcyl/BBot-Graia)](https://github.com/djkcyl/BBot-Graia/blob/master/LICENSE)
+
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/djkcyl/BBot-Graia?color=brightgreen)
+![Python Version](https://img.shields.io/badge/python-3.9-blue)
+![Poetry Using](https://img.shields.io/badge/poetry-using-blue)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ![!](https://count.aunly.cn/get/@BBot-Graia?theme=rule34)
 
