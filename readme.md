@@ -1,5 +1,7 @@
 <div align="center">
 
+![BBot-Graia](https://socialify.git.ci/djkcyl/BBot-Graia/image?description=1&font=Inter&forks=1&logo=https%3A%2F%2Fa60.oss.aunly.cn%2Fbbot%2Flogo.png&owner=1&pattern=Circuit%20Board&stargazers=1&theme=Dark)
+  
 # BBot for Ariadne
 
 ![!](https://count.aunly.cn/get/@BBot-Graia?theme=rule34)
