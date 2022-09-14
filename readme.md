@@ -1,6 +1,6 @@
 <div align="center">
 
-![BBot-Graia](https://socialify.git.ci/djkcyl/BBot-Graia/image?description=1&font=Inter&logo=https%3A%2F%2Fgithub.com%2Fdjkcyl%2FBBot-Graia%2Fraw%2Fdjkcyl-patch-1%2Flogo.png&owner=1&pattern=Circuit%20Board&theme=Dark)
+![BBot-Graia](https://socialify.git.ci/djkcyl/BBot-Graia/image?description=1&font=Inter&logo=https%3A%2F%2Fgithub.com%2Fdjkcyl%2FBBot-Graia%2Fblob%2Fmaster%2Flogo.png%3Fraw%3Dtrue&owner=1&pattern=Circuit%20Board&theme=Dark)
   
 # BBot for Ariadne
 ![GitHub Repo stars](https://img.shields.io/github/stars/djkcyl/BBot-Graia?style=social)
