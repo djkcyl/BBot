@@ -3,12 +3,12 @@ import contextlib
 
 from pathlib import Path
 from loguru import logger
+from graia.ariadne import Ariadne
 from playwright.async_api._generated import Request
 from playwright._impl._api_types import TimeoutError
+from graiax.playwright.interface import PlaywrightContext
 
 from core.bot_config import BotConfig
-
-from .browser import get_browser
 
 
 error_path = Path("data").joinpath("error")
@@ -17,9 +17,10 @@ error_path.mkdir(parents=True, exist_ok=True)
 
 async def get_dynamic_screenshot(dynid):
     st = int(time.time())
-    browser = await get_browser()
+    app = Ariadne.current()
+    browser_context = app.launch_manager.get_interface(PlaywrightContext).context
     for i in range(3):
-        page = await browser.new_page()
+        page = await browser_context.new_page()
         try:
             page.on("requestfinished", network_request)
             page.on("requestfailed", network_requestfailed)
@@ -67,7 +68,7 @@ async def get_dynamic_screenshot(dynid):
             image = await page.screenshot(clip=clip, full_page=True, type="jpeg", quality=98)
             await page.close()
             return image
-        except Exception: # noqa
+        except Exception:  # noqa
             url = page.url
             if "bilibili.com/404" in url:
                 logger.error(f"[Bilibili] {dynid} 动态不存在，正在重试")

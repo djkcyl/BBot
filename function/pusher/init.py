@@ -178,7 +178,7 @@ async def init(app: Ariadne):
                 BotConfig.Bilibili.username
             ):
                 logger.critical(
-                    "[Bilibili推送] 检测到上次登录的账号与当前账号不一致，如需继续使用，请先手动删除数据库和 data/.lock 文件"
+                    "[Bilibili推送] 检测到上次登录的账号与当前账号不一致，如需继续使用，请先手动删除数据库（data/data.db）和 data/.lock 文件"
                 )
                 sys.exit(1)
 

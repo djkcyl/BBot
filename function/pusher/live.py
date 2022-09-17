@@ -3,6 +3,7 @@ import asyncio
 
 from loguru import logger
 from graia.saya import Channel
+from httpx import TimeoutException
 from graia.ariadne.app import Ariadne
 from graia.ariadne.model import MemberPerm
 from graia.ariadne.message.chain import MessageChain
@@ -38,8 +39,14 @@ async def main(app: Ariadne):
             del BOT_Status["living"][up]
     try:
         status_infos = await get_rooms_info_by_uids(sub_list)
-    except Exception: # noqa
+    except TimeoutException as timeout_error:
+        logger.warning(f"获取直播间信息超时: {timeout_error}")
+        await asyncio.sleep(5)
+        BOT_Status["live_updating"] = False
+        return
+    except Exception:  # noqa
         logger.exception("获取直播间状态失败:")
+        await asyncio.sleep(5)
         BOT_Status["live_updating"] = False
         return
     if status_infos:

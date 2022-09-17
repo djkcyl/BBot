@@ -87,7 +87,7 @@ qrcode = ["qrcode[pil] (>=7.3.1,<8.0.0)"]
 
 [[package]]
 name = "black"
-version = "22.6.0"
+version = "22.8.0"
 description = "The uncompromising code formatter."
 category = "dev"
 optional = false
@@ -209,30 +209,30 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "graia-amnesia"
-version = "0.5.8"
+version = "0.6.0"
 description = "a collection of shared components for graia"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 
 [package.dependencies]
-launart = ">=0.3.3"
+launart = ">=0.6.0,<1.0.0"
 loguru = ">=0.6.0,<1.0.0"
 statv = ">=0.2.2"
 typing-extensions = ">=4.0.0"
 yarl = ">=1.7.2,<2.0.0"
 
 [package.extras]
-aiohttp = ["aiohttp (>=3.8.1,<4.0.0)"]
-colorful = ["richuru (>=0.1.0,<1.0.0)"]
-orjson = ["orjson (>=3.6.7,<4.0.0)"]
-starlette = ["starlette (>=0.19.0,<1.0.0)"]
-ujson = ["ujson (>=5.2.0,<6.0.0)"]
 uvicorn = ["uvicorn (>=0.17.6,<1.0.0)"]
+ujson = ["ujson (>=5.2.0,<6.0.0)"]
+starlette = ["starlette (>=0.19.0,<1.0.0)"]
+orjson = ["orjson (>=3.6.7,<4.0.0)"]
+colorful = ["richuru (>=0.1.0,<1.0.0)"]
+aiohttp = ["aiohttp (>=3.8.1,<4.0.0)"]
 
 [[package]]
 name = "graia-ariadne"
-version = "0.8.4"
+version = "0.9.4"
 description = "Another elegant Python QQ Bot framework for mirai and mirai-api-http v2."
 category = "main"
 optional = false
@@ -241,12 +241,13 @@ python-versions = ">=3.8,<4.0"
 [package.dependencies]
 aiohttp = ">=3.8,<4.0"
 creart-graia = ">=0.1.5,<1.0.0"
-graia-amnesia = "0.5.8"
+graia-amnesia = ">=0.6.0,<0.7.0"
 graia-broadcast = ">=0.18,<1.0"
-graia-saya = {version = ">=0.0,<1.0", optional = true, markers = "extra == \"graia\""}
-graia-scheduler = {version = ">=0.0,<1.0", optional = true, markers = "extra == \"graia\""}
-launart = ">=0.6.0,<1.0.0"
+graia-saya = {version = ">=0.0,<1.0", optional = true, markers = "extra == \"standard\""}
+graia-scheduler = {version = ">=0.0,<1.0", optional = true, markers = "extra == \"standard\""}
+launart = ">=0.6,<1.0"
 pydantic = ">=1.9,<2.0"
+richuru = {version = ">=0.1,<1.0", optional = true, markers = "extra == \"standard\""}
 typing-extensions = ">=4.3,<5.0"
 
 [package.extras]
@@ -287,6 +288,20 @@ python-versions = ">=3.7,<4.0"
 [package.dependencies]
 croniter = ">=1.0.0,<2.0.0"
 graia-broadcast = ">=0.12.1"
+
+[[package]]
+name = "graiax-playwright"
+version = "0.2.0.post1"
+description = "适用于 Graia 的 Playwright 管理器"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+launart = ">=0.6.1,<0.7.0"
+loguru = ">=0.6.0,<1.0.0"
+playwright = ">=1.25.2,<2.0.0"
+typing-extensions = ">=4.3.0"
 
 [[package]]
 name = "greenlet"
@@ -369,7 +384,7 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "launart"
-version = "0.6.0"
+version = "0.6.1"
 description = "Component lifetime manager for runtime."
 category = "main"
 optional = false
@@ -714,7 +729,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "77ae132e5c3057f193d38c116b30661979e926708b54cb119bb1d057c54ebf75"
+content-hash = "db47b01cf06a376adb1b6549bd0bf8888a2c6e97f382e9015314a30dd0b73da3"
 
 [metadata.files]
 aiohttp = []
@@ -726,7 +741,31 @@ bilireq = [
     {file = "bilireq-0.2.2-py3-none-any.whl", hash = "sha256:0c82908eb908b766a602709b413dfcea076ce34ad7d3c3d70970884c13f31a15"},
     {file = "bilireq-0.2.2.tar.gz", hash = "sha256:fbd93654e33a40e0a99e7ccc291f3c663feec39996aa639ab2a21f24d6fe3f70"},
 ]
-black = []
+black = [
+    {file = "black-22.8.0-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:ce957f1d6b78a8a231b18e0dd2d94a33d2ba738cd88a7fe64f53f659eea49fdd"},
+    {file = "black-22.8.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:5107ea36b2b61917956d018bd25129baf9ad1125e39324a9b18248d362156a27"},
+    {file = "black-22.8.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:e8166b7bfe5dcb56d325385bd1d1e0f635f24aae14b3ae437102dedc0c186747"},
+    {file = "black-22.8.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:dd82842bb272297503cbec1a2600b6bfb338dae017186f8f215c8958f8acf869"},
+    {file = "black-22.8.0-cp310-cp310-win_amd64.whl", hash = "sha256:d839150f61d09e7217f52917259831fe2b689f5c8e5e32611736351b89bb2a90"},
+    {file = "black-22.8.0-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:a05da0430bd5ced89176db098567973be52ce175a55677436a271102d7eaa3fe"},
+    {file = "black-22.8.0-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4a098a69a02596e1f2a58a2a1c8d5a05d5a74461af552b371e82f9fa4ada8342"},
+    {file = "black-22.8.0-cp36-cp36m-win_amd64.whl", hash = "sha256:5594efbdc35426e35a7defa1ea1a1cb97c7dbd34c0e49af7fb593a36bd45edab"},
+    {file = "black-22.8.0-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:a983526af1bea1e4cf6768e649990f28ee4f4137266921c2c3cee8116ae42ec3"},
+    {file = "black-22.8.0-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3b2c25f8dea5e8444bdc6788a2f543e1fb01494e144480bc17f806178378005e"},
+    {file = "black-22.8.0-cp37-cp37m-win_amd64.whl", hash = "sha256:78dd85caaab7c3153054756b9fe8c611efa63d9e7aecfa33e533060cb14b6d16"},
+    {file = "black-22.8.0-cp38-cp38-macosx_10_9_universal2.whl", hash = "sha256:cea1b2542d4e2c02c332e83150e41e3ca80dc0fb8de20df3c5e98e242156222c"},
+    {file = "black-22.8.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:5b879eb439094751185d1cfdca43023bc6786bd3c60372462b6f051efa6281a5"},
+    {file = "black-22.8.0-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:0a12e4e1353819af41df998b02c6742643cfef58282915f781d0e4dd7a200411"},
+    {file = "black-22.8.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c3a73f66b6d5ba7288cd5d6dad9b4c9b43f4e8a4b789a94bf5abfb878c663eb3"},
+    {file = "black-22.8.0-cp38-cp38-win_amd64.whl", hash = "sha256:e981e20ec152dfb3e77418fb616077937378b322d7b26aa1ff87717fb18b4875"},
+    {file = "black-22.8.0-cp39-cp39-macosx_10_9_universal2.whl", hash = "sha256:8ce13ffed7e66dda0da3e0b2eb1bdfc83f5812f66e09aca2b0978593ed636b6c"},
+    {file = "black-22.8.0-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:32a4b17f644fc288c6ee2bafdf5e3b045f4eff84693ac069d87b1a347d861497"},
+    {file = "black-22.8.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:0ad827325a3a634bae88ae7747db1a395d5ee02cf05d9aa7a9bd77dfb10e940c"},
+    {file = "black-22.8.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:53198e28a1fb865e9fe97f88220da2e44df6da82b18833b588b1883b16bb5d41"},
+    {file = "black-22.8.0-cp39-cp39-win_amd64.whl", hash = "sha256:bc4d4123830a2d190e9cc42a2e43570f82ace35c3aeb26a512a2102bce5af7ec"},
+    {file = "black-22.8.0-py3-none-any.whl", hash = "sha256:d2c21d439b2baf7aa80d6dd4e3659259be64c6f49dfd0f32091063db0e006db4"},
+    {file = "black-22.8.0.tar.gz", hash = "sha256:792f7eb540ba9a17e8656538701d3eb1afcb134e3b45b71f20b25c77a8db7e6e"},
+]
 certifi = []
 charset-normalizer = []
 click = []
@@ -747,12 +786,12 @@ flake8 = [
 ]
 frozenlist = []
 graia-amnesia = [
-    {file = "graia-amnesia-0.5.8.tar.gz", hash = "sha256:6dfb4fbff8e1c4b19ce8946d4e570342f334c294cea8134d1b536c9904d7d129"},
-    {file = "graia_amnesia-0.5.8-py3-none-any.whl", hash = "sha256:75f433a55f0b139782c77fa8f91413a933685a057cdab5646386144e6b68665d"},
+    {file = "graia-amnesia-0.6.0.tar.gz", hash = "sha256:9f4ed226ebd2ccfe5e09489e4afffd9e58ae28c3fa93211dda72c3c6b9a439f0"},
+    {file = "graia_amnesia-0.6.0-py3-none-any.whl", hash = "sha256:c1e347171cd42d81b10dea4fb6afef4bed4e836fa9c698ecf595ccaa5c2d1939"},
 ]
 graia-ariadne = [
-    {file = "graia-ariadne-0.8.4.tar.gz", hash = "sha256:9bcf5e9208182216de3803309af471825bc6566fca831e0ad7fc20d94cef11cc"},
-    {file = "graia_ariadne-0.8.4-py3-none-any.whl", hash = "sha256:6956bd1fadcd8f1a76eaa840bb70159f435f235ca21fdffb0106cd9fb2581b4a"},
+    {file = "graia-ariadne-0.9.4.tar.gz", hash = "sha256:a9a4bcdd3a1fb6f5ccd0024b3f6120449b4b7e434fd90a28ae63bc4367280a9c"},
+    {file = "graia_ariadne-0.9.4-py3-none-any.whl", hash = "sha256:5c87d60da11c42aad32d3d70100c646e91af1b6911c14b657dd88688290fb082"},
 ]
 graia-broadcast = [
     {file = "graia-broadcast-0.18.2.tar.gz", hash = "sha256:07b0285d417021c795c3c4f4f12713311fcdec10d63f8e7a8ed7964e2f1b7a5a"},
@@ -765,6 +804,10 @@ graia-saya = [
 graia-scheduler = [
     {file = "graia-scheduler-0.0.8.tar.gz", hash = "sha256:b26731e8f83f413e3dda435b5b46d49e78f6bae4b902596c9c51adc9f93b5a18"},
     {file = "graia_scheduler-0.0.8-py3-none-any.whl", hash = "sha256:73515cc46a71e7e9c5b48825b20df3fa8d97f5708637d6cf29e51b152294c0fa"},
+]
+graiax-playwright = [
+    {file = "graiax-playwright-0.2.0.post1.tar.gz", hash = "sha256:20c4e55993da5d92ade3e55bad988d8aa149d6644a8b97293df21a6670473a64"},
+    {file = "graiax_playwright-0.2.0.post1-py3-none-any.whl", hash = "sha256:93131aa594c6d51d68636374b7817778f982f7ac76de59fdc62a4ccec26c2672"},
 ]
 greenlet = []
 grpcio = [
@@ -820,8 +863,8 @@ httpcore = []
 httpx = []
 idna = []
 launart = [
-    {file = "launart-0.6.0-py3-none-any.whl", hash = "sha256:21a0db0e7493d67567e8913e2f0e35871aaf36a70a41fcc732cc19b881cad5b5"},
-    {file = "launart-0.6.0.tar.gz", hash = "sha256:2452efdb7524740f2e8e59a0de1719d1044f96bed7e16119a8ce8e4b933eb73a"},
+    {file = "launart-0.6.1-py3-none-any.whl", hash = "sha256:515ccadb1aa2c0ff5647bad10bd4dab53913edbe63eb0f550a80bbe723b31658"},
+    {file = "launart-0.6.1.tar.gz", hash = "sha256:630d5582c3f5e7b68df0b2bde46f5bdfef69557fdade2af8414172e4c862dd15"},
 ]
 loguru = []
 mccabe = [

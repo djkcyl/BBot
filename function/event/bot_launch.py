@@ -4,11 +4,11 @@ from loguru import logger
 from graia.saya import Channel
 from graia.ariadne.app import Ariadne
 from graia.ariadne.message.chain import MessageChain
+from graiax.playwright.interface import PlaywrightContext
 from graia.ariadne.event.lifecycle import ApplicationLaunched
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 
 from core.bot_config import BotConfig
-from library.browser import get_browser
 from library.bilibili_request import hc
 
 channel = Channel.current()
@@ -21,12 +21,18 @@ async def main(app: Ariadne):
     """
     try:
         logger.info("正在获取浏览器版本")
-        browser = await get_browser()
-        page = await browser.new_page()
+        browser_context = app.launch_manager.get_interface(PlaywrightContext)
+        if not BotConfig.Bilibili.mobile_style:
+            await browser_context.context.add_cookies(
+                [{"name": "hit-dyn-v2", "value": "1", "domain": ".bilibili.com", "path": "/"}]
+            )
+            
+        page = browser_context.context.pages[0]
         version = await page.evaluate("() => navigator.appVersion")
         logger.info(f"[BiliBili推送] 浏览器启动完成，当前版本 {version}")
+        await page.close()
     except Exception as e:
-        logger.error(f"[BiliBili推送] 浏览器启动失败{e}")
+        logger.error(f"[BiliBili推送] 浏览器启动失败 {e}")
         sys.exit(1)
 
     logger.info("[BiliBili推送] 正在获取首页 Cookie")

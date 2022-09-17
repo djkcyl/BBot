@@ -8,6 +8,7 @@ datas += copy_metadata('graia-saya')
 datas += copy_metadata('graia-scheduler')
 datas += copy_metadata('graia-broadcast')
 datas += copy_metadata('creart-graia')
+datas += copy_metadata('graiax-playwright')
 
 
 block_cipher = None

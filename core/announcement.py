@@ -1,6 +1,5 @@
 from pathlib import Path
 from loguru import logger
-from typing import Dict, List
 from importlib import metadata
 
 
@@ -9,7 +8,7 @@ RAW_TOML = Path(__file__).parent.parent.joinpath("pyproject.toml").read_text(enc
 PROJECT_VERSION = RAW_TOML.split("version = ")[1].split("\n")[0].strip('"')
 
 ARIADNE_VERSION = (
-    RAW_TOML.split("version = ")[2].split(", extras")[0].split("\n")[0].strip('"').strip("^")
+    RAW_TOML.split("version = ")[2].split(", extras")[0].split("\n")[0].strip('"}{^')
 )
 
 BBOT_ASCII_LOGO = rf"""
@@ -45,10 +44,10 @@ def get_monitored_libs():
     return monitored_libs
 
 
-def get_dist_map() -> Dict[str, str]:
+def get_dist_map() -> dict[str, str]:
     """获取与项目相关的发行字典"""
     monitored_libs = get_monitored_libs()
-    dist_map: Dict[str, str] = {}
+    dist_map: dict[str, str] = {}
     for dist in metadata.distributions():
         name: str = dist.metadata["Name"]
         if name.lower() in monitored_libs.keys():
@@ -59,8 +58,8 @@ def get_dist_map() -> Dict[str, str]:
 
 def base_telemetry() -> None:
     """执行基础遥测检查"""
-    output: List[str] = [""]
-    dist_map: Dict[str, str] = get_dist_map()
+    output: list[str] = [""]
+    dist_map: dict[str, str] = get_dist_map()
     output.extend(
         " ".join(
             [

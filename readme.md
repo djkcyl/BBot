@@ -7,12 +7,14 @@
 ![GitHub forks](https://img.shields.io/github/forks/djkcyl/BBot-Graia?style=social)
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/djkcyl/BBot-Graia/Release)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/djkcyl/BBot-Graia?color=brightgreen)
 ![GitHub all releases](https://img.shields.io/github/downloads/djkcyl/BBot-Graia/total)
+![Platform](https://img.shields.io/badge/platform-linux_%7C_windows-lightgrey)
+
 [![License](https://img.shields.io/github/license/djkcyl/BBot-Graia)](https://github.com/djkcyl/BBot-Graia/blob/master/LICENSE)
+[![wakatime](https://wakatime.com/badge/github/djkcyl/BBot-Graia.svg)](https://wakatime.com/badge/github/djkcyl/BBot-Graia)
 ![QQ](https://img.shields.io/badge/Tencent_QQ-2948531755-ff69b4)
 
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/djkcyl/BBot-Graia?color=brightgreen)
-![Platform](https://img.shields.io/badge/platform-linux_%7C_windows-lightgrey)
 ![Python Version](https://img.shields.io/badge/python-3.9-blue)
 ![Poetry Using](https://img.shields.io/badge/poetry-using-blue)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)

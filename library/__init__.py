@@ -65,9 +65,11 @@ async def subscribe_uid(uid: Union[str, int], groupid: Union[str, int]):
             await unsubscribe_uid(uid, groupid)
             BOT_Status["init"] = True
             return f"UP（{uid}）订阅失败"
-        if int(dyn.extend.dyn_id_str) > BOT_Status["offset"]:
+        if int(dyn.extend.dyn_id_str) > BOT_Status["offset"] if BOT_Status["offset"] else 0:
             BOT_Status["offset"] = int(dyn.extend.dyn_id_str)
     elif not BotConfig.Bilibili.use_login:
+        if BOT_Status["offset"] is None:
+            BOT_Status["offset"] = {}
         BOT_Status["offset"][uid] = int(dyn.extend.dyn_id_str)
 
     if dyn.modules[0].module_author.author.live.live_state == 1:
