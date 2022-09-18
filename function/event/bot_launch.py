@@ -19,21 +19,22 @@ async def main(app: Ariadne):
     """
     Graia 成功启动
     """
-    try:
-        logger.info("正在获取浏览器版本")
-        browser_context = app.launch_manager.get_interface(PlaywrightContext)
-        if not BotConfig.Bilibili.mobile_style:
-            await browser_context.context.add_cookies(
-                [{"name": "hit-dyn-v2", "value": "1", "domain": ".bilibili.com", "path": "/"}]
-            )
-            
-        page = browser_context.context.pages[0]
-        version = await page.evaluate("() => navigator.appVersion")
-        logger.info(f"[BiliBili推送] 浏览器启动完成，当前版本 {version}")
-        await page.close()
-    except Exception as e:
-        logger.error(f"[BiliBili推送] 浏览器启动失败 {e}")
-        sys.exit(1)
+    if BotConfig.Bilibili.use_browser:
+        try:
+            logger.info("正在获取浏览器版本")
+            browser_context = app.launch_manager.get_interface(PlaywrightContext)
+            if not BotConfig.Bilibili.mobile_style:
+                await browser_context.context.add_cookies(
+                    [{"name": "hit-dyn-v2", "value": "1", "domain": ".bilibili.com", "path": "/"}]
+                )
+                
+            page = browser_context.context.pages[0]
+            version = await page.evaluate("() => navigator.appVersion")
+            logger.info(f"[BiliBili推送] 浏览器启动完成，当前版本 {version}")
+            await page.close()
+        except Exception as e:
+            logger.error(f"[BiliBili推送] 浏览器启动失败 {e}")
+            sys.exit(1)
 
     logger.info("[BiliBili推送] 正在获取首页 Cookie")
     await hc.get("https://bilibili.com/", follow_redirects=True)

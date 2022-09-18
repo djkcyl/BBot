@@ -1,5 +1,6 @@
-from datetime import datetime
 from typing import Union
+from loguru import logger
+from datetime import datetime
 from peewee import (
     Cast,
     Model,
@@ -11,6 +12,7 @@ from peewee import (
 )
 
 
+data_version = 2
 db = SqliteDatabase("data/data.db")
 
 
@@ -64,7 +66,31 @@ class SubList(BaseModel):
         table_name = "sub_list"
 
 
-db.create_tables([DynamicPush, LivePush, SubList], safe=True)
+class DataVersion(BaseModel):
+    """数据库版本记录"""
+
+    version = IntegerField()
+
+    class Meta:
+        table_name = "data_version"
+
+
+db.create_tables([DynamicPush, LivePush, SubList, DataVersion], safe=True)
+
+
+if not DataVersion.select().exists():
+    logger.warning(f"数据库版本记录不存在，正在创建，当前版本：{data_version}")
+    DataVersion(version=2).save()
+elif DataVersion.get().version != data_version:
+    logger.warning(f"数据库版本不匹配，当前版本：{data_version}，数据库版本：{DataVersion.get().version}，正在更新")
+    while DataVersion.get().version != data_version:
+        if DataVersion.get().version == 1:
+            logger.warning("当前数据版本为 1，正在更新至 2")
+            # 将 LivePush 表中的 statu 字段改为 status
+            db.execute_sql("ALTER TABLE live_push RENAME COLUMN statu TO status")
+            DataVersion.update(version=2).execute()
+
+    logger.success("数据库更新完成")
 
 
 def insert_dynamic_push(
@@ -90,9 +116,9 @@ def insert_live_push(
     uid: Union[str, int],
     status: bool,
     push_groups: int,
-    room_name: str = None,
-    room_area_parent: str = None,
-    room_area: str = None,
+    room_name: str = "",
+    room_area_parent: str = "",
+    room_area: str = "",
 ):
     """在直播推送表中插入一条记录"""
     LivePush(

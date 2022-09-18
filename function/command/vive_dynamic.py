@@ -1,3 +1,5 @@
+import time
+
 from graia.saya import Channel
 from graia.ariadne.app import Ariadne
 from graia.ariadne.model import Group
@@ -9,7 +11,9 @@ from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import (
     Twilight,
     FullMatch,
+    ArgResult,
     RegexResult,
+    ArgumentMatch,
     WildcardMatch,
 )
 
@@ -24,11 +28,21 @@ channel = Channel.current()
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight([FullMatch("查看动态"), "anything" @ WildcardMatch()])],
+        inline_dispatchers=[
+            Twilight(
+                [
+                    FullMatch("查看动态"),
+                    "test" @ ArgumentMatch("--test", action="store_true", optional=True),
+                    "anything" @ WildcardMatch(),
+                ]
+            )
+        ],
         decorators=[Permission.require(), Interval.require(20)],
     )
 )
-async def main(app: Ariadne, group: Group, message: MessageChain, anything: RegexResult):
+async def main(
+    app: Ariadne, group: Group, message: MessageChain, test: ArgResult, anything: RegexResult
+):
 
     if not (uid := await uid_extract(anything.result.display, group.id)):
         return await app.send_group_message(
@@ -41,18 +55,24 @@ async def main(app: Ariadne, group: Group, message: MessageChain, anything: Rege
     if res.list:
         if len(res.list) > 1:
             if res.list[0].modules[0].module_author.is_top:
-                dyn_id = res.list[1].extend.dyn_id_str
+                dyn = res.list[1]
             else:
-                dyn_id = res.list[0].extend.dyn_id_str
+                dyn = res.list[0]
         else:
-            dyn_id = res.list[0].extend.dyn_id_str
-        shot_image = await get_dynamic_screenshot(dyn_id)
+            dyn = res.list[0]
+        if test.result:
+            t1 = time.time()
+        shot_image = await get_dynamic_screenshot(dyn)
+        if test.result:
+            t2 = time.time()
+            shot_time = t2 - t1
         return await app.send_group_message(
             group,
             MessageChain(
                 Image(data_bytes=shot_image),
                 "\n",
-                await get_b23_url(f"https://t.bilibili.com/{dyn_id}"),
+                await get_b23_url(f"https://t.bilibili.com/{dyn.extend.dyn_id_str}"),
+                f"\n测试耗时：{shot_time:.2f}秒" if test.result else "",
             ),
             quote=message,
         )

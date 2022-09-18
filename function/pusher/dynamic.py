@@ -166,7 +166,7 @@ async def push(app: Ariadne, dyn: DynamicItem):
                     await push(app, dynamic)
 
         logger.debug(f"[Dynamic] Getting screenshot of {dynid}")
-        shot_image = await get_dynamic_screenshot(dynid)
+        shot_image = await get_dynamic_screenshot(dyn)
 
         if shot_image:
             logger.debug(f"[Dynamic] Get dynamic screenshot {dynid}")

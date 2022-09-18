@@ -185,7 +185,7 @@ async def init(app: Ariadne):
         elif (f := len(followed_list)) != 0:
             if sys.argv.pop() != "--ignore-sub":
                 logger.critical(
-                    f"[Bilibili推送] 该账号已关注 {f} 个用户，为避免产生问题，已停止运行，请先手动取消关注或添加启动参数 --ignore-sub"
+                    f"[Bilibili推送] 该账号已关注 {f} 个用户，为避免产生问题，已停止运行，请先手动取消关注或添加启动参数 --ignore-sub，这将取关所有已关注的用户"
                 )
                 sys.exit(1)
             else:
