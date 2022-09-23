@@ -1,3 +1,4 @@
+import function.command.add_talk
 import function.command.announcement
 import function.command.quit_group
 import function.command.status
@@ -22,6 +23,7 @@ import function.command.whitelist.add
 import function.command.whitelist.close
 import function.command.whitelist.open
 import function.command.whitelist.remove
+import function.command.web_auth
 import function.event.bot_launch
 import function.event.exception
 import function.event.invited_join_group

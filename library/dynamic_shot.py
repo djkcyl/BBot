@@ -4,6 +4,7 @@ import contextlib
 from pathlib import Path
 from loguru import logger
 from graia.ariadne import Ariadne
+from sentry_sdk import capture_exception
 from dynamicrendergrpc.Core.Dynamic import Render
 from playwright.async_api._generated import Request
 from playwright._impl._api_types import TimeoutError
@@ -80,6 +81,7 @@ async def get_dynamic_screenshot(dyn: DynamicItem):
                     logger.error(f"[Bilibili推送] {dynid} 动态不存在，正在尝试本地渲染")
                     break
                 else:
+                    capture_exception()
                     logger.exception(f"[BiliBili推送] {dynid} 动态截图失败，正在重试：")
                     await page.screenshot(
                         path=f"{error_path}/{dynid}_{i}_{st}.jpg",
@@ -94,6 +96,7 @@ async def get_dynamic_screenshot(dyn: DynamicItem):
     try:
         return await dynamic_rander.run(dyn)
     except Exception:  # noqa
+        capture_exception()
         logger.exception(f"[Bilibili推送] {dynid} 动态本地渲染失败")
         return None
 

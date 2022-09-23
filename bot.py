@@ -4,12 +4,17 @@ import contextlib
 from creart import it
 from pathlib import Path
 from graia.saya import Saya
+from fastapi import FastAPI
 from graia.ariadne.app import Ariadne
+from graiax.fastapi import FastAPIService
 from graia.scheduler import GraiaScheduler
 from graiax.playwright.service import PlaywrightService
+from graia.amnesia.builtins.uvicorn import UvicornService
+from graia.amnesia.builtins.memcache import MemcacheService
 from graia.ariadne.entry import config, HttpClientConfig, WebsocketClientConfig
 
 from core.log import logger
+from website import BotService
 from core.bot_config import BotConfig
 from core.announcement import base_telemetry
 
@@ -27,6 +32,7 @@ app_config = config(
 
 app = Ariadne(app_config)
 app.config(install_log=True)
+
 if BotConfig.Bilibili.use_browser:
     app.launch_manager.add_service(
         PlaywrightService(
@@ -40,6 +46,15 @@ if BotConfig.Bilibili.use_browser:
             else "",
         )
     )
+app.launch_manager.add_service(MemcacheService())
+app.launch_manager.add_service(
+    FastAPIService(
+        FastAPI(title="BBot API",description="适用于 BBot WebUI 的 API 文档", swagger_ui_parameters={"defaultModelsExpandDepth": -1})
+    )
+)
+app.launch_manager.add_service(UvicornService())
+app.launch_manager.add_service(BotService())
+
 app.create(GraiaScheduler)
 saya = it(Saya)
 

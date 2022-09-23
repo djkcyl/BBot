@@ -15,7 +15,7 @@ from bilireq.exceptions import ResponseCodeError
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.event.message import FriendMessage
 from graia.broadcast.interrupt import InterruptControl
-from graia.ariadne.event.lifecycle import ApplicationLaunched
+from graia.ariadne.event.lifecycle import AccountLaunch
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from bilireq.grpc.dynamic import grpc_get_followed_dynamic_users, grpc_get_user_dynamics
 
@@ -66,7 +66,7 @@ async def init_dyn_id(up_uid):
         logger.warning(f"[BiliBili推送] UP {up_uid} 动态获取失败")
 
 
-@channel.use(ListenerSchema(listening_events=[ApplicationLaunched]))
+@channel.use(ListenerSchema(listening_events=[AccountLaunch]))
 async def init(app: Ariadne):
 
     await asyncio.sleep(1)

@@ -2,8 +2,8 @@ import traceback
 
 from io import StringIO
 from graia.saya import Channel
-
 from graia.ariadne.app import Ariadne
+from sentry_sdk import capture_exception
 from graia.ariadne.message.element import Image
 from graia.ariadne.message.chain import MessageChain
 from graia.broadcast.builtin.event import ExceptionThrowed
@@ -17,6 +17,7 @@ channel = Channel.current()
 
 
 async def make_msg_for_unknown_exception(event: ExceptionThrowed):
+    capture_exception(event.exception)
     with StringIO() as fp:
         traceback.print_tb(event.exception.__traceback__, file=fp)
         tb = fp.getvalue()

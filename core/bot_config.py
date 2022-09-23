@@ -5,6 +5,7 @@ import yaml
 from pathlib import Path
 from loguru import logger
 from typing import Optional
+from sentry_sdk import capture_exception
 from pydantic import AnyHttpUrl, BaseSettings, Extra, validator
 
 # 数据模型类
@@ -158,8 +159,9 @@ if bot_config_file.exists():
             logger.critical(f"{err[0].ljust(pos_maxlen)} => {err[1]}")
         logger.critical("请检查配置文件(data/bot_group.yaml)中上述配置内容")
         sys.exit(1)
-    except Exception as e:
-        logger.exception(e)
+    except Exception:
+        capture_exception()
+        logger.exception("配置文件存在未知错误")
         logger.critical("读取配置文件时出现未知错误, 请检查配置文件是否填写正确")
         sys.exit(1)
     save_config()

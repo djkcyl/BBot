@@ -1,9 +1,11 @@
 import asyncio
+import contextlib
 
 from loguru import logger
 from datetime import datetime
 from graia.saya import Channel
 from graia.ariadne.app import Ariadne
+from sentry_sdk import capture_exception
 from graia.ariadne.model import MemberPerm
 from bilireq.utils import ResponseCodeError
 from graia.ariadne.message.element import AtAll
@@ -126,11 +128,6 @@ async def main(app: Ariadne):
     await asyncio.sleep(0.5)
 
 
-@channel.use(SchedulerSchema(every_custom_seconds(2)))
-async def debug():
-    logger.debug(BOT_Status)
-
-
 async def push(app: Ariadne, dyn: DynamicItem):
     """推送动态"""
 
@@ -239,15 +236,17 @@ async def push(app: Ariadne, dyn: DynamicItem):
                     )
                     await asyncio.sleep(1)
                 except UnknownTarget:
+                    logger.warning(f"[BiliBili推送] {dynid} | 推送失败，找不到该群 {data.group}，正在取消订阅")
                     delete = await delete_group(data.group)
-                    logger.info(
-                        f"[BiliBili推送] {dynid} | 推送失败，找不到该群 {data.group}，已删除该群订阅的 {len(delete)} 个 UP"
-                    )
+                    logger.warning(f"[BiliBili推送] 已删除群 {data.group} 订阅的 {len(delete)} 个 UP")
+                    with contextlib.suppress():
+                        await app.quit_group(int(data.group))
                 except AccountMuted:
                     group = await app.get_group(int(data.group))
                     group = f"{group.name}（{group.id}）" if group else data.group
                     logger.warning(f"[BiliBili推送] {dynid} | 推送失败，账号在 {group} 被禁言")
-                except Exception: # noqa
+                except Exception:  # noqa
+                    capture_exception()
                     logger.exception(f"[BiliBili推送] {dynid} | 推送失败，未知错误")
         if BotConfig.Bilibili.use_login:
             try:
@@ -310,3 +309,8 @@ async def check_uid(app: Ariadne, uid):
 
 class ScreenshotError(Exception):
     pass
+
+
+@channel.use(SchedulerSchema(every_custom_seconds(2)))
+async def debug():
+    logger.debug(BOT_Status)

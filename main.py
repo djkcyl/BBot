@@ -1,7 +1,13 @@
 import sys
 import psutil
+import sentry_sdk
 
 from pathlib import Path
+
+sentry_sdk.init(
+    dsn="https://e7455ef7813c42e2b854bdd5c26adeb6@o1418272.ingest.sentry.io/6761179",
+    traces_sample_rate=1.0,
+)
 
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
     s = psutil.Process().parent()

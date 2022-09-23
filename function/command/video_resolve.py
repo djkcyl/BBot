@@ -5,6 +5,7 @@ import asyncio
 from loguru import logger
 from graia.saya import Channel
 from graia.ariadne.app import Ariadne
+from sentry_sdk import capture_exception
 from graia.ariadne.model import Group, Member
 from graia.ariadne.event.message import GroupMessage
 from graia.ariadne.message.chain import MessageChain
@@ -54,6 +55,7 @@ async def bilibili_main(
                 ),
             )
         except Exception: # noqa
+            capture_exception()
             logger.exception("视频解析 API 调用出错")
             await app.send_group_message(group, MessageChain("视频解析 API 调用出错"), quote=source)
 

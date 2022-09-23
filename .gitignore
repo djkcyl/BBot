@@ -19,6 +19,8 @@ package
 .vscode/
 .idea/
 data/.lock
-.venv/
+.venv*/
 dist/
 build/
+Static/Cache/Face/*
+Static/Cache/Pendant/*

@@ -1,10 +1,12 @@
+from json import JSONDecodeError
 import time
 import asyncio
 
 from loguru import logger
 from graia.saya import Channel
-from httpx import TimeoutException
+from httpx import TransportError
 from graia.ariadne.app import Ariadne
+from sentry_sdk import capture_exception
 from graia.ariadne.model import MemberPerm
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.connection.util import UploadMethod
@@ -39,14 +41,15 @@ async def main(app: Ariadne):
             del BOT_Status["living"][up]
     try:
         status_infos = await get_rooms_info_by_uids(sub_list)
-    except TimeoutException as timeout_error:
-        logger.warning(f"获取直播间信息超时: {timeout_error}")
+    except (TransportError, JSONDecodeError) as error:
+        logger.warning(f"获取直播间状态失败: {type(error)} {error}")
         await asyncio.sleep(5)
         BOT_Status["live_updating"] = False
         return
     except Exception:  # noqa
+        capture_exception()
         logger.exception("获取直播间状态失败:")
-        await asyncio.sleep(5)
+        await asyncio.sleep(30)
         BOT_Status["live_updating"] = False
         return
     if status_infos:

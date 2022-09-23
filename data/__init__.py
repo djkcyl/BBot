@@ -1,6 +1,6 @@
-from typing import Union
+from typing import Any, Union
 from loguru import logger
-from datetime import datetime
+from datetime import datetime, timedelta
 from peewee import (
     Cast,
     Model,
@@ -66,6 +66,16 @@ class SubList(BaseModel):
         table_name = "sub_list"
 
 
+class TalkCount(BaseModel):
+    """消息统计"""
+
+    time = DateTimeField()
+    count = IntegerField()
+
+    class Meta:
+        table_name = "talk_count"
+
+
 class DataVersion(BaseModel):
     """数据库版本记录"""
 
@@ -75,7 +85,7 @@ class DataVersion(BaseModel):
         table_name = "data_version"
 
 
-db.create_tables([DynamicPush, LivePush, SubList, DataVersion], safe=True)
+db.create_tables([DynamicPush, LivePush, SubList, TalkCount, DataVersion], safe=True)
 
 
 if not DataVersion.select().exists():
@@ -158,13 +168,6 @@ def get_sub_by_uid(uid: Union[str, int]) -> list[SubList]:
     return list(SubList.select().where(SubList.uid == str(uid)).order_by(SubList.group))
 
 
-def uid_in_group_exists(uid: Union[str, int], group: Union[str, int]) -> bool:
-    """检查uid是否在该群订阅中"""
-    return bool(
-        SubList.select().where(SubList.uid == str(uid), SubList.group == str(group)).exists()
-    )
-
-
 def get_sub_data(uid: Union[str, int], group: Union[str, int]) -> SubList:
     """获取订阅数据"""
     return SubList.get(SubList.uid == str(uid), SubList.group == str(group))
@@ -195,3 +198,35 @@ def unsub_uid_by_group(uid: Union[str, int], group: Union[str, int]):
 def delete_sub_by_uid(uid: Union[str, int]):
     """删除该uid的所有订阅"""
     SubList.delete().where(SubList.uid == str(uid)).execute()
+
+
+def add_talk_count():
+    """添加聊天计数"""
+    now_time = datetime.now().replace(minute=0, second=0, microsecond=0)
+    # 如果当前时间已经存在记录，则计数加一，否则新建一条记录
+    if TalkCount.select().where(TalkCount.time == now_time).exists():
+        TalkCount.update(count=TalkCount.count + 1).where(TalkCount.time == now_time).execute()
+    else:
+        TalkCount(time=now_time, count=1).save()
+
+
+def get_talk_count(from_time: datetime, to_time: datetime) -> list[dict[str, Any]]:
+    """获取并返回指定范围内每小时的聊天计数"""
+    return [
+        {"time": i.time, "count": i.count}
+        for i in TalkCount.select().where(
+            TalkCount.time >= from_time, TalkCount.time <= to_time
+        )
+    ]
+
+
+def get_push_count(from_time: datetime, to_time: datetime) -> int:
+    """获取并返回指定范围内的推送计数"""
+    return (
+        DynamicPush.select()
+        .where(DynamicPush.push_time >= from_time, DynamicPush.push_time <= to_time)
+        .count()
+    )
+
+
+print(get_talk_count(datetime.now() - timedelta(days=1), datetime.now() + timedelta(days=1)))

@@ -7,7 +7,6 @@ import time
 
 from asyncio import Lock
 from typing import Optional
-from graia.saya import Channel
 from collections import defaultdict
 from typing import DefaultDict, Set, Tuple, Union
 from graia.broadcast.exceptions import ExecutionStop
@@ -16,8 +15,6 @@ from graia.broadcast.builtin.decorators import Depend
 from graia.ariadne.model import Member, MemberPerm, Friend
 
 from .bot_config import BotConfig
-
-channel = Channel.current()
 
 
 class Permission:
@@ -32,7 +29,7 @@ class Permission:
     DEFAULT = USER
 
     @classmethod
-    def get(cls, member: Union[Member, int]) -> int:
+    def get(cls, member: Union[Member, int, str]) -> int:
         """
         获取用户的权限
 
@@ -43,8 +40,8 @@ class Permission:
         if isinstance(member, Member):
             user = member.id
             user_permission = member.permission
-        elif isinstance(member, int):
-            user = member
+        elif isinstance(member, (int, str)):
+            user = int(member)
             user_permission = None
         else:
             raise TypeError("member must be Member or int")
