@@ -16,7 +16,7 @@ from core.bot_config import BotConfig
 
 error_path = Path("data").joinpath("error")
 error_path.mkdir(parents=True, exist_ok=True)
-
+mobile_style_js = Path(__file__).parent.joinpath("mobile_style.js").read_text(encoding="utf-8")
 
 async def get_dynamic_screenshot(dyn: DynamicItem):
     dynid = dyn.extend.dyn_id_str
@@ -37,18 +37,7 @@ async def get_dynamic_screenshot(dyn: DynamicItem):
                     if "bilibili.com/404" in url:
                         logger.warning(f"[Bilibili推送] {dynid} 动态不存在，正在尝试本地渲染")
                         break
-                    await page.add_script_tag(
-                        content=(
-                            # 去除打开app按钮
-                            "document.getElementsByClassName('launch-app-btn').forEach(v=>v.remove());"
-                            # 去除关注按钮
-                            "document.getElementsByClassName('dyn-header__following').forEach(v=>v.remove());"
-                            # 修复字体与换行问题
-                            "const dyn=document.getElementsByClassName('dyn-card')[0];"
-                            "dyn.style.fontFamily='Noto Sans CJK SC, sans-serif';"
-                            "dyn.style.overflowWrap='break-word'"
-                        )
-                    )
+                    await page.add_script_tag(content=mobile_style_js)
                     card = await page.query_selector(".dyn-card")
                     assert card
                     clip = await card.bounding_box()

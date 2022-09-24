@@ -1,3 +1,4 @@
+import os
 import sys
 import psutil
 import sentry_sdk
@@ -30,4 +31,5 @@ for /f "tokens=*" %%a in ('dir /b /s /a-d bbot*.exe') do (
         input("按回车键退出 Press Enter to exit")
         sys.exit(1)
 
+os.environ["PLAYWRIGHT_BROWSERS_PATH"] = Path("data", "browser").absolute().as_posix()
 import bot

@@ -170,8 +170,7 @@ elif Path(sys.argv[0]).name != "_child.py":
     logger.error(f"未找到配置文件，已为您创建默认配置文件（{bot_config_file}），请修改后重新启动")
     bot_config_file.write_text(
         Path(__file__)
-        .parent.parent.joinpath("data")
-        .joinpath("bot_config.exp.yaml")
+        .parent.parent.joinpath("data", "bot_config.exp.yaml")
         .read_text(encoding="utf-8"),
         encoding="utf-8",
     )
