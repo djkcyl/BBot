@@ -6,7 +6,6 @@ from pathlib import Path
 from graia.saya import Saya
 from fastapi import FastAPI
 from graia.ariadne.app import Ariadne
-from graiax.fastapi import FastAPIService
 from graia.scheduler import GraiaScheduler
 from graiax.playwright.service import PlaywrightService
 from graia.amnesia.builtins.uvicorn import UvicornService
@@ -16,6 +15,7 @@ from graia.ariadne.entry import config, HttpClientConfig, WebsocketClientConfig
 from core.log import logger
 from website import BotService
 from core.bot_config import BotConfig
+from library.fastapi import FastAPIService
 from core.announcement import base_telemetry
 
 logger.info("BBot is starting...")
@@ -49,10 +49,14 @@ if BotConfig.Bilibili.use_browser:
 app.launch_manager.add_service(MemcacheService())
 app.launch_manager.add_service(
     FastAPIService(
-        FastAPI(title="BBot API",description="适用于 BBot WebUI 的 API 文档", swagger_ui_parameters={"defaultModelsExpandDepth": -1})
+        FastAPI(
+            title="BBot API",
+            description="适用于 BBot WebUI 的 API 文档",
+            swagger_ui_parameters={"defaultModelsExpandDepth": -1},
+        )
     )
 )
-app.launch_manager.add_service(UvicornService())
+app.launch_manager.add_service(UvicornService(host="0.0.0.0", port=8001))
 app.launch_manager.add_service(BotService())
 
 app.create(GraiaScheduler)
@@ -63,7 +67,7 @@ with saya.module_context():
 
     saya.require("function")
 
-import function  # noqa: E402 F401
+import function  # noqa
 
 with contextlib.suppress(KeyboardInterrupt, asyncio.exceptions.CancelledError):
     app.launch_blocking()

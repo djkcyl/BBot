@@ -23,7 +23,7 @@ from library import delete_uid
 from core.bot_config import BotConfig
 from core import BOT_Status, Bili_Auth
 from data import get_all_uid, delete_sub_by_uid
-from library.bilibili_request import relation_modify, grpc_get_followed_dynamics_noads
+from library.bilibili_request import relation_modify, grpc_get_followed_dynamics_noads, get_user_space_info
 
 
 inc = it(InterruptControl)
@@ -167,6 +167,7 @@ async def init(app: Ariadne):
         Bili_Auth.update(auth_data)
         logger.debug(await Bili_Auth.get_info())
         login_cache_file.write_text(json.dumps(dict(Bili_Auth), indent=2, ensure_ascii=False))
+
 
         # 初始化
         subid_list = get_all_uid()

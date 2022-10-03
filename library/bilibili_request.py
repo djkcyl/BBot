@@ -1,7 +1,9 @@
 import httpx
 
 from typing import Union
-from bilireq.utils import post
+from bilireq.utils import post, get
+from bilireq.grpc.protos.bilibili.app.view.v1.view_pb2_grpc import ViewStub
+from bilireq.grpc.protos.bilibili.app.view.v1.view_pb2 import ViewReq, ViewReply
 from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2_grpc import DynamicStub
 from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2 import (
     DynamicType,
@@ -81,6 +83,19 @@ async def search_user(keyword: str):
     return (await hc.get(url, params=data)).json()["data"]
 
 
+async def get_user_space_info(uid: int):
+    """
+    获取用户空间信息
+    """
+    url = "https://app.bilibili.com/x/v2/space"
+    params = {
+        "vmid": uid,
+        "build": 6840300,
+        "ps": 1,
+    }
+    return await get(url, params=params)
+
+
 async def grpc_get_followed_dynamics_noads():
     resp = await grpc_get_followed_dynamics(auth=Bili_Auth)
     exclude_list = [
@@ -99,3 +114,15 @@ async def grpc_get_dynamic_details(dynamic_ids: str, **kwargs) -> DynDetailsRepl
     stub = DynamicStub(kwargs.pop("_channel"))
     req = DynDetailsReq(dynamic_ids=dynamic_ids)
     return await stub.DynDetails(req, **kwargs)
+
+
+@grpc_request
+async def grpc_get_view_info(aid: int = None, bvid: str = None, **kwargs) -> ViewReply:
+    stub = ViewStub(kwargs.pop("_channel"))
+    if aid:
+        req = ViewReq(aid=aid)
+    elif bvid:
+        req = ViewReq(bvid=bvid)
+    else:
+        raise ValueError("aid or bvid must be provided")
+    return await stub.View(req, **kwargs)

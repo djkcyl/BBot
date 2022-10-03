@@ -9,12 +9,13 @@ from sentry_sdk import capture_exception
 from graia.ariadne.model import MemberPerm
 from bilireq.utils import ResponseCodeError
 from graia.ariadne.message.element import AtAll
+from graia.broadcast.exceptions import ExecutionStop
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.connection.util import UploadMethod
 from graia.scheduler.saya.schema import SchedulerSchema
 from graia.scheduler.timers import every_custom_seconds
 from bilireq.grpc.dynamic import grpc_get_user_dynamics
-from graia.ariadne.exception import UnknownTarget, AccountMuted
+from graia.ariadne.exception import UnknownTarget, AccountMuted, RemoteException
 from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2 import (
     FoldType,
     DynamicItem,
@@ -245,6 +246,19 @@ async def push(app: Ariadne, dyn: DynamicItem):
                     group = await app.get_group(int(data.group))
                     group = f"{group.name}（{group.id}）" if group else data.group
                     logger.warning(f"[BiliBili推送] {dynid} | 推送失败，账号在 {group} 被禁言")
+                except RemoteException as e:
+                    if "resultType=46" in str(e):
+                        logger.error(f"[BiliBili推送] {dynid} | 推送失败，Bot 被限制发送群聊消息")
+                        await app.send_friend_message(
+                            BotConfig.master,
+                            MessageChain("Bot 被限制发送群聊消息（46 代码），请尽快处理后发送 /init 重新开启推送进程"),
+                        )
+                        BOT_Status["dynamic_updating"] = True
+                        BOT_Status["init"] = False
+                        raise ExecutionStop() from e
+                    else:
+                        capture_exception()
+                        logger.exception(f"[BiliBili推送] {dynid} | 推送失败，未知错误")
                 except Exception:  # noqa
                     capture_exception()
                     logger.exception(f"[BiliBili推送] {dynid} | 推送失败，未知错误")

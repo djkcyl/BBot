@@ -19,7 +19,7 @@ channel = Channel.current()
 login_cache_file = Path("data/login_cache.json")
 
 
-@channel.use(SchedulerSchema(crontabify("0 0 1 * *")))
+@channel.use(SchedulerSchema(crontabify("0 0 * * *")))
 async def main(app: Ariadne):
     logger.info("[BiliBili推送] 开始刷新 token")
     if BotConfig.Bilibili.use_login:

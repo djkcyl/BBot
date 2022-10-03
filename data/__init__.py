@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Union
 from loguru import logger
 from datetime import datetime, timedelta
 from peewee import (
@@ -210,13 +210,20 @@ def add_talk_count():
         TalkCount(time=now_time, count=1).save()
 
 
-def get_talk_count(from_time: datetime, to_time: datetime) -> list[dict[str, Any]]:
-    """获取并返回指定范围内每小时的聊天计数"""
+def get_talk_count(from_time: datetime, to_time: datetime) -> list[dict[str, int]]:
+    """获取指定范围内的每个整点小时"""
+
     return [
-        {"time": i.time, "count": i.count}
-        for i in TalkCount.select().where(
-            TalkCount.time >= from_time, TalkCount.time <= to_time
-        )
+        {
+            "time": int(x.timestamp()),
+            "count": TalkCount.get(TalkCount.time == x).count
+            if TalkCount.select().where(TalkCount.time == x).exists()
+            else 0,
+        }
+        for x in [
+            from_time.replace(minute=0, second=0, microsecond=0) + timedelta(hours=i)
+            for i in range(int((to_time - from_time).total_seconds() // 3600))
+        ]
     ]
 
 
@@ -227,6 +234,3 @@ def get_push_count(from_time: datetime, to_time: datetime) -> int:
         .where(DynamicPush.push_time >= from_time, DynamicPush.push_time <= to_time)
         .count()
     )
-
-
-print(get_talk_count(datetime.now() - timedelta(days=1), datetime.now() + timedelta(days=1)))

@@ -80,7 +80,7 @@ class AddFollowResponse(BaseResponse):
 
 
 class TalkCount(BaseModel):
-    time: datetime
+    time: int
     count: int
 
 

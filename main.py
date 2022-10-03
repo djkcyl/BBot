@@ -32,4 +32,5 @@ for /f "tokens=*" %%a in ('dir /b /s /a-d bbot*.exe') do (
         sys.exit(1)
 
 os.environ["PLAYWRIGHT_BROWSERS_PATH"] = Path("data", "browser").absolute().as_posix()
+
 import bot

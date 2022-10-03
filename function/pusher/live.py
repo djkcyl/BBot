@@ -1,20 +1,21 @@
-from json import JSONDecodeError
 import time
 import asyncio
 
 from loguru import logger
 from graia.saya import Channel
+from json import JSONDecodeError
 from httpx import TransportError
 from graia.ariadne.app import Ariadne
 from sentry_sdk import capture_exception
 from graia.ariadne.model import MemberPerm
+from bilireq.live import get_rooms_info_by_uids
+from graia.broadcast.exceptions import ExecutionStop
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.connection.util import UploadMethod
 from graia.ariadne.message.element import Image, AtAll
 from graia.scheduler.saya.schema import SchedulerSchema
 from graia.scheduler.timers import every_custom_seconds
-from graia.ariadne.exception import UnknownTarget, AccountMuted
-from bilireq.live import get_rooms_info_by_uids
+from graia.ariadne.exception import UnknownTarget, AccountMuted, RemoteException
 
 from core import BOT_Status
 from core.bot_config import BotConfig
@@ -61,6 +62,9 @@ async def main(app: Ariadne):
                 # if up_id in BOT_Status["skip_uid"]:
                 #     continue
                 # 如果存在直播信息则为已开播
+                logger.debug(
+                    f"[Live] {up_name}({up_id}) live_status: {live_data['live_status']}"
+                )
                 if live_data["live_status"] == 1:
                     # 判断是否在正在直播列表中
                     if up_id in BOT_Status["living"]:
@@ -164,6 +168,25 @@ async def main(app: Ariadne):
                                 group = await app.get_group(int(data.group))
                                 group = f"{group.name}（{group.id}）" if group else data.group
                                 logger.warning(f"[BiliBili推送] 推送失败，账号在 {group} 被禁言")
+
+                            except RemoteException as e:
+                                if "resultType=46" in str(e):
+                                    logger.error("[BiliBili推送] 推送失败，Bot 被限制发送群聊消息")
+                                    await app.send_friend_message(
+                                        BotConfig.master,
+                                        MessageChain(
+                                            "Bot 被限制发送群聊消息（46 代码），请尽快处理后发送 /init 重新开启推送进程"
+                                        ),
+                                    )
+                                    BOT_Status["dynamic_updating"] = True
+                                    BOT_Status["init"] = False
+                                    raise ExecutionStop() from e
+                                else:
+                                    capture_exception()
+                                    logger.exception("[BiliBili推送] 推送失败，未知错误")
+                            except Exception:  # noqa
+                                capture_exception()
+                                logger.exception("[BiliBili推送] 推送失败，未知错误")
 
                             await asyncio.sleep(1)
                     insert_live_push(up_id, False, len(get_sub_by_uid(up_id)))
