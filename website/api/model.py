@@ -4,8 +4,6 @@ from datetime import datetime
 from pydantic import BaseModel
 from graia.ariadne.model import MemberPerm
 
-from core.bot_config import _BotConfig, BotConfig
-
 
 class Token(BaseModel):
     access_token: str

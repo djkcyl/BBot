@@ -6,7 +6,7 @@ from graia.ariadne.message.chain import MessageChain
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.event.mirai import BotInvitedJoinGroupRequestEvent
 
-from core.bot_config import BotConfig
+from bot import BotConfig
 from core.group_config import GroupPermission
 
 channel = Channel.current()

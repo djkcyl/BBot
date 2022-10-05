@@ -15,7 +15,7 @@ from graia.ariadne.event.mirai import (
 
 from data import get_sub_by_group
 from library import unsubscribe_uid
-from core.bot_config import BotConfig
+from bot import BotConfig
 from core.group_config import GroupPermission
 
 channel = Channel.current()
