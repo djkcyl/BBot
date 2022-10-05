@@ -90,7 +90,6 @@ class HomeItem(BaseModel):
     uid_count: int
     push_count: int
     talk_count: list[TalkCount]
-    bot_config: _BotConfig = BotConfig
 
 
 class HomeResponse(BaseResponse):

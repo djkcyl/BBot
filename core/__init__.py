@@ -1,4 +1,7 @@
+from typing import Optional
 from bilireq.auth import Auth
+
+from core.bot_config import BotConfig
 
 BOT_Status = {
     "living": {},
@@ -9,3 +12,4 @@ BOT_Status = {
 }
 
 Bili_Auth = Auth()
+Bot_Config = BotConfig

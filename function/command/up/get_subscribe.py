@@ -7,6 +7,7 @@ from graia.broadcast.exceptions import PropagationCancelled
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import Twilight, RegexMatch
 
+
 from data import get_sub_by_group
 from core.control import Interval, Permission
 
@@ -18,11 +19,10 @@ channel = Channel.current()
         listening_events=[GroupMessage],
         inline_dispatchers=[Twilight(RegexMatch(r"(查看)?(本群)?(订阅|关注)列表"))],
         decorators=[Permission.require(), Interval.require()],
-        priority=10,
-    )
+        priority=15,
+    ),
 )
 async def sub_list(app: Ariadne, group: Group):
-
     sublist = get_sub_by_group(group.id)
     sublist_count = len(sublist)
     if sublist_count == 0:
