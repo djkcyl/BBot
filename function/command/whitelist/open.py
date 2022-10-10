@@ -7,7 +7,7 @@ from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import Twilight, FullMatch
 
 from core.control import Permission
-from core.bot_config import BotConfig, save_config
+from bot import BotConfig
 
 channel = Channel.current()
 
@@ -28,6 +28,6 @@ async def main(app: Ariadne, friend: Friend):
         msg = "白名单开启成功"
     else:
         BotConfig.access_control = True
-        save_config()
+        BotConfig.save()
         msg = "白名单当前已开启"
     await app.send_friend_message(friend, MessageChain(msg))

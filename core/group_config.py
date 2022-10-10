@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Union
 from graia.ariadne.model import Group
 
-from .bot_config import BotConfig
+from bot import BotConfig
 
 
 grouplist_file = Path("data/group_list.json")

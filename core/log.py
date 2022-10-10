@@ -3,7 +3,7 @@ import richuru
 from pathlib import Path
 from loguru import logger
 
-from core.bot_config import BotConfig
+from bot import BotConfig
 
 # read log_level and verify
 log_level = str(BotConfig.log_level).upper()

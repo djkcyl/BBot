@@ -11,7 +11,7 @@ from graia.scheduler.timers import crontabify
 from graia.ariadne.message.chain import MessageChain
 from graia.scheduler.saya.schema import SchedulerSchema
 
-from core.bot_config import BotConfig
+from bot import BotConfig
 from core import BOT_Status, Bili_Auth
 
 

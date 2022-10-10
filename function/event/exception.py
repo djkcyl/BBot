@@ -9,7 +9,7 @@ from graia.ariadne.message.chain import MessageChain
 from graia.broadcast.builtin.event import ExceptionThrowed
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 
-from core.bot_config import BotConfig
+from bot import BotConfig
 from library.text2image import text2image
 
 

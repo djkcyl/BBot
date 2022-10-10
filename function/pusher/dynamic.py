@@ -24,7 +24,7 @@ from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2 import (
 )
 
 from core import BOT_Status
-from core.bot_config import BotConfig
+from bot import BotConfig
 from library import delete_group, delete_uid, set_name
 from library.dynamic_shot import get_dynamic_screenshot
 from library.bilibili_request import (

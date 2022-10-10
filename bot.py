@@ -12,9 +12,9 @@ from graia.amnesia.builtins.uvicorn import UvicornService
 from graia.amnesia.builtins.memcache import MemcacheService
 from graia.ariadne.entry import config, HttpClientConfig, WebsocketClientConfig
 
+from main import BotConfig
 from core.log import logger
 from website import BotService
-from core.bot_config import BotConfig
 from library.fastapi import FastAPIService
 from core.announcement import base_telemetry
 
