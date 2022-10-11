@@ -1,18 +1,18 @@
 <div align="center">
 
-![BBot-Graia](https://socialify.git.ci/djkcyl/BBot-Graia/image?description=1&font=Inter&logo=https%3A%2F%2Fgithub.com%2Fdjkcyl%2FBBot-Graia%2Fblob%2Fmaster%2Flogo.png%3Fraw%3Dtrue&owner=1&pattern=Circuit%20Board&theme=Dark)
+![BBot-Graia](https://socialify.git.ci/djkcyl/BBot/image?description=1&font=Inter&logo=https%3A%2F%2Fgithub.com%2Fdjkcyl%2FBBot%2Fblob%2Fmaster%2Flogo.png%3Fraw%3Dtrue&owner=1&pattern=Circuit%20Board&theme=Dark)
   
 # BBot for Ariadne
-![GitHub Repo stars](https://img.shields.io/github/stars/djkcyl/BBot-Graia?style=social)
-![GitHub forks](https://img.shields.io/github/forks/djkcyl/BBot-Graia?style=social)
+![GitHub Repo stars](https://img.shields.io/github/stars/djkcyl/BBot?style=social)
+![GitHub forks](https://img.shields.io/github/forks/djkcyl/BBot?style=social)
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/djkcyl/BBot-Graia/Release)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/djkcyl/BBot-Graia?color=brightgreen)
-![GitHub all releases](https://img.shields.io/github/downloads/djkcyl/BBot-Graia/total)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/djkcyl/BBot/Release)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/djkcyl/BBot?color=brightgreen)
+![GitHub all releases](https://img.shields.io/github/downloads/djkcyl/BBot/total)
 ![Platform](https://img.shields.io/badge/platform-linux_%7C_windows-lightgrey)
 
-[![License](https://img.shields.io/github/license/djkcyl/BBot-Graia)](https://github.com/djkcyl/BBot-Graia/blob/master/LICENSE)
-[![wakatime](https://wakatime.com/badge/github/djkcyl/BBot-Graia.svg)](https://wakatime.com/badge/github/djkcyl/BBot-Graia)
+[![License](https://img.shields.io/github/license/djkcyl/BBot)](https://github.com/djkcyl/BBot/blob/master/LICENSE)
+[![wakatime](https://wakatime.com/badge/github/djkcyl/BBot.svg)](https://wakatime.com/badge/github/djkcyl/BBot)
 ![QQ](https://img.shields.io/badge/Tencent_QQ-2948531755-ff69b4)
 
 ![Python Version](https://img.shields.io/badge/python-3.9-blue)
@@ -54,7 +54,7 @@ B，也代表 BiliBili，这个 Bot 将专注于哔哩哔哩的推送等服务
 
 ## 使用
 
-**[BBot 使用文档](https://github.com/djkcyl/BBot-Graia/wiki)**
+**[BBot 使用文档](https://github.com/djkcyl/BBot/wiki)**
 
 ## TODO
 
@@ -88,4 +88,4 @@ More...
 
 ## Stargazers over time
 
-[![Stargazers over time](https://starchart.cc/djkcyl/BBot-Graia.svg)](https://starchart.cc/djkcyl/BBot-Graia)
+[![Stargazers over time](https://starchart.cc/djkcyl/BBot.svg)](https://starchart.cc/djkcyl/BBot)
