@@ -44,7 +44,7 @@ from data import (
 channel = Channel.current()
 
 
-@channel.use(SchedulerSchema(every_custom_seconds(0.001)))
+@channel.use(SchedulerSchema(every_custom_seconds(0)))
 async def main(app: Ariadne):
 
     logger.debug("[Dynamic Pusher] Dynamic Pusher running now...")
@@ -240,7 +240,7 @@ async def push(app: Ariadne, dyn: DynamicItem):
                     logger.warning(f"[BiliBili推送] {dynid} | 推送失败，找不到该群 {data.group}，正在取消订阅")
                     delete = await delete_group(data.group)
                     logger.warning(f"[BiliBili推送] 已删除群 {data.group} 订阅的 {len(delete)} 个 UP")
-                    with contextlib.suppress():
+                    with contextlib.suppress(UnknownTarget):
                         await app.quit_group(int(data.group))
                 except AccountMuted:
                     group = await app.get_group(int(data.group))
@@ -256,6 +256,12 @@ async def push(app: Ariadne, dyn: DynamicItem):
                         BOT_Status["dynamic_updating"] = True
                         BOT_Status["init"] = False
                         raise ExecutionStop() from e
+                    elif "resultType=110" in str(e):  # 110: 可能为群被封
+                        logger.warning(f"[BiliBili推送] {dynid} | 推送失败，Bot 因未知原因被移出群聊")
+                        delete = await delete_group(data.group)
+                        logger.warning(f"[BiliBili推送] 已删除群 {data.group} 订阅的 {len(delete)} 个 UP")
+                        with contextlib.suppress(UnknownTarget):
+                            await app.quit_group(int(data.group))
                     else:
                         capture_exception()
                         logger.exception(f"[BiliBili推送] {dynid} | 推送失败，未知错误")

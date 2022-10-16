@@ -18,6 +18,7 @@ error_path = Path("data").joinpath("error")
 error_path.mkdir(parents=True, exist_ok=True)
 mobile_style_js = Path(__file__).parent.joinpath("mobile_style.js").read_text(encoding="utf-8")
 
+
 async def get_dynamic_screenshot(dyn: DynamicItem):
     dynid = dyn.extend.dyn_id_str
     if BotConfig.Bilibili.use_browser:
@@ -64,11 +65,19 @@ async def get_dynamic_screenshot(dyn: DynamicItem):
                 )
                 await page.close()
                 return image
-            except Exception:  # noqa
+            except Exception as e:  # noqa
                 url = page.url
                 if "bilibili.com/404" in url:
                     logger.error(f"[Bilibili推送] {dynid} 动态不存在，正在尝试本地渲染")
                     break
+                elif type(e) == AssertionError:
+                    logger.exception(f"[BiliBili推送] {dynid} 动态截图失败，正在重试：")
+                    await page.screenshot(
+                        path=f"{error_path}/{dynid}_{i}_{st}.jpg",
+                        full_page=True,
+                        type="jpeg",
+                        quality=80,
+                    )
                 else:
                     capture_exception()
                     logger.exception(f"[BiliBili推送] {dynid} 动态截图失败，正在重试：")

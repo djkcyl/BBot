@@ -16,7 +16,12 @@ font_bold = str(font_path.joinpath("sarasa-mono-sc-bold.ttf"))
 font_vanfont = str(font_path.joinpath("vanfont.ttf"))
 
 
-async def binfo_image_create(video_info: ViewReply, b23_url: str):
+async def binfo_image_create(video_view: ViewReply, b23_url: str):
+
+    video_info = (
+        video_view.activity_season if video_view.activity_season.arc.aid else video_view
+    )
+
     client = hc
     client.headers.update(
         {
@@ -207,7 +212,9 @@ async def binfo_image_create(video_info: ViewReply, b23_url: str):
     video.paste(dynamic_bg, (20, 390 + title_bg_y + 20))
     video.paste(info_bg, (20, 390 + title_bg_y + 20 + dynamic_bg_y + 20))
     video.paste(up_bg, (20, 390 + title_bg_y + 20 + dynamic_bg_y + 10 + info_bg_y))
-    video.paste(banner_bg, (0, 390 + title_bg_y + 20 + dynamic_bg_y + 10 + info_bg_y + up_bg_y - 18))
+    video.paste(
+        banner_bg, (0, 390 + title_bg_y + 20 + dynamic_bg_y + 10 + info_bg_y + up_bg_y - 18)
+    )
 
     image = BytesIO()
     video.save(image, "JPEG")

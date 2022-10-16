@@ -41,12 +41,18 @@ async def main(app: Ariadne):
         if up not in sub_list:
             del BOT_Status["living"][up]
     try:
-        status_infos = await get_rooms_info_by_uids(sub_list)
-    except (TransportError, JSONDecodeError) as error:
-        logger.warning(f"获取直播间状态失败: {type(error)} {error}")
-        await asyncio.sleep(5)
-        BOT_Status["live_updating"] = False
-        return
+        try:
+            status_infos = await get_rooms_info_by_uids(sub_list)
+        except (TransportError, JSONDecodeError) as error:
+            logger.warning(f"获取直播间状态失败: {type(error)} {error}")
+            await asyncio.sleep(5)
+            BOT_Status["live_updating"] = False
+            return
+        except RuntimeError as error:
+            if "The connection pool was closed while" not in str(error):
+                raise error
+            BOT_Status["live_updating"] = False
+            return
     except Exception:  # noqa
         capture_exception()
         logger.exception("获取直播间状态失败:")

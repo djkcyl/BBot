@@ -30,6 +30,7 @@ import function.event.invited_join_group
 import function.event.join_group
 import function.event.leave_group
 import function.event.mute
+import function.event.offline
 import function.event.new_friend
 import function.event.prem_change
 import function.pusher.init

@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional, Union
 from loguru import logger
 from datetime import datetime, timedelta
 from peewee import (
@@ -227,10 +227,15 @@ def get_talk_count(from_time: datetime, to_time: datetime) -> list[dict[str, int
     ]
 
 
-def get_push_count(from_time: datetime, to_time: datetime) -> int:
+def get_push_count(
+    from_time: Optional[datetime] = None, to_time: Optional[datetime] = None
+) -> int:
     """获取并返回指定范围内的推送计数"""
-    return (
-        DynamicPush.select()
-        .where(DynamicPush.push_time >= from_time, DynamicPush.push_time <= to_time)
-        .count()
-    )
+    if from_time and to_time:
+        return (
+            DynamicPush.select()
+            .where(DynamicPush.push_time >= from_time, DynamicPush.push_time <= to_time)
+            .count()
+        )
+    else:
+        return DynamicPush.select().count()

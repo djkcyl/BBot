@@ -2,18 +2,20 @@ import re
 
 from loguru import logger
 from graia.saya import Channel
+from grpc.aio import AioRpcError
 from graia.ariadne.app import Ariadne
 from sentry_sdk import capture_exception
+from bilireq.exceptions import GrpcError
 from graia.ariadne.model import Group, Member
 from graia.ariadne.event.message import GroupMessage
 from graia.ariadne.message.chain import MessageChain
 from graia.saya.builtins.broadcast.schema import ListenerSchema
-from graia.ariadne.message.element import Image, Plain, Voice, FlashImage, Source
+from graia.ariadne.message.element import Image, Voice, FlashImage, Source
 
 from library.b23_extract import b23_extract
 from core.control import Interval, Permission
 from library.draw_bili_image import binfo_image_create
-from library.bilibili_request import get_b23_url, hc, grpc_get_view_info
+from library.bilibili_request import get_b23_url, grpc_get_view_info
 
 channel = Channel.current()
 
@@ -36,14 +38,22 @@ async def bilibili_main(
         return await Interval.manual(member.id)
     try:
         video_info = await video_info_get(video_number)
+    except AioRpcError as e:
+        await Interval.manual(group.id, 5)
+        return await app.send_group_message(group, MessageChain(f"视频信息获取失败，错误信息：{e}"))
+    except GrpcError as e:
+        await Interval.manual(group.id, 5)
+        return await app.send_group_message(group, MessageChain(f"视频信息获取失败，错误信息：{e}"))
     except Exception:
         capture_exception()
-        await Interval.manual(member.id)
-        return await app.send_group_message(group, MessageChain([Plain("视频不存在或解析失败")]))
-    await Interval.manual(video_info.arc.aid)
+        await Interval.manual(group.id, 5)
+        return await app.send_group_message(group, MessageChain("视频不存在或解析失败"))
+    aid = video_info.activity_season.arc.aid or video_info.arc.aid
+    bvid = video_info.activity_season.bvid or video_info.bvid
+    await Interval.manual(aid)
     try:
-        logger.info(f"开始生成视频信息图片：{video_info.arc.aid}")
-        b23_url = await get_b23_url(f"https://www.bilibili.com/video/{video_info.bvid}")
+        logger.info(f"开始生成视频信息图片：{aid}")
+        b23_url = await get_b23_url(f"https://www.bilibili.com/video/{bvid}")
         image = await binfo_image_create(video_info, b23_url)
         await app.send_group_message(
             group,

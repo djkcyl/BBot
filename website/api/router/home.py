@@ -9,10 +9,10 @@ from .auth import verify_token
 from ..model import Info, HomeResponse, TalkCount, HomeItem
 
 
-router = APIRouter(tags=["Home"])   
+router = APIRouter(tags=["Home"])
 
 
-@router.get("/all", summary="获取服务器基本信息")
+@router.get("/all", summary="获取服务器基本信息", response_model=HomeResponse)
 async def home(info: Info = Depends(verify_token)):
     if info.permission < Permission.MASTER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permission denied")
@@ -38,5 +38,6 @@ async def home(info: Info = Depends(verify_token)):
                 datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
                 + timedelta(days=1),
             ),
+            all_push_count=get_push_count(),
         ),
     )

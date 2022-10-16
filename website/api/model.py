@@ -4,6 +4,8 @@ from datetime import datetime
 from pydantic import BaseModel
 from graia.ariadne.model import MemberPerm
 
+from core.bot_config import _BotConfig
+
 
 class Token(BaseModel):
     access_token: str
@@ -87,8 +89,13 @@ class HomeItem(BaseModel):
     friend_count: int
     uid_count: int
     push_count: int
+    all_push_count: int
     talk_count: list[TalkCount]
 
 
 class HomeResponse(BaseResponse):
     data: HomeItem
+
+
+class ConfigResponse(BaseResponse):
+    data: _BotConfig
