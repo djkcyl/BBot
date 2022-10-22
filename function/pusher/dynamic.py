@@ -4,6 +4,7 @@ import contextlib
 from loguru import logger
 from datetime import datetime
 from graia.saya import Channel
+from grpc.aio import AioRpcError
 from graia.ariadne.app import Ariadne
 from sentry_sdk import capture_exception
 from graia.ariadne.model import MemberPerm
@@ -69,6 +70,10 @@ async def main(app: Ariadne):
     if BotConfig.Bilibili.use_login:
         try:
             dynall = await asyncio.wait_for(grpc_get_followed_dynamics_noads(), timeout=10)
+        except AioRpcError as e:
+            logger.error(f"[Dynamic] Get dynamic list failed: {e.details()}")
+            BOT_Status["dynamic_updating"] = False
+            return
         except asyncio.TimeoutError:
             logger.debug("[Dynamic] Get dynamic list failed")
             BOT_Status["dynamic_updating"] = False

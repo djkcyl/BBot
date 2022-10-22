@@ -106,4 +106,4 @@ while True:
         logger.exception(e)
         load_config_webui(reason="未知原因")
 
-import bot
+import bot # noqa
