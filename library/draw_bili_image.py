@@ -137,24 +137,25 @@ async def binfo_image_create(video_view: ViewReply, b23_url: str):
                 up_data = None
             else:
                 raise e
-        name_color = up_data["card"]["vip"]["label"]["bg_color"] if up_data else None or "black"
+        name_color = up_data["card"]["vip"]["label"]["bg_color"] if up_data else "black"
 
-        if up_data["card"]["level_info"]["current_level"] if up_data else True:
+        current_level = up_data["card"]["level_info"]["current_level"] if up_data else 0
+        if current_level == 0:
             up_level = "\uE6CB"
             level_color = (191, 191, 191)
-        elif up_data["card"]["level_info"]["current_level"] if up_data else 0 == 1:
+        elif current_level == 1:
             up_level = "\uE6CC"
             level_color = (191, 191, 191)
-        elif up_data["card"]["level_info"]["current_level"] if up_data else 0 == 2:
+        elif current_level == 2:
             up_level = "\uE6CD"
             level_color = (149, 221, 178)
-        elif up_data["card"]["level_info"]["current_level"] if up_data else 0 == 3:
+        elif current_level == 3:
             up_level = "\uE6CE"
             level_color = (146, 209, 229)
-        elif up_data["card"]["level_info"]["current_level"] if up_data else 0 == 4:
+        elif current_level == 4:
             up_level = "\uE6CF"
             level_color = (255, 179, 124)
-        elif up_data["card"]["level_info"]["current_level"] if up_data else 0 == 5:
+        elif current_level == 5:
             up_level = "\uE6D0"
             level_color = (255, 108, 0)
         else:
@@ -177,7 +178,7 @@ async def binfo_image_create(video_view: ViewReply, b23_url: str):
         draw.text(
             (160, 25 + (i * 120)),
             up_data["card"]["name"] if up_data else "账号已注销",
-            name_color,
+            name_color or "black",
             name_font,
         )
         name_size_x, _ = name_font.getsize(up_data["card"]["name"] if up_data else "账号已注销")
