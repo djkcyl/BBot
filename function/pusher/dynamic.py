@@ -267,6 +267,10 @@ async def push(app: Ariadne, dyn: DynamicItem):
                         logger.warning(f"[BiliBili推送] 已删除群 {data.group} 订阅的 {len(delete)} 个 UP")
                         with contextlib.suppress(UnknownTarget):
                             await app.quit_group(int(data.group))
+                    elif "reason=AT_ALL_LIMITED" in str(e):
+                        logger.warning(f"[BiliBili推送] {dynid} | 推送失败，Bot 在该群 @全体成员 次数已达上限")
+                        await app.send_friend_message(int(data.group), MessageChain(msg[1:]))
+                        await asyncio.sleep(1)
                     else:
                         capture_exception()
                         logger.exception(f"[BiliBili推送] {dynid} | 推送失败，未知错误")
