@@ -37,17 +37,21 @@ async def bilibili_main(
     else:
         return await Interval.manual(member.id)
     try:
-        video_info = await video_info_get(video_number)
-    except AioRpcError as e:
+        if (video_info := await video_info_get(video_number)) is None:
+            await Interval.manual(group.id, 5)
+            return
+    except (AioRpcError, GrpcError) as e:
         await Interval.manual(group.id, 5)
-        return await app.send_group_message(group, MessageChain(f"视频信息获取失败，错误信息：{e}"))
-    except GrpcError as e:
-        await Interval.manual(group.id, 5)
-        return await app.send_group_message(group, MessageChain(f"视频信息获取失败，错误信息：{e}"))
-    except Exception:
+        return await app.send_group_message(
+            group, MessageChain(f"{video_number} 视频信息获取失败，错误信息：{type(e)} {e}")
+        )
+    except Exception as e:
         capture_exception()
         await Interval.manual(group.id, 5)
-        return await app.send_group_message(group, MessageChain("视频不存在或解析失败"))
+        logger.exception(e)
+        return await app.send_group_message(
+            group, MessageChain(f"{video_number} 视频信息解析失败，错误信息：{type(e)} {e}")
+        )
     aid = video_info.activity_season.arc.aid or video_info.arc.aid
     bvid = video_info.activity_season.bvid or video_info.bvid
     await Interval.manual(aid)
@@ -80,9 +84,8 @@ def bv2av(bv):
 
 async def video_info_get(vid_id: str):
     if vid_id[:2].lower() == "av":
-        video_info = await grpc_get_view_info(aid=int(vid_id[2:]))
-    elif vid_id[:2].upper() == "BV":
-        video_info = await grpc_get_view_info(bvid=vid_id)
-    else:
-        raise ValueError("视频 ID 格式错误，只可为 av 或 BV")
-    return video_info
+        if aid := int(vid_id[2:]):
+            return await grpc_get_view_info(aid=aid)
+        else:
+            return
+    return await grpc_get_view_info(bvid=vid_id)

@@ -4,6 +4,7 @@ from io import BytesIO
 from pathlib import Path
 from qrcode.image.pil import PilImage
 from PIL import Image, ImageFont, ImageDraw
+from bilireq.exceptions import ResponseCodeError
 from bilireq.grpc.protos.bilibili.app.view.v1.view_pb2 import ViewReply
 
 from library.bilibili_request import hc, get_user_space_info
@@ -129,25 +130,31 @@ async def binfo_image_create(video_view: ViewReply, b23_url: str):
 
     for i, up in enumerate(up_list):
         uid, up_title = up
-        up_data = await get_user_space_info(uid)
-        name_color = up_data["card"]["vip"]["label"]["bg_color"] or "black"
+        try:
+            up_data = await get_user_space_info(uid)
+        except ResponseCodeError as e:
+            if e.code == 404:
+                up_data = None
+            else:
+                raise e
+        name_color = up_data["card"]["vip"]["label"]["bg_color"] if up_data else None or "black"
 
-        if up_data["card"]["level_info"]["current_level"] == 0:
+        if up_data["card"]["level_info"]["current_level"] if up_data else True:
             up_level = "\uE6CB"
             level_color = (191, 191, 191)
-        elif up_data["card"]["level_info"]["current_level"] == 1:
+        elif up_data["card"]["level_info"]["current_level"] if up_data else 0 == 1:
             up_level = "\uE6CC"
             level_color = (191, 191, 191)
-        elif up_data["card"]["level_info"]["current_level"] == 2:
+        elif up_data["card"]["level_info"]["current_level"] if up_data else 0 == 2:
             up_level = "\uE6CD"
             level_color = (149, 221, 178)
-        elif up_data["card"]["level_info"]["current_level"] == 3:
+        elif up_data["card"]["level_info"]["current_level"] if up_data else 0 == 3:
             up_level = "\uE6CE"
             level_color = (146, 209, 229)
-        elif up_data["card"]["level_info"]["current_level"] == 4:
+        elif up_data["card"]["level_info"]["current_level"] if up_data else 0 == 4:
             up_level = "\uE6CF"
             level_color = (255, 179, 124)
-        elif up_data["card"]["level_info"]["current_level"] == 5:
+        elif up_data["card"]["level_info"]["current_level"] if up_data else 0 == 5:
             up_level = "\uE6D0"
             level_color = (255, 108, 0)
         else:
@@ -155,7 +162,11 @@ async def binfo_image_create(video_view: ViewReply, b23_url: str):
             level_color = (255, 0, 0)
 
         # 头像
-        face_url = up_data["card"]["face"]
+        face_url = (
+            up_data["card"]["face"]
+            if up_data
+            else "https://i0.hdslb.com/bfs/face/member/noface.jpg"
+        )
         face_get = (await client.get(face_url)).content
         face_bio = BytesIO(face_get)
         face = Image.open(face_bio)
@@ -163,8 +174,13 @@ async def binfo_image_create(video_view: ViewReply, b23_url: str):
         face = face.resize(face_size)
         up_bg.paste(face, (20, 20 + (i * 120)), mask)
         # 名字
-        draw.text((160, 25 + (i * 120)), up_data["card"]["name"], name_color, name_font)
-        name_size_x, _ = name_font.getsize(up_data["card"]["name"])
+        draw.text(
+            (160, 25 + (i * 120)),
+            up_data["card"]["name"] if up_data else "账号已注销",
+            name_color,
+            name_font,
+        )
+        name_size_x, _ = name_font.getsize(up_data["card"]["name"] if up_data else "账号已注销")
         # 等级
         draw.text((160 + name_size_x + 10, 16 + (i * 120)), up_level, level_color, icon_font)
         # 身份
@@ -184,7 +200,7 @@ async def binfo_image_create(video_view: ViewReply, b23_url: str):
         # 粉丝量
         draw.text(
             (162, 66 + (i * 120)),
-            "粉丝 " + num_fmt(up_data["card"]["fans"]),
+            "粉丝 " + num_fmt(up_data["card"]["fans"]) if up_data else "N/A",
             "#474747",
             follower_font,
         )
