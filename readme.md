@@ -12,7 +12,7 @@
 ![Platform](https://img.shields.io/badge/platform-linux_%7C_windows-lightgrey)
 
 [![License](https://img.shields.io/github/license/djkcyl/BBot-Graia)](https://github.com/djkcyl/BBot-Graia/blob/master/LICENSE)
-[![wakatime](https://wakatime.com/badge/github/djkcyl/BBot-Graia.svg)](https://wakatime.com/badge/github/djkcyl/BBot-Graia)
+[![wakatime](https://wakatime.com/badge/github/djkcyl/BBot.svg)](https://wakatime.com/badge/github/djkcyl/BBot)
 ![QQ](https://img.shields.io/badge/Tencent_QQ-2948531755-ff69b4)
 
 ![Python Version](https://img.shields.io/badge/python-3.9-blue)
