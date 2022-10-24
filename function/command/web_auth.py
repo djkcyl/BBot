@@ -23,7 +23,7 @@ channel = Channel.current()
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[Twilight([FullMatch("/auth"), "anything" @ WildcardMatch()])],
-        decorators=[Permission.require(Permission.GROUP_ADMIN), Interval.require(20)],
+        decorators=[Permission.require(Permission.GROUP_ADMIN), Interval.require()],
     )
 )
 async def main(

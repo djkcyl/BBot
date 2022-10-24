@@ -3,7 +3,6 @@ from graia.ariadne.app import Ariadne
 from graia.ariadne.model import Group
 from graia.ariadne.event.message import GroupMessage
 from graia.ariadne.message.chain import MessageChain
-from graia.broadcast.exceptions import PropagationCancelled
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import Twilight, RegexMatch
 
@@ -17,9 +16,8 @@ channel = Channel.current()
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight(RegexMatch(r"(查看)?(本群)?(订阅|关注)列表"))],
+        inline_dispatchers=[Twilight(RegexMatch(r"查看(本群)?(订阅|关注)列表"))],
         decorators=[Permission.require(), Interval.require()],
-        priority=15,
     ),
 )
 async def sub_list(app: Ariadne, group: Group):
@@ -35,5 +33,3 @@ async def sub_list(app: Ariadne, group: Group):
         )
 
         await app.send_group_message(group, MessageChain(msg))
-
-    raise PropagationCancelled

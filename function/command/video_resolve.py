@@ -35,7 +35,7 @@ async def bilibili_main(
     if video_number:
         video_number = video_number[0]
     else:
-        return await Interval.manual(member.id)
+        return
     try:
         if (video_info := await video_info_get(video_number)) is None:
             await Interval.manual(group.id, 5)

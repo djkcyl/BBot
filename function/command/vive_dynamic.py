@@ -38,7 +38,7 @@ channel = Channel.current()
                 ]
             )
         ],
-        decorators=[Permission.require(), Interval.require(20)],
+        decorators=[Permission.require(), Interval.require()],
     )
 )
 async def main(

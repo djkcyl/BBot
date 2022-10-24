@@ -2,7 +2,6 @@ from loguru import logger
 from graia.saya import Channel
 from graia.ariadne.app import Ariadne
 from graia.ariadne.model import Group
-from graia.ariadne.message.element import Image
 from graia.ariadne.event.message import GroupMessage
 from graia.ariadne.message.chain import MessageChain
 from graia.saya.builtins.broadcast.schema import ListenerSchema
@@ -20,8 +19,8 @@ help_text = (
     " 0. /quit\n"
     " 1. BiliBili 视频解析\n"
     " 2. 查看关注列表\n"
-    " 3. 关注 <uid>\n    > (订阅|关注)(主播|[uU][pP])?\n"
-    " 4. 取关 <uid>\n    > (退订|取消?关注?)\\s?(主播|[uU][pP])?\n"
+    f" 3. 关注 <uid>\n    > @{BotConfig.name} (订阅|关注)(主播|[uU][pP])?\n"
+    f" 4. 取关 <uid>\n    > @{BotConfig.name} (退订|取消?关注?)\\s?(主播|[uU][pP])?\n"
     " 5. 查看动态 <uid>\n"
     " 6. 设定|删除 昵称 <uid> [昵称]\n"
     " 7. 开启|关闭 @全体成员 <uid>\n"

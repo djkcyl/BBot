@@ -7,7 +7,7 @@ from data import add_talk_count
 channel = Channel.current()
 
 
-@channel.use(ListenerSchema(listening_events=[GroupMessage], priority=1))
+@channel.use(ListenerSchema(listening_events=[GroupMessage]))
 async def main():
 
     add_talk_count()

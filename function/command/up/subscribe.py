@@ -39,7 +39,6 @@ channel = Channel.current()
     )
 )
 async def main(app: Ariadne, group: Group, at: ElementResult, anything: RegexResult):
-
     at_result: At = at.result  # type: ignore
     if at_result.target == app.account:
         message = anything.result.display  # type: ignore

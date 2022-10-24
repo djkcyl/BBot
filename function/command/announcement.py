@@ -12,7 +12,7 @@ from graia.ariadne.message.parser.twilight import (
     WildcardMatch,
 )
 
-from core.control import Interval, Permission
+from core.control import Permission
 
 channel = Channel.current()
 
@@ -21,7 +21,7 @@ channel = Channel.current()
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[Twilight([FullMatch("公告"), "anything" @ WildcardMatch()])],
-        decorators=[Permission.require(Permission.MASTER), Interval.require(20)],
+        decorators=[Permission.require(Permission.MASTER)],
     )
 )
 async def main(app: Ariadne, anything: RegexResult):
