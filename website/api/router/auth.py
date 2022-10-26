@@ -1,4 +1,3 @@
-import time
 import asyncio
 import secrets
 
@@ -110,7 +109,17 @@ async def can_manage_groups(info: Info):
 
 
 async def can_manage_group(info: Info, group: int):
-    return group in [x.id for x in await can_manage_groups(info)]
+    if info.permission > Permission.MASTER:
+        return True
+    app = Ariadne.current()
+    try:
+        can = (await app.get_member(group, int(info.qq) or 0)).permission in [
+            MemberPerm.Administrator,
+            MemberPerm.Owner,
+        ]
+    except UnknownTarget:
+        can = False
+    return can
 
 
 @router.get("/get_key", response_model=KeyResponse, summary="获取 key")
