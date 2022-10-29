@@ -19,7 +19,7 @@
 ![Poetry Using](https://img.shields.io/badge/poetry-using-blue)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-![!](https://count.aunly.cn/get/@BBot-Graia?theme=rule34)
+![!](https://count.getloli.com/get/@BBot-Graia?theme=rule34)
 
 基于 [Graia-Ariadne](../../../../GraiaProject/Ariadne) 搭建的高效、高性能哔哩哔哩推送 [QQ](../../../../project-mirai/mirai-api-http) 机器人
 
