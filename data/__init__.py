@@ -12,7 +12,7 @@ from peewee import (
 )
 
 
-data_version = 2
+data_version = 3
 db = SqliteDatabase("data/data.db")
 
 
@@ -60,6 +60,7 @@ class SubList(BaseModel):
     group = CharField()
     atall = BooleanField(default=False)
     live = BooleanField(default=True)
+    live_tips = CharField(null=True)
     dynamic = BooleanField(default=True)
 
     class Meta:
@@ -90,15 +91,20 @@ db.create_tables([DynamicPush, LivePush, SubList, TalkCount, DataVersion], safe=
 
 if not DataVersion.select().exists():
     logger.warning(f"数据库版本记录不存在，正在创建，当前版本：{data_version}")
-    DataVersion(version=2).save()
+    DataVersion(version=data_version).save()
 elif DataVersion.get().version != data_version:
-    logger.warning(f"数据库版本不匹配，当前版本：{data_version}，数据库版本：{DataVersion.get().version}，正在更新")
+    logger.warning(f"数据库版本不匹配，当前当前最新版本：{data_version}，正在更新")
     while DataVersion.get().version != data_version:
         if DataVersion.get().version == 1:
             logger.warning("当前数据版本为 1，正在更新至 2")
             # 将 LivePush 表中的 statu 字段改为 status
             db.execute_sql("ALTER TABLE live_push RENAME COLUMN statu TO status")
             DataVersion.update(version=2).execute()
+        elif DataVersion.get().version == 2:
+            logger.warning("当前数据版本为 2，正在更新至 3")
+            # 在 SubList 表中添加 live_tips 字段，允许为空
+            db.execute_sql("ALTER TABLE sub_list ADD COLUMN live_tips VARCHAR(255) NULL")
+            DataVersion.update(version=3).execute()
 
     logger.success("数据库更新完成")
 
@@ -211,8 +217,7 @@ def add_talk_count():
 
 
 def get_talk_count(from_time: datetime, to_time: datetime) -> list[dict[str, int]]:
-    """获取指定范围内的每个整点小时"""
-
+    """获取指定范围内的每个整点小时的消息量"""
     return [
         {
             "time": int(x.timestamp()),

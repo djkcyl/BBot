@@ -22,4 +22,4 @@ data/.lock
 .venv*/
 dist/
 build/
-Static/Cache/*
+Static/

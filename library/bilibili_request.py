@@ -12,6 +12,7 @@ from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2 import (
 )
 from bilireq.grpc.utils import grpc_request
 from bilireq.grpc.dynamic import grpc_get_followed_dynamics
+from loguru import logger
 
 from core import Bili_Auth
 
@@ -71,7 +72,9 @@ async def get_b23_url(burl: str) -> str:
         "share_id": "public.webview.0.0.pv",
         "share_mode": 3,
     }
-    return (await post(url, data=data))["content"]
+    resp = await post(url, data=data)
+    logger.debug(resp)
+    return resp["content"]
 
 
 async def search_user(keyword: str):
@@ -80,7 +83,9 @@ async def search_user(keyword: str):
     """
     url = "https://api.bilibili.com/x/web-interface/search/type"
     data = {"keyword": keyword, "search_type": "bili_user"}
-    return (await hc.get(url, params=data)).json()["data"]
+    resp = (await hc.get(url, params=data)).json()
+    logger.debug(resp)
+    return resp["data"]
 
 
 async def get_user_space_info(uid: int):

@@ -83,7 +83,8 @@ class _Event(BaseModel, extra=Extra.ignore):
 
 
 class _Webui(BaseModel, extra=Extra.ignore):
-    webui_host: AnyHttpUrl = "http://0.0.0.0:8080"
+    webui_host: str = "0.0.0.0"
+    webui_port: int = 8001
     webui_enable: bool = False
 
 

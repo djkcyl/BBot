@@ -40,6 +40,9 @@ async def bilibili_main(
         if (video_info := await video_info_get(video_number)) is None:
             await Interval.manual(group.id, 5)
             return
+        elif video_info.ecode == 1:
+            await app.send_group_message(group, MessageChain(f"未找到视频 {video_number}，可能已被 UP 主删除。"))
+            return
     except (AioRpcError, GrpcError) as e:
         await Interval.manual(group.id, 5)
         return await app.send_group_message(

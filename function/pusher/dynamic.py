@@ -24,8 +24,9 @@ from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2 import (
     DynModuleType,
 )
 
-from core import BOT_Status
 from bot import BotConfig
+from core import BOT_Status
+from core.context import Context
 from library import delete_group, delete_uid, set_name
 from library.dynamic_shot import get_dynamic_screenshot
 from library.bilibili_request import (
@@ -236,6 +237,8 @@ async def push(app: Ariadne, dyn: DynamicItem):
                         msg.append(f"\n\n注：{BotConfig.name} 没有权限@全体成员")
                 try:
                     logger.debug(f"[Dynamic] Send dynamic {dynid} to {data.group}")
+                    Context.push_type.set("dynamic")
+                    Context.push_id.set(dynid)
                     await app.send_group_message(
                         int(data.group),
                         MessageChain(msg),

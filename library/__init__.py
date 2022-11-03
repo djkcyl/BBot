@@ -162,7 +162,7 @@ def set_atall(uid, groupid, atall):
         return False
 
 
-async def delete_group(groupid):
+async def delete_group(groupid) -> list[str]:
     """删除某个群的所有订阅"""
     remove_list = []
     logger.info(f"正在删除群 {groupid} 的所有订阅")

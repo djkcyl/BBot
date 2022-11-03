@@ -56,7 +56,9 @@ app.launch_manager.add_service(
         )
     )
 )
-app.launch_manager.add_service(UvicornService(host="0.0.0.0", port=8001))
+app.launch_manager.add_service(
+    UvicornService(host=BotConfig.Webui.webui_host, port=int(BotConfig.Webui.webui_port))
+)
 app.launch_manager.add_service(BotService())
 
 app.create(GraiaScheduler)
