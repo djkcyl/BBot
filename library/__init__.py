@@ -1,6 +1,6 @@
 import asyncio
-
 import contextlib
+
 from typing import Union
 from loguru import logger
 from bilireq.grpc.dynamic import grpc_get_user_dynamics

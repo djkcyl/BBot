@@ -24,11 +24,7 @@ from library import delete_uid
 from bot import BotConfig
 from core import BOT_Status, Bili_Auth
 from data import get_all_uid, delete_sub_by_uid
-from library.bilibili_request import (
-    relation_modify,
-    grpc_get_followed_dynamics_noads,
-    get_user_space_info,
-)
+from library.bilibili_request import relation_modify, grpc_get_followed_dynamics_noads
 
 
 inc = it(InterruptControl)

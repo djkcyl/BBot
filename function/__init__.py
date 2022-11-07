@@ -35,8 +35,10 @@ import function.event.new_friend
 import function.event.prem_change
 import function.pusher.init
 import function.pusher.dynamic
-import function.pusher.live
+import function.pusher.live  # noqa
+
 # import function.scheduler.refresh_token  # noqa
+
 from loguru import logger
 
 logger.success("[function] 加载完成")

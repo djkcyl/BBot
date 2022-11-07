@@ -41,7 +41,9 @@ async def bilibili_main(
             await Interval.manual(group.id, 5)
             return
         elif video_info.ecode == 1:
-            await app.send_group_message(group, MessageChain(f"未找到视频 {video_number}，可能已被 UP 主删除。"))
+            await app.send_group_message(
+                group, MessageChain(f"未找到视频 {video_number}，可能已被 UP 主删除。")
+            )
             return
     except (AioRpcError, GrpcError) as e:
         await Interval.manual(group.id, 5)
@@ -87,8 +89,8 @@ def bv2av(bv):
 
 async def video_info_get(vid_id: str):
     if vid_id[:2].lower() == "av":
-        if aid := int(vid_id[2:]):
-            return await grpc_get_view_info(aid=aid)
+        if (aid := int(vid_id[2:])) > 1:
+            await grpc_get_view_info(aid=aid)
         else:
             return
     return await grpc_get_view_info(bvid=vid_id)

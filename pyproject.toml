@@ -24,6 +24,7 @@ dynamicrendergrpc = "^1.1.0"
 [tool.poetry.dev-dependencies]
 flake8 = "^5.0.4"
 black = "^22.10.0"
+yamllint = "^1.28.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
