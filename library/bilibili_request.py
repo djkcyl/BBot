@@ -122,7 +122,7 @@ async def grpc_get_dynamic_details(dynamic_ids: str, **kwargs) -> DynDetailsRepl
 
 
 @grpc_request
-async def grpc_get_view_info(aid: int = None, bvid: str = None, **kwargs) -> ViewReply:
+async def grpc_get_view_info(aid: int = 0, bvid: str = "", **kwargs) -> ViewReply:
     stub = ViewStub(kwargs.pop("_channel"))
     if aid:
         req = ViewReq(aid=aid)

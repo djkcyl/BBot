@@ -47,6 +47,7 @@ async def bilibili_main(
             return
     except (AioRpcError, GrpcError) as e:
         await Interval.manual(group.id, 5)
+        logger.exception(e)
         return await app.send_group_message(
             group, MessageChain(f"{video_number} 视频信息获取失败，错误信息：{type(e)} {e}")
         )
@@ -89,8 +90,6 @@ def bv2av(bv):
 
 async def video_info_get(vid_id: str):
     if vid_id[:2].lower() == "av":
-        if (aid := int(vid_id[2:])) > 1:
-            await grpc_get_view_info(aid=aid)
-        else:
-            return
+        aid = int(vid_id[2:])
+        return await grpc_get_view_info(aid=aid) if aid > 1 else None
     return await grpc_get_view_info(bvid=vid_id)
