@@ -133,7 +133,7 @@ async def binfo_image_create(video_view: ViewReply, b23_url: str):
         try:
             up_data = await get_user_space_info(uid)
         except ResponseCodeError as e:
-            if e.code == 404:
+            if e.code in [-404, 404]:
                 up_data = None
             else:
                 raise e
@@ -168,7 +168,10 @@ async def binfo_image_create(video_view: ViewReply, b23_url: str):
             if up_data
             else "https://i0.hdslb.com/bfs/face/member/noface.jpg"
         )
-        face_get = (await client.get(face_url)).content
+        face_req = await client.get(face_url)
+        if face_req.status_code == 404:
+            face_req = await client.get(f"{face_url}@160w_160h_1c_1s.webp")
+        face_get = face_req.content
         face_bio = BytesIO(face_get)
         face = Image.open(face_bio)
         face.convert("RGB")
@@ -177,11 +180,13 @@ async def binfo_image_create(video_view: ViewReply, b23_url: str):
         # 名字
         draw.text(
             (160, 25 + (i * 120)),
-            up_data["card"]["name"] if up_data else "账号已注销",
+            up_data["card"]["name"] if up_data else f"账号已注销（{uid}）",
             name_color or "black",
             name_font,
         )
-        name_size_x, _ = name_font.getsize(up_data["card"]["name"] if up_data else "账号已注销")
+        name_size_x, _ = name_font.getsize(
+            up_data["card"]["name"] if up_data else f"账号已注销（{uid} "
+        )
         # 等级
         draw.text((160 + name_size_x + 10, 16 + (i * 120)), up_level, level_color, icon_font)
         # 身份

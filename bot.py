@@ -73,4 +73,4 @@ import function  # noqa
 
 with contextlib.suppress(KeyboardInterrupt, asyncio.exceptions.CancelledError):
     app.launch_blocking()
-logger.info("BBot is shutting down...")
+logger.info("BBot is shut down.")

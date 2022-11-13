@@ -4,9 +4,10 @@ from loguru import logger
 from graia.saya import Channel
 from grpc.aio import AioRpcError
 from graia.ariadne.app import Ariadne
+from graia.ariadne.model import Group
 from sentry_sdk import capture_exception
 from bilireq.exceptions import GrpcError
-from graia.ariadne.model import Group, Member
+from httpx._exceptions import TimeoutException
 from graia.ariadne.event.message import GroupMessage
 from graia.ariadne.message.chain import MessageChain
 from graia.saya.builtins.broadcast.schema import ListenerSchema
@@ -21,13 +22,11 @@ channel = Channel.current()
 
 
 @channel.use(ListenerSchema(listening_events=[GroupMessage], decorators=[Permission.require()]))
-async def bilibili_main(
-    app: Ariadne, group: Group, member: Member, message: MessageChain, source: Source
-):
+async def main(app: Ariadne, group: Group, message: MessageChain, source: Source):
     if message.has(Image) or message.has(Voice) or message.has(FlashImage):
         return
 
-    message_str = message.as_persistent_string()
+    message_str = message.as_persistent_string(binary=False)
     if "b23.tv" in message_str:
         message_str = await b23_extract(message_str) or message_str
     p = re.compile(r"av(\d{1,15})|BV(1[A-Za-z0-9]{2}4.1.7[A-Za-z0-9]{2})")
@@ -42,21 +41,21 @@ async def bilibili_main(
             return
         elif video_info.ecode == 1:
             await app.send_group_message(
-                group, MessageChain(f"未找到视频 {video_number}，可能已被 UP 主删除。")
+                group, MessageChain(f"未找到视频 {video_number}，可能已被 UP 主删除。"), quote=source
             )
             return
     except (AioRpcError, GrpcError) as e:
         await Interval.manual(group.id, 5)
         logger.exception(e)
         return await app.send_group_message(
-            group, MessageChain(f"{video_number} 视频信息获取失败，错误信息：{type(e)} {e}")
+            group, MessageChain(f"{video_number} 视频信息获取失败，错误信息：{type(e)} {e}"), quote=source
         )
     except Exception as e:
         capture_exception()
         await Interval.manual(group.id, 5)
         logger.exception(e)
         return await app.send_group_message(
-            group, MessageChain(f"{video_number} 视频信息解析失败，错误信息：{type(e)} {e}")
+            group, MessageChain(f"{video_number} 视频信息解析失败，错误信息：{type(e)} {e}"), quote=source
         )
     aid = video_info.activity_season.arc.aid or video_info.arc.aid
     bvid = video_info.activity_season.bvid or video_info.bvid
@@ -71,6 +70,11 @@ async def bilibili_main(
                 Image(data_bytes=image),
                 f"\n{b23_url}",
             ),
+            quote=source,
+        )
+    except TimeoutException:
+        await app.send_group_message(
+            group, MessageChain(f"{video_number} 视频信息生成超时，请稍后再试。"), quote=source
         )
     except Exception as e:  # noqa
         capture_exception()

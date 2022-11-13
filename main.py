@@ -55,7 +55,7 @@ def load_config_webui(reason: str = "未知原因", err: dict = {}):
         for err in err_info:
             logger.critical(f"{err[0].ljust(pos_maxlen)} => {err[1]}")
 
-    app = FastAPI()
+    app = FastAPI(docs_url=None, redoc_url=None)
     port = os.getenv("BBOT_WEBUI_PORT", 8090)
 
     @app.get("/api/config/load")
@@ -88,13 +88,11 @@ def load_config_webui(reason: str = "未知原因", err: dict = {}):
 
     if isinstance(err, dict):
         valueerror_output(err)
-    logger.critical(f"由于 {reason} 原因导致配置加载失败, 请打开浏览器访问 BBot 主机的 http://0.0.0.0:{port} 进行配置")
+    logger.critical(f"由于 {reason} ，导致配置加载失败, 请打开浏览器访问 BBot 主机的 http://0.0.0.0:{port} 进行配置")
     uvicorn.run(app, host="0.0.0.0", port=int(port))
 
 
-# sourcery skip: replace-interpolation-with-fstring
 while True:
-    # 尝试从默认位置加载
     try:
         BotConfig = _BotConfig.load(allow_create=True)
         BotConfig.save()
