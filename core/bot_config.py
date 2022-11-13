@@ -1,9 +1,9 @@
 import json
-from pathlib import Path
-from typing import Optional
-
 import yaml
+
+from pathlib import Path
 from loguru import logger
+from typing import Optional
 from pydantic import AnyHttpUrl, BaseModel, Extra, validator
 
 DEFUALT_CONFIG_PATH = Path("data", "bot_config.yaml")
