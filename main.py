@@ -92,7 +92,7 @@ def load_config_webui(reason: str = "未知原因", err: dict = {}):
     uvicorn.run(app, host="0.0.0.0", port=int(port))
 
 
-while True:
+for _ in range(3):
     try:
         BotConfig = _BotConfig.load(allow_create=True)
         BotConfig.save()
@@ -104,5 +104,8 @@ while True:
     except Exception as e:
         logger.exception(e)
         load_config_webui(reason="未知原因")
+else:
+    logger.critical("配置加载失败, 请检查配置文件")
+    sys.exit(1)
 
 import bot  # noqa

@@ -33,19 +33,18 @@ app_config = config(
 app = Ariadne(app_config)
 app.config(install_log=True)
 
-if BotConfig.Bilibili.use_browser:
-    app.launch_manager.add_service(
-        PlaywrightService(
-            user_data_dir=Path("data").joinpath("browser"),
-            device_scale_factor=2 if BotConfig.Bilibili.mobile_style else 1.25,
-            user_agent=(
-                "Mozilla/5.0 (Linux; Android 10; RMX1911) AppleWebKit/537.36 "
-                "(KHTML, like Gecko) Chrome/100.0.4896.127 Mobile Safari/537.36"
-            )
-            if BotConfig.Bilibili.mobile_style
-            else "",
+app.launch_manager.add_service(
+    PlaywrightService(
+        user_data_dir=Path("data").joinpath("browser"),
+        device_scale_factor=2 if BotConfig.Bilibili.mobile_style else 1.25,
+        user_agent=(
+            "Mozilla/5.0 (Linux; Android 10; RMX1911) AppleWebKit/537.36 "
+            "(KHTML, like Gecko) Chrome/100.0.4896.127 Mobile Safari/537.36"
         )
+        if BotConfig.Bilibili.mobile_style
+        else "",
     )
+)
 app.launch_manager.add_service(MemcacheService())
 app.launch_manager.add_service(
     FastAPIService(
