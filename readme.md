@@ -18,6 +18,7 @@
 ![Python Version](https://img.shields.io/badge/python-3.9-blue)
 ![Poetry Using](https://img.shields.io/badge/poetry-using-blue)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/djkcyl/bbot)
 
 ![!](https://count.getloli.com/get/@BBot-Graia?theme=rule34)
 
