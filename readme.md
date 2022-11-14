@@ -56,6 +56,8 @@ B，也代表 BiliBili，这个 Bot 将专注于哔哩哔哩的推送等服务
 
 **[BBot 使用文档](https://github.com/djkcyl/BBot/wiki)**
 
+Docker 部署请查看 [这里](https://github.com/djkcyl/BBot-Graia/issues/20)
+
 ## TODO
 
 - [x] 增加群内配置功能
