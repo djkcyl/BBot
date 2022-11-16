@@ -52,7 +52,7 @@ B，也代表 BiliBili，这个 Bot 将专注于哔哩哔哩的推送等服务
 
 **[BBot 使用文档](https://github.com/djkcyl/BBot/wiki)**
 
-Docker 部署请查看 [这里](https://github.com/djkcyl/BBot-Graia/issues/20)
+Docker 部署请查看 [这里](https://github.com/djkcyl/BBot-Graia/wiki/Docker)
 
 ## TODO
 
@@ -67,6 +67,7 @@ Docker 部署请查看 [这里](https://github.com/djkcyl/BBot-Graia/issues/20)
 - [x] 增加非登录式的推送更新逻辑
 - [x] 更换 BiliBili 请求库为更成熟的 [BiliReq](../../../../SK-415/bilireq)
 - [x] 可能会增加不需要浏览器的动态截图获取方式
+- [x] 增加 Docker 部署方案
 - [ ] **增加 Web 端管理界面**
 - [ ] 增加简单的推送数据分析及报告
 - [ ] 丰富管理员指令
