@@ -1,7 +1,7 @@
 <div align="center">
 
 ![BBot-Graia](https://socialify.git.ci/djkcyl/BBot/image?description=1&font=Inter&logo=https%3A%2F%2Fgithub.com%2Fdjkcyl%2FBBot%2Fblob%2Fmaster%2Flogo.png%3Fraw%3Dtrue&owner=1&pattern=Circuit%20Board&theme=Dark)
-
+  
 # BBot for Ariadne
 ![GitHub Repo stars](https://img.shields.io/github/stars/djkcyl/BBot?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/djkcyl/BBot?style=social)
@@ -41,10 +41,10 @@ B，也代表 BiliBili，这个 Bot 将专注于哔哩哔哩的推送等服务
 
 ## 特色
 
-- 使用 **gRPC 接口**，推送效率远超使用 REST Api 的哔哩哔哩机器人且目前未见有风控（-421）风险
-- 使用登录和非登录两种方案，有需要的用户可以登录后再次提升效率
+- 大量使用并发 **gRPC 接口**，推送效率远超使用 REST Api 的哔哩哔哩机器人且目前未见有风控（-421）风险
+- 使用登录和非登录两种方案，对于财大气粗的用户可以登录后再次提升效率
 - 动态使用 Web 端截图，虽然会吃那么点性能，~~但这都是值得的~~
-- 可自由配置是否在群内 @全体成员、是否推送直播和动态，每个群都是独立的配置
+- 可自由配置是否在群内 @全体成员、对于直播和动态的分别控制等
 - 可针对不同群聊对订阅的 UP 主进行昵称替换
 - 可限制每个群可订阅的最大 UP 主数量
 
@@ -52,7 +52,7 @@ B，也代表 BiliBili，这个 Bot 将专注于哔哩哔哩的推送等服务
 
 **[BBot 使用文档](https://github.com/djkcyl/BBot/wiki)**
 
-Docker 部署请查看 [这里](https://github.com/djkcyl/BBot-Graia/issues/20)
+Docker 部署请查看 [这里](https://github.com/djkcyl/BBot-Graia/wiki/Docker)
 
 ## TODO
 
@@ -67,7 +67,7 @@ Docker 部署请查看 [这里](https://github.com/djkcyl/BBot-Graia/issues/20)
 - [x] 增加非登录式的推送更新逻辑
 - [x] 更换 BiliBili 请求库为更成熟的 [BiliReq](../../../../SK-415/bilireq)
 - [x] 可能会增加不需要浏览器的动态截图获取方式
-- [x] 增加 Docker 部署方式
+- [x] 增加 Docker 部署方案
 - [ ] **增加 Web 端管理界面**
 - [ ] 增加简单的推送数据分析及报告
 - [ ] 丰富管理员指令
