@@ -1,6 +1,7 @@
 import sys
 import psutil
 import richuru
+import contextlib
 
 from pathlib import Path
 from loguru import logger
@@ -19,19 +20,11 @@ LOGPATH.mkdir(exist_ok=True)
 
 
 def in_screen():
-    try:
+    with contextlib.suppress(psutil.NoSuchProcess):
         for proc in psutil.Process().parents():
             if proc.name() in ["screen", "tmux"]:
                 return True
-    except psutil.NoSuchProcess:
-        return False
-
-    try:
-        with open("/proc/1/cgroup", "r") as f:
-            if "docker" in f.read():
-                return True
-    except FileNotFoundError:
-        return False
+    return psutil.Process().pid == 1
 
 
 if not in_screen():

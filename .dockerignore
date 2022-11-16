@@ -18,5 +18,5 @@ logs
 __pycache__
 release.py
 test.py
-data
+data/
 Dockerfile

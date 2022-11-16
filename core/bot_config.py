@@ -11,8 +11,8 @@ DEFUALT_CONFIG_PATH = Path("data", "bot_config.yaml")
 
 class _Mirai(BaseModel, extra=Extra.ignore):
     account: int
-    verify_key: str
-    mirai_host: AnyHttpUrl
+    verify_key: str = "mah"
+    mirai_host: AnyHttpUrl = AnyHttpUrl("http://bbot-mah:6081", scheme="http")
 
 
 class _Debug(BaseModel, extra=Extra.ignore):
