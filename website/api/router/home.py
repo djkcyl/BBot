@@ -3,7 +3,7 @@ from graia.ariadne.app import Ariadne
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from core.control import Permission
-from data import get_all_uid, get_push_count, get_talk_count
+from core.data import get_all_uid, get_push_count, get_talk_count
 
 from .auth import verify_token
 from ..model import Info, HomeResponse, TalkCount, HomeItem

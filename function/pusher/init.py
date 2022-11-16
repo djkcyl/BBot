@@ -23,7 +23,7 @@ from bilireq.grpc.dynamic import grpc_get_followed_dynamic_users, grpc_get_user_
 from library import delete_uid
 from bot import BotConfig
 from core import BOT_Status, Bili_Auth
-from data import get_all_uid, delete_sub_by_uid
+from core.data import get_all_uid, delete_sub_by_uid
 from library.bilibili_request import relation_modify, grpc_get_followed_dynamics_noads
 
 

@@ -13,7 +13,7 @@ from graia.ariadne.event.mirai import (
     BotLeaveEventDisband,
 )
 
-from data import get_sub_by_group
+from core.data import get_sub_by_group
 from library import unsubscribe_uid
 from bot import BotConfig
 from core.group_config import GroupPermission

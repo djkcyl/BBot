@@ -2,7 +2,7 @@ from graia.saya import Channel
 from graia.ariadne.event.message import GroupMessage
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 
-from data import add_talk_count
+from core.data import add_talk_count
 
 channel = Channel.current()
 

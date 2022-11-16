@@ -20,7 +20,7 @@ Event:
   permchange: true   # 是否向管理员发送权限变更的事件提醒。
 Webui:
   webui_host: "0.0.0.0"
-  webui_port: 8001
+  webui_port: 6080
   webui_enable: true
 log_level: INFO      # 控制台输出的日志等级
 name: BBot           # bot 的自称

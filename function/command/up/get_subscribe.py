@@ -7,7 +7,7 @@ from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import Twilight, RegexMatch
 
 
-from data import get_sub_by_group
+from core.data import get_sub_by_group
 from core.control import Interval, Permission
 
 channel = Channel.current()

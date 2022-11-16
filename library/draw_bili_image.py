@@ -11,7 +11,7 @@ from library.bilibili_request import hc, get_user_space_info
 
 from .strings import get_cut_str, num_fmt
 
-font_path = Path(__file__).parent.parent.joinpath("data").joinpath("font")
+font_path = Path(__file__).parent.parent.joinpath("static", "font")
 font_semibold = str(font_path.joinpath("sarasa-mono-sc-semibold.ttf"))
 font_bold = str(font_path.joinpath("sarasa-mono-sc-bold.ttf"))
 font_vanfont = str(font_path.joinpath("vanfont.ttf"))

@@ -1,3 +1,5 @@
+import sys
+import psutil
 import richuru
 
 from pathlib import Path
@@ -12,10 +14,32 @@ if log_level not in ["TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "C
     log_level = "INFO"
 
 # ensure logs dir exist
-LOGPATH = Path("logs")
+LOGPATH = Path("data", "logs")
 LOGPATH.mkdir(exist_ok=True)
 
-richuru.install(level=log_level)
+
+def in_screen():
+    try:
+        for proc in psutil.Process().parents():
+            if proc.name() in ["screen", "tmux"]:
+                return True
+    except psutil.NoSuchProcess:
+        return False
+
+    try:
+        with open("/proc/1/cgroup", "r") as f:
+            if "docker" in f.read():
+                return True
+    except FileNotFoundError:
+        return False
+
+
+if not in_screen():
+    richuru.install(level=log_level)
+else:
+    logger.info("检测到当前运行在 docker, screen 或 tmux 中，已禁用 richuru")
+    logger.remove(0)
+    logger.add(sys.stderr, level=log_level, backtrace=True, diagnose=True)
 
 # add latest logger
 logger.add(
@@ -26,7 +50,6 @@ logger.add(
     rotation="00:00",
     retention="1 years",
     compression="tar.xz",
-    colorize=False,
     level="INFO",
 )
 
@@ -39,7 +62,6 @@ logger.add(
     rotation="00:00",
     retention="15 days",
     compression="tar.xz",
-    colorize=False,
     level="DEBUG",
 )
 
@@ -52,7 +74,6 @@ logger.add(
     rotation="00:00",
     retention="15 days",
     compression="tar.xz",
-    colorize=False,
     level="WARNING",
 )
 

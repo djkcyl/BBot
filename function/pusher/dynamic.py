@@ -35,7 +35,7 @@ from library.bilibili_request import (
     grpc_get_dynamic_details,
     grpc_get_followed_dynamics_noads,
 )
-from data import (
+from core.data import (
     uid_exists,
     get_all_uid,
     is_dyn_pushed,

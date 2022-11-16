@@ -13,7 +13,7 @@ from fastapi.security import OAuth2PasswordBearer
 from graia.amnesia.builtins.memcache import Memcache
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from data import get_sub_by_group
+from core.data import get_sub_by_group
 from core.control import Permission
 
 from ..model import AuthResponse, Token, KeyResponse, InfoResponse, Info, GroupItem

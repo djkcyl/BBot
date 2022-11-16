@@ -15,7 +15,11 @@ from bot import BotConfig
 
 error_path = Path("data").joinpath("error")
 error_path.mkdir(parents=True, exist_ok=True)
-mobile_style_js = Path(__file__).parent.joinpath("mobile_style.js").read_text(encoding="utf-8")
+mobile_style_js = (
+    Path(__file__)
+    .parent.parent.joinpath("static", "mobile_style.js")
+    .read_text(encoding="utf-8")
+)
 
 
 async def get_dynamic_screenshot(dyn: DynamicItem):

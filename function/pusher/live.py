@@ -22,7 +22,7 @@ from bot import BotConfig
 from library.time_tools import calc_time_total
 from library.bilibili_request import get_b23_url
 from library import delete_group, delete_uid, set_name
-from data import insert_live_push, get_all_uid, get_sub_by_uid
+from core.data import insert_live_push, get_all_uid, get_sub_by_uid
 
 channel = Channel.current()
 

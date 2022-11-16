@@ -9,7 +9,7 @@ from core import BOT_Status
 from bot import BotConfig
 from core.group_config import GroupPermission
 from library.bilibili_request import relation_modify
-from data import (
+from core.data import (
     add_sub,
     uid_exists,
     get_sub_data,

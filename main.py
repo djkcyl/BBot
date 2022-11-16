@@ -34,7 +34,7 @@ for /f "tokens=*" %%a in ('dir /b /s /a-d bbot*.exe') do (
         input("按回车键退出 Press Enter to exit")
         sys.exit(1)
 
-os.environ["PLAYWRIGHT_BROWSERS_PATH"] = Path("data", "browser").absolute().as_posix()
+os.environ["PLAYWRIGHT_BROWSERS_PATH"] = Path("static", "browser").as_posix()
 
 
 # 加载配置项webui
@@ -56,7 +56,7 @@ def load_config_webui(reason: str = "未知原因", err: dict = {}):
             logger.critical(f"{err[0].ljust(pos_maxlen)} => {err[1]}")
 
     app = FastAPI(docs_url=None, redoc_url=None)
-    port = os.getenv("BBOT_WEBUI_PORT", 8090)
+    port = os.getenv("BBOT_WEBUI_PORT", 6080)
 
     @app.get("/api/config/load")
     async def load_config(config: dict):

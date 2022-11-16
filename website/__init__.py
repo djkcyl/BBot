@@ -1,14 +1,19 @@
+from pathlib import Path
 from typing import Union
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from launart import Launchable, ExportInterface, Launart
 from graia.amnesia.transport.common.asgi import ASGIHandlerProvider
 
 from .api.router import router
 
+STATIC_PATH = Path(__file__).parent.joinpath("static")
+
 
 async def root():
-    return {"message": "Hello World"}
+    return FileResponse(STATIC_PATH.joinpath("html", "index.html"))
 
 
 class BotService(Launchable):
@@ -32,5 +37,10 @@ class BotService(Launchable):
                 allow_methods=["*"],
                 allow_headers=["*"],
             )
-            app.get("/", tags=["Hello World"])(root)
+            app.get("/")(root)
+            app.mount(
+                "/",
+                StaticFiles(directory=STATIC_PATH.joinpath("html")),
+                name="static",
+            )
             app.include_router(router, prefix="/api")

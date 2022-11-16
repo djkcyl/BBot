@@ -16,7 +16,7 @@ class _Mirai(BaseModel, extra=Extra.ignore):
 
 
 class _Debug(BaseModel, extra=Extra.ignore):
-    groups: Optional[list[int]]
+    groups: Optional[list[int]] = [123]
     enable: bool = False
 
     # 规范 groups 内容
@@ -83,7 +83,7 @@ class _Event(BaseModel, extra=Extra.ignore):
 
 class _Webui(BaseModel, extra=Extra.ignore):
     webui_host: str = "0.0.0.0"
-    webui_port: int = 8001
+    webui_port: int = 6080
     webui_enable: bool = False
 
 
@@ -125,7 +125,7 @@ class _BotConfig(BaseModel, extra=Extra.ignore):
     def _create_file(file: Path = DEFUALT_CONFIG_PATH):
         file.write_text(
             Path(__file__)
-            .parent.parent.joinpath("data")
+            .parent.parent.joinpath("static")
             .joinpath("bot_config.exp.yaml")
             .read_text(encoding="utf-8"),
             encoding="utf-8",
