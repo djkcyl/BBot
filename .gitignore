@@ -6,3 +6,4 @@ package
 .idea/
 static/browser/
 data/
+docker_build

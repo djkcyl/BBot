@@ -8,6 +8,7 @@ main.spec
 .flake8
 logo.png
 tv.png
+docker_build
 poetry.lock
 package
 static/browser
