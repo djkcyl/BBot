@@ -1,5 +1,6 @@
 import function.command.add_talk
 import function.command.announcement
+import function.command.init
 import function.command.quit_group
 import function.command.status
 import function.command.video_resolve

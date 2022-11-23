@@ -34,7 +34,7 @@ def get_monitored_libs():
         filter(
             None,
             RAW_TOML.split("[tool.poetry.dependencies]")[1]
-            .split("[tool.poetry.dev-dependencies]")[0]
+            .split("[tool.poetry.group.dev.dependencies]")[0]
             .split("\n"),
         )
     )
