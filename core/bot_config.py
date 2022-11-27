@@ -123,6 +123,9 @@ class _BotConfig(BaseModel, extra=Extra.ignore):
     # 从模板创建配置文件
     @staticmethod
     def _create_file(file: Path = DEFUALT_CONFIG_PATH):
+        if not file.parent.exists():
+            logger.warning("配置文件目录不存在，已自动创建")
+            file.parent.mkdir(parents=True, exist_ok=True)
         file.write_text(
             Path(__file__)
             .parent.parent.joinpath("static")
@@ -154,6 +157,7 @@ class _BotConfig(BaseModel, extra=Extra.ignore):
     @classmethod
     def load(cls, file: Path = DEFUALT_CONFIG_PATH, allow_create: bool = False):
         # 如果文件不存在
+        print(file.exists())
         if not file.exists():
             if allow_create:
                 cls._create_file(file)
