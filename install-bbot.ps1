@@ -2,6 +2,7 @@ $pythonVersion = "3.9"
 $installPathName = "bbot"
 $gitRepo = "https://github.com/djkcyl/BBot-Graia.git"
 $gitBranch = "web"
+$mainFile = "main.py"
 
 
 $pythonPath = "python/Scripts/python.exe"
@@ -71,7 +72,7 @@ Write-Host "Installing dependencies"
 
 
 $script = "Set-Location ./$installPathName
-$pythonPath ./main.py
+$pythonPath ./$mainFile
 Set-Location .."
 Set-Content -Path "./start-$installPathName.ps1" -Value $script
 
