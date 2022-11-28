@@ -15,6 +15,24 @@ if [ -z "$BASH_VERSION" ]; then
     exit 1
 fi
 
+pythonIsRunning() {
+    if [ -z "$(ps -ef | grep -v grep | grep -i python)" ]; then
+        return 1
+    else
+        return 0
+    fi
+}
+
+if pythonIsRunning; then
+    read -p "检测到系统内有其他 python 正在运行，是否继续？[y/N] " -r
+    if [[ $REPLY =~ [Yy] ]]; then
+        echo "正在继续"
+    else
+        echo "安装终止"
+        exit 1
+    fi
+fi
+
 if [[ $* == *--clear* ]]; then
     rm -rf ./bbot
 fi
@@ -98,6 +116,25 @@ if [ -z "\$BASH_VERSION" ]; then
     echo "请使用 bash 执行此脚本"
     exit 1
 fi
+
+pythonIsRunning() {
+    if [ -z "$(ps -ef | grep -v grep | grep -i python)" ]; then
+        return 1
+    else
+        return 0
+    fi
+}
+
+if pythonIsRunning; then
+    read -p "检测到系统内有其他 python 正在运行，是否继续？[y/N] " -r
+    if [[ \$REPLY =~ [Yy] ]]; then
+        echo "正在继续"
+    else
+        echo "安装终止"
+        exit 1
+    fi
+fi
+
 
 if [ "\$1" == "start" ]; then
     python/bin/python main.py

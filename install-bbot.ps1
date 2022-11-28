@@ -1,15 +1,19 @@
-$pythonVersion = "3.9"
-$installPathName = "bbot"
-$gitRepo = "https://github.com/djkcyl/BBot-Graia.git"
-$gitBranch = "web"
-$mainFile = "main.py"
+$pythonFullVersion = "3.10.8" # 填写你需要的 Python 版本
+$compatiblePythonVersion = "3.9" # 填写可以兼容的 Python 版本
+$installPathName = "bbot" # 填写安装路径名，可代指 bot 的名字
+$gitRepo = "https://github.com/djkcyl/BBot-Graia.git" # 填写你的 bot 的 git 仓库地址
+$gitBranch = "web" # 填写仓库分支
+$mainFile = "main.py" # 填写你的 bot 的主文件名
 
-
+# 以下内容请不要修改
 $pythonPath = "python/Scripts/python.exe"
 $needClear = $args[0] -eq "--clear"
 $wingetInstalled = Get-Command winget -ErrorAction SilentlyContinue
 $gitInstalled = Get-Command git -ErrorAction SilentlyContinue
 $pythonInstalled = Get-Command python -ErrorAction SilentlyContinue
+$pythonVersion = $pythonFullVersion.Split(".")[0..1] -join "."
+$pythonVersionMinor = $pythonVersion.split(".")[1]
+$compatiblePythonVersionMinor = $compatiblePythonVersion.split(".")[1]
 
 if ($needClear) {
     Write-Host "Clearing ./$installPathName"
@@ -50,7 +54,7 @@ function CreatePythonVenv {
 
 
 $pythonInstalledVersion = $pythonInstalled.Version
-if ($pythonInstalled -and $pythonInstalled.Version.Major -eq 3 -and ($pythonInstalled.Version.Minor -eq 9 -or $pythonInstalled.Version.Minor -eq 10)) {
+if ($pythonInstalled -and $pythonInstalled.Version.Major -eq 3 -and ($pythonInstalled.Version.Minor -eq $pythonVersionMinor -or $pythonInstalled.Version.Minor -eq $compatiblePythonVersionMinor)) {
     Write-Host "Python $pythonInstalledVersion is already installed"
     CreatePythonVenv
 }
@@ -62,7 +66,7 @@ else {
     }
     else {
         Write-Host "Installing Python $pythonVersion with Scoop"
-        & scoop install python@$pythonVersion
+        & scoop install python@$pythonFullVersion
         CreatePythonVenv
     }
 }
@@ -71,40 +75,39 @@ Write-Host "Installing dependencies"
 & $installPathName/$pythonPath -m pip install -r ./$installPathName/requirements.txt
 
 
-$script = "Set-Location ./$installPathName
-$pythonPath ./$mainFile
-Set-Location .."
-Set-Content -Path "./start-$installPathName.ps1" -Value $script
-
-$script = "`$process = Get-Process -Name 'python' -ErrorAction SilentlyContinue
-if (`$process) {
-    `$process | Format-Table -AutoSize
-    `$choice = Read-Host -Prompt 'There are currently Python processes running, choose whether to force an update? (y/n)'
-    if !(`$choice -eq 'y') {
+$script = "`$runingProcess = Get-Process -Name 'python' -ErrorAction SilentlyContinue
+if (`$runingProcess) {
+    `$runingProcess | Format-Table -AutoSize
+    `$choice = Read-Host -Prompt 'There are currently Python processes running, choose whether to continue? (y/n)'
+    if (!(`$choice -eq 'y')) {
         exit
     }
 }
-& Set-Location ./$installPathName
-& git pull
-& $pythonPath -m pip install -r ./requirements.txt --upgrade
-Set-Location .."
-Set-Content -Path "./update-$installPathName.ps1" -Value $script
 
-$script = "`$process = Get-Process -Name 'python' -ErrorAction SilentlyContinue
-if (`$process) {
-    `$process | Format-Table -AutoSize
-    `$choice = Read-Host -Prompt 'There are currently Python processes running, choose whether to force an update? (y/n)'
-    if !(`$choice -eq 'y') {
-        exit
-    }
+function Update {
+    & git pull
+    & $pythonPath -m pip install -r ./requirements.txt --upgrade
 }
-Remove-Item -Path ./$installPathName -Recurse -Force
-Remove-Item -Path ./start-$installPathName.ps1 -Force
-Remove-Item -Path ./update-$installPathName.ps1 -Force
-Remove-Item -Path ./uninstall-$installPathName.ps1 -Force"
-Set-Content -Path "./uninstall-$installPathName.ps1" -Value $script
 
-Write-Host "Installation completed"
-Write-Host "Run start-$installPathName.ps1 to start the $installPathName"
-Write-Host "Run update-$installPathName.ps1 to update the $installPathName"
-Write-Host "Run uninstall-$installPathName.ps1 to uninstall the $installPathName"
+function Uninstall {
+    Remove-Item -Path ./$installPathName -Recurse -Force
+}
+
+function Start {
+    & $pythonPath ./$mainFile
+}
+
+if ($args[0] -eq '--update') {
+    Update
+}
+elseif ($args[0] -eq '--uninstall') {
+    Uninstall
+}
+elseif ($args[0] -eq '--start') {
+    Start
+}
+else {
+    Write-Host 'Usage: ./$installPathName.ps1 [--update|--uninstall|--start]'
+}"
+
+Set-Content -Path ./$installPathName/$installPathName.ps1 -Value $script
