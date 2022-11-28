@@ -20,6 +20,10 @@ if ($needClear) {
     Remove-Item -Path $installPathName -Recurse -Force
 }
 
+if ($PSVersionTable.PSVersion.Major -lt 5 -or $PSVersionTable.PSVersion.Minor -lt 1) {
+    Write-Host "This script only supports Windows 10 or Windows Server 2019 and above." -ForegroundColor Red
+    exit
+}
 
 function InstallScoop {
     Write-Host "Installing Scoop"
