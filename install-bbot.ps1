@@ -1,5 +1,4 @@
-$pythonFullVersion = "3.10.8" # 填写你需要的 Python 版本
-$compatiblePythonVersion = "3.9" # 填写可以兼容的 Python 版本
+$PythonVersion = "3.9" # 填写可以兼容的最低 Python 版本
 $installPathName = "bbot" # 填写安装路径名，可代指 bot 的名字
 $gitRepo = "https://github.com/djkcyl/BBot-Graia.git" # 填写你的 bot 的 git 仓库地址
 $gitBranch = "web" # 填写仓库分支
@@ -11,9 +10,7 @@ $needClear = $args[0] -eq "--clear"
 $wingetInstalled = Get-Command winget -ErrorAction SilentlyContinue
 $gitInstalled = Get-Command git -ErrorAction SilentlyContinue
 $pythonInstalled = Get-Command python -ErrorAction SilentlyContinue
-$pythonVersion = $pythonFullVersion.Split(".")[0..1] -join "."
 $pythonVersionMinor = $pythonVersion.split(".")[1]
-$compatiblePythonVersionMinor = $compatiblePythonVersion.split(".")[1]
 
 if ($needClear) {
     Write-Host "Clearing ./$installPathName"
@@ -58,7 +55,7 @@ function CreatePythonVenv {
 
 
 $pythonInstalledVersion = $pythonInstalled.Version
-if ($pythonInstalled -and $pythonInstalled.Version.Major -eq 3 -and ($pythonInstalled.Version.Minor -eq $pythonVersionMinor -or $pythonInstalled.Version.Minor -eq $compatiblePythonVersionMinor)) {
+if ($pythonInstalled -and $pythonInstalled.Version.Major -eq 3 -and $pythonInstalled.Version.Minor -ge $pythonVersionMinor) {
     Write-Host "Python $pythonInstalledVersion is already installed"
     CreatePythonVenv
 }
@@ -70,7 +67,7 @@ else {
     }
     else {
         Write-Host "Installing Python $pythonVersion with Scoop"
-        & scoop install python@$pythonFullVersion
+        & scoop install python
         CreatePythonVenv
     }
 }
