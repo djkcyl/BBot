@@ -12,9 +12,24 @@ $gitInstalled = Get-Command git -ErrorAction SilentlyContinue
 $pythonInstalled = Get-Command python -ErrorAction SilentlyContinue
 $pythonVersionMinor = $pythonVersion.split(".")[1]
 
-if ($needClear) {
-    Write-Host "Clearing ./$installPathName"
-    Remove-Item -Path $installPathName -Recurse -Force
+
+# 判断是否已安装过
+if (Test-Path $installPathName) {
+    if ($needClear) {
+        Write-Host "Clearing ./$installPathName"
+        Remove-Item -Path $installPathName -Recurse -Force
+    }
+    else {
+        $choice = Read-Host -Prompt "The bot has been installed. Do you want to clear it? (y/n)"
+        if ($choice -eq "y") {
+            Write-Host "Clearing ./$installPathName"
+            Remove-Item -Path $installPathName -Recurse -Force
+        }
+        else {
+            Write-Host "Exiting..."
+            exit
+        }
+    }
 }
 
 if ($PSVersionTable.PSVersion.Major -lt 5 -or $PSVersionTable.PSVersion.Minor -lt 1) {
