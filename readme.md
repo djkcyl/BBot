@@ -1,6 +1,6 @@
 <div align="center">
 
-![BBot-Graia](https://socialify.git.ci/djkcyl/BBot-Graia/image?description=1&descriptionEditable=A%20bot%20that%20uses%20the%20gRPC%20interface%20for%20efficient%20pushing%20of%20BiliBili%20updates%20and%20live%20streams%20within%20QQ%20groups&font=Inter&logo=https%3A%2F%2Fgithub.com%2Fdjkcyl%2FBBot-Graia%2Fraw%2Fmaster%2Flogo.png&name=1&owner=1&pattern=Circuit%20Board&theme=Light)
+![BBot-Graia](https://socialify.git.ci/djkcyl/BBot-Graia/image?description=1&descriptionEditable=A%20BiliBili%20dynamic%20and%20live%20bot%20using%20the%20gRPC%20interface&font=Inter&logo=https%3A%2F%2Fgithub.com%2Fdjkcyl%2FBBot-Graia%2Fraw%2Fmaster%2Flogo.png&name=1&owner=1&pattern=Circuit%20Board&theme=Light)
   
 # BBot for Ariadne
 ![GitHub Repo stars](https://img.shields.io/github/stars/djkcyl/BBot?style=social)
