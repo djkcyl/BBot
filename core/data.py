@@ -36,6 +36,17 @@ class DynamicPush(BaseModel):
         table_name = "dynamic_push"
 
 
+class GroupPush(BaseModel):
+    """群推送记录"""
+
+    group = CharField()
+    dyn_id = CharField()
+    push_time = DateTimeField(default=datetime.now)
+
+    class Meta:
+        table_name = "group_push"
+
+
 class LivePush(BaseModel):
     """直播推送记录"""
 
@@ -86,7 +97,7 @@ class DataVersion(BaseModel):
         table_name = "data_version"
 
 
-db.create_tables([DynamicPush, LivePush, SubList, TalkCount, DataVersion], safe=True)
+db.create_tables([DynamicPush, GroupPush, LivePush, SubList, TalkCount, DataVersion], safe=True)
 
 
 if not DataVersion.select().exists():
@@ -244,3 +255,17 @@ def get_push_count(
         )
     else:
         return DynamicPush.select().count()
+
+
+# 添加动态推送至群的记录
+def insert_dyn_push_to_group(dyn_id: Union[str, int], group: Union[str, int]):
+    GroupPush(dyn_id=str(dyn_id), group=str(group)).save()
+
+
+# 判断该动态是否在该群推送过
+def is_dyn_pushed_in_group(dyn_id: Union[str, int], group: Union[str, int]) -> bool:
+    return bool(
+        GroupPush.select()
+        .where(GroupPush.dyn_id == str(dyn_id), GroupPush.group == str(group))
+        .exists()
+    )

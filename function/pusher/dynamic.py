@@ -41,6 +41,8 @@ from core.data import (
     is_dyn_pushed,
     get_sub_by_uid,
     insert_dynamic_push,
+    is_dyn_pushed_in_group,
+    insert_dyn_push_to_group,
 )
 
 channel = Channel.current()
@@ -116,6 +118,7 @@ async def main(app: Ariadne):
         else:
             logger.error("[Dynamic] Gotten dynamic is empty")
             logger.error(dynall)
+
     else:
         # 把uid分组，每组发送一次请求
         check_list = [
@@ -163,7 +166,9 @@ async def push(app: Ariadne, dyn: DynamicItem):
                 for dynamic in details.list:
                     try:
                         if is_dyn_pushed(dynamic.extend.dyn_id_str):
-                            logger.debug(f"[Dynamic] {dynid} | {up_name}({up_id}) is pushed, skip")
+                            logger.debug(
+                                f"[Dynamic] {dynid} | {up_name}({up_id}) is pushed, skip"
+                            )
                             continue
                     except ValueError:
                         continue
@@ -177,7 +182,9 @@ async def push(app: Ariadne, dyn: DynamicItem):
             dyn_img = await app.upload_image(shot_image, UploadMethod.Group)
             logger.debug(f"[Dynamic] Upload dynamic screenshot {dynid} | {up_name}({up_id})")
         else:
-            logger.debug(f"[Dynamic] Get dynamic screenshot {dynid} | {up_name}({up_id}) failed")
+            logger.debug(
+                f"[Dynamic] Get dynamic screenshot {dynid} | {up_name}({up_id}) failed"
+            )
             err_msg = f"[BiliBili推送] {dynid} | {up_name}({up_id}) 更新了动态，截图失败"
             logger.error(err_msg)
             await app.send_friend_message(BotConfig.master, MessageChain(err_msg))
@@ -236,16 +243,26 @@ async def push(app: Ariadne, dyn: DynamicItem):
                         msg = ["@全体成员 "] + msg
                         msg.append(f"\n\n注：{BotConfig.name} 没有权限@全体成员")
                 try:
-                    logger.debug(f"[Dynamic] Send dynamic {dynid} | {up_name}({up_id}) to {data.group}")
+                    if is_dyn_pushed_in_group(dynid, data.group):
+                        logger.debug(
+                            f"[Dynamic] {dynid} | {up_name}({up_id}) is pushed in group {data.group}, skip"
+                        )
+                        continue
+                    logger.debug(
+                        f"[Dynamic] Send dynamic {dynid} | {up_name}({up_id}) to {data.group}"
+                    )
                     Context.push_type.set("dynamic")
                     Context.push_id.set(dynid)
                     await app.send_group_message(
                         int(data.group),
                         MessageChain(msg),
                     )
-                    await asyncio.sleep(1)
+                    insert_dyn_push_to_group(dynid, data.group)
+                    await asyncio.sleep(2)
                 except UnknownTarget:
-                    logger.warning(f"[BiliBili推送] {dynid} | {up_name}({up_id}) 推送失败，找不到该群 {data.group}，正在取消订阅")
+                    logger.warning(
+                        f"[BiliBili推送] {dynid} | {up_name}({up_id}) 推送失败，找不到该群 {data.group}，正在取消订阅"
+                    )
                     delete = await delete_group(data.group)
                     logger.warning(f"[BiliBili推送] 已删除群 {data.group} 订阅的 {len(delete)} 个 UP")
                     with contextlib.suppress(UnknownTarget):
@@ -253,10 +270,14 @@ async def push(app: Ariadne, dyn: DynamicItem):
                 except AccountMuted:
                     group = await app.get_group(int(data.group))
                     group = f"{group.name}（{group.id}）" if group else data.group
-                    logger.warning(f"[BiliBili推送] {dynid} | {up_name}({up_id}) 推送失败，账号在 {group} 被禁言")
+                    logger.warning(
+                        f"[BiliBili推送] {dynid} | {up_name}({up_id}) 推送失败，账号在 {group} 被禁言"
+                    )
                 except RemoteException as e:
                     if "resultType=46" in str(e):
-                        logger.error(f"[BiliBili推送] {dynid} | {up_name}({up_id}) 推送失败，Bot 被限制发送群聊消息")
+                        logger.error(
+                            f"[BiliBili推送] {dynid} | {up_name}({up_id}) 推送失败，Bot 被限制发送群聊消息"
+                        )
                         await app.send_friend_message(
                             BotConfig.master,
                             MessageChain("Bot 被限制发送群聊消息（46 代码），请尽快处理后发送 /init 重新开启推送进程"),
@@ -265,13 +286,17 @@ async def push(app: Ariadne, dyn: DynamicItem):
                         BOT_Status["init"] = False
                         raise ExecutionStop() from e
                     elif "resultType=110" in str(e):  # 110: 可能为群被封
-                        logger.warning(f"[BiliBili推送] {dynid} | {up_name}({up_id}) 推送失败，Bot 因未知原因被移出群聊")
+                        logger.warning(
+                            f"[BiliBili推送] {dynid} | {up_name}({up_id}) 推送失败，Bot 因未知原因被移出群聊"
+                        )
                         delete = await delete_group(data.group)
                         logger.warning(f"[BiliBili推送] 已删除群 {data.group} 订阅的 {len(delete)} 个 UP")
                         with contextlib.suppress(UnknownTarget):
                             await app.quit_group(int(data.group))
                     elif "reason=AT_ALL_LIMITED" in str(e):
-                        logger.warning(f"[BiliBili推送] {dynid} | {up_name}({up_id}) 推送失败，Bot 在该群 @全体成员 次数已达上限")
+                        logger.warning(
+                            f"[BiliBili推送] {dynid} | {up_name}({up_id}) 推送失败，Bot 在该群 @全体成员 次数已达上限"
+                        )
                         await app.send_group_message(int(data.group), MessageChain(msg[1:]))
                         await asyncio.sleep(1)
                     else:
@@ -295,7 +320,9 @@ async def push(app: Ariadne, dyn: DynamicItem):
             len(get_sub_by_uid(up_id)),
         )
     else:
-        logger.warning(f"[BiliBili推送] {dynid} | {up_name}({up_id}) 没有找到订阅 UP {up_name}（{up_id}）的群，已退订！")
+        logger.warning(
+            f"[BiliBili推送] {dynid} | {up_name}({up_id}) 没有找到订阅 UP {up_name}（{up_id}）的群，已退订！"
+        )
         await delete_uid(up_id)
 
 
