@@ -41,7 +41,7 @@ jobs:
       - name: Build Pyinstaller Binary
         run: |
           pip install --upgrade pyinstaller
-          python -m pyinstaller main.spec
+          pyinstaller main.spec
 
       - name: Build Nuitka Binary
         run: |
