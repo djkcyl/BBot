@@ -58,6 +58,12 @@ jobs:
           mv ./dist/$(python release.py --buildname) ./build/$(python release.py --name --package-tools pyinstaller)
           mv ./nuitka/$(python release.py --buildname) ./build/$(python release.py --name --package-tools nuitka)
 
+      # - name: Upload
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: ${{ matrix.os }}
+      #     path: build/*
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:

@@ -54,12 +54,18 @@ jobs:
 
       - name: Rename Binary
         run: |
-          mv ./dist/$(python release.py --buildname) ./build/$(python release.py --name --package-tools pyinstaller --beta {{ steps.commit.outputs.hash }})
-          mv ./nuitka/$(python release.py --buildname) ./build/$(python release.py --name --package-tools nuitka --beta {{ steps.commit.outputs.hash }})
+          mv ./dist/$(python release.py --buildname) ./build/$(python release.py --name --package-tools pyinstaller --beta ${{ steps.commit.outputs.short }})
+          mv ./nuitka/$(python release.py --buildname) ./build/$(python release.py --name --package-tools nuitka --beta ${{ steps.commit.outputs.short }})
+
+      # - name: Upload 
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: ${{ matrix.os }}
+      #     path: build/*
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           prerelease: true
-          tag_name: v$(python release.py --version --beta {{ steps.commit.outputs.hash }})
+          tag_name: v$(python release.py --version --beta ${{ steps.commit.outputs.short }})
           files: build/*
