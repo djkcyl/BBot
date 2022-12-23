@@ -47,7 +47,7 @@ jobs:
         run: |
           pip uninstall -y pyinstaller
           pip install nuitka zstandard orderedset imageio
-          python -m nuitka --onefile --standalone --show-progress --assume-yes-for-downloads --output-dir=nuitka --windows-icon-from-ico=tv.png --user-package-configuration-file=nuitka.yml .\main.py
+          python -m nuitka --onefile --standalone --show-progress --assume-yes-for-downloads --output-dir=nuitka --windows-icon-from-ico=tv.png --user-package-configuration-file=nuitka.yml main.py
 
       - name: Get commit hash
         id: commit
