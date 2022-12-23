@@ -1,21 +1,21 @@
 import os
 import sys
-from pathlib import Path
-
 import psutil
-import sentry_sdk
+from pathlib import Path
 from loguru import logger
+from sentry_sdk import init as sentry_sdk_init
 
 from core.bot_config import _BotConfig
+from library.detect_package import is_package
 
-sentry_sdk.init(
+sentry_sdk_init(
     dsn="https://e7455ef7813c42e2b854bdd5c26adeb6@o1418272.ingest.sentry.io/6761179",
     traces_sample_rate=1.0,
 )
 
-if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+if is_package:
     s = psutil.Process().parent()
-    if s.name() == "explorer.exe" or s.parent().name() == "explorer.exe":
+    if s.name() not in ["powershell.exe", "cmd.exe"]:
         Path("start.bat").write_text(
             """@echo off
 title BBot for Ariadne
@@ -88,7 +88,9 @@ def load_config_webui(reason: str = "未知原因", err: dict = {}):
 
     if isinstance(err, dict):
         valueerror_output(err)
-    logger.critical(f"由于 {reason} ，导致配置加载失败, 请打开浏览器访问 BBot 主机的 http://0.0.0.0:{port} 进行配置")
+    logger.critical(
+        f"由于 {reason} ，导致配置加载失败, 请打开浏览器访问 BBot 主机的 http://0.0.0.0:{port} 进行配置，或手动配置完成后使用 Ctrl+C 重载配置"
+    )
     uvicorn.run(app, host="0.0.0.0", port=int(port))
 
 
@@ -105,7 +107,7 @@ for _ in range(3):
         logger.exception(e)
         load_config_webui(reason="未知原因")
 else:
-    logger.critical("配置加载失败, 请检查配置文件")
+    logger.critical("配置加载失败超过 3 次, 请检查配置文件后重新启动")
     sys.exit(1)
 
 import bot  # noqa

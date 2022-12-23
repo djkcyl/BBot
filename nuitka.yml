@@ -1,0 +1,36 @@
+- module-name: __main__
+  data-files:
+    dirs:
+      - 'static'
+      - 'website\static'
+    patterns:
+      - "pyproject.toml"
+
+- module-name: sentry_sdk.integrations
+  implicit-imports:
+    - depends:
+      - .logging
+      - .stdlib
+      - .excepthook
+      - .dedupe
+      - .atexit
+      - .modules
+      - .argv
+      - .threading
+      - .django
+      - .flask
+      - .starlette
+      - .fastapi
+      - .bottle
+      - .falcon
+      - .sanic
+      - .celery
+      - .rq
+      - .aiohttp
+      - .tornado
+      - .sqlalchemy
+      - .redis
+      - .pyramid
+      - .boto3
+
+# nuitka --standalone --show-progress --output-dir=build .\test.py

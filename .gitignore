@@ -7,3 +7,5 @@ package
 static/browser/
 data/
 docker_build
+build
+venv
