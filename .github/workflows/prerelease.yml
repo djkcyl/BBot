@@ -27,13 +27,10 @@ jobs:
         with:
           python-version: "3.9.x"
 
-      - name: Install Pyinstaller and Nuitka
+      - name: Install Dependencies
         run: |
           pip install --upgrade wheel pip
-          pip install --upgrade pyinstaller nuitka zstandard orderedset imageio
-
-      - name: Install Dependencies
-        run: pip install -r requirements.txt
+          pip install -r requirements.txt
 
       - name: Install Playwright Browsers
         env:
@@ -41,10 +38,15 @@ jobs:
         run: playwright install chromium
 
       - name: Build Pyinstaller Binary
-        run: pyinstaller main.spec
+        run: |
+          pip install --upgrade pyinstaller
+          pyinstaller main.spec
 
       - name: Build Nuitka Binary
-        run: nuitka --onefile --standalone --show-progress --assume-yes-for-downloads --output-dir=nuitka --windows-icon-from-ico=tv.png --user-package-configuration-file=nuitka.yml .\main.py
+        run: |
+          pip uninstall -y pyinstaller
+          pip install nuitka zstandard orderedset imageio
+          nuitka --onefile --standalone --show-progress --assume-yes-for-downloads --output-dir=nuitka --windows-icon-from-ico=tv.png --user-package-configuration-file=nuitka.yml .\main.py
 
       - name: Get commit hash
         id: commit
