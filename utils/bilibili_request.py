@@ -1,6 +1,7 @@
 import httpx
 
 from typing import Union
+from loguru import logger
 from bilireq.utils import post, get
 from bilireq.grpc.protos.bilibili.app.view.v1.view_pb2_grpc import ViewStub
 from bilireq.grpc.protos.bilibili.app.view.v1.view_pb2 import ViewReq, ViewReply
@@ -12,7 +13,6 @@ from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2 import (
 )
 from bilireq.grpc.utils import grpc_request
 from bilireq.grpc.dynamic import grpc_get_followed_dynamics
-from loguru import logger
 
 from core import Bili_Auth
 

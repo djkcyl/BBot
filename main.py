@@ -6,7 +6,7 @@ from loguru import logger
 from sentry_sdk import init as sentry_sdk_init
 
 from core.bot_config import _BotConfig
-from library.detect_package import is_package
+from utils.detect_package import is_package
 
 sentry_sdk_init(
     dsn="https://e7455ef7813c42e2b854bdd5c26adeb6@o1418272.ingest.sentry.io/6761179",

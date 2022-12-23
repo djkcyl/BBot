@@ -8,7 +8,7 @@ from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import Twilight, RegexMatch
 
 from bot import BotConfig
-from library.text2image import text2image
+from utils.text2image import text2image
 from core.control import Interval, Permission
 
 channel = Channel.current()

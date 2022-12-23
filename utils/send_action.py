@@ -1,6 +1,8 @@
 import contextlib
+
 from loguru import logger
 from graia.ariadne.app import Ariadne
+from sentry_sdk import capture_exception
 from graia.ariadne.message.element import AtAll
 from graia.broadcast.exceptions import ExecutionStop
 from graia.ariadne.message.chain import MessageChain
@@ -9,12 +11,12 @@ from graia.ariadne.event.message import ActiveMessage
 from graia.ariadne.model import Friend, Group, Member
 from graia.ariadne.typing import SendMessageAction, SendMessageException
 from graia.ariadne.exception import UnknownTarget, AccountMuted, RemoteException
-from sentry_sdk import capture_exception
 
 from bot import BotConfig
 from core import BOT_Status
-from library import delete_group
 from core.context import Context
+
+from .up_operation import delete_group
 
 Exc_T = TypeVar("Exc_T", bound=SendMessageException)
 

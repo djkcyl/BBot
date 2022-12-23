@@ -15,7 +15,7 @@ from graia.ariadne.entry import config, HttpClientConfig, WebsocketClientConfig
 from main import BotConfig
 from core.log import logger
 from website import BotService
-from library.fastapi import FastAPIService
+from utils.fastapi import FastAPIService
 from core.announcement import base_telemetry
 
 logger.info("BBot is starting...")

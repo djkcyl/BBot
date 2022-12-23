@@ -10,7 +10,7 @@ from graiax.playwright.interface import PlaywrightContext
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 
 from bot import BotConfig
-from library.bilibili_request import hc
+from utils.bilibili_request import hc
 
 channel = Channel.current()
 

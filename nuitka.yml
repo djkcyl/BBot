@@ -33,4 +33,17 @@
       - .pyramid
       - .boto3
 
+- module-name: graia
+  implicit-imports:
+    - depends:
+      - .creart
+      - .creart.saya
+      - .creart.broadcast
+      - .ariadne.message.commander.creart
+
+- module-name: playwright
+  data-files:
+    dirs:
+      - 'driver'
+
 # nuitka --standalone --show-progress --output-dir=build .\test.py

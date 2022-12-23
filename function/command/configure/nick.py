@@ -11,8 +11,8 @@ from graia.ariadne.message.parser.twilight import (
     RegexResult,
 )
 
-from library import set_nick
-from library.uid_extract import uid_extract
+from utils.up_operation import set_nick
+from utils.uid_extract import uid_extract
 from core.control import Interval, Permission
 
 channel = Channel.current()

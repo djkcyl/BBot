@@ -3,7 +3,7 @@ import contextlib
 
 from loguru import logger
 
-from library.bilibili_request import hc
+from .bilibili_request import hc
 
 
 async def b23_extract(text: str):

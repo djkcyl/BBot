@@ -7,7 +7,7 @@ from pathlib import Path
 from loguru import logger
 
 from bot import BotConfig
-from library.detect_package import is_package
+from utils.detect_package import is_package
 
 # read log_level and verify
 log_level = str(BotConfig.log_level).upper()

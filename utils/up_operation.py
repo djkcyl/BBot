@@ -5,10 +5,9 @@ from typing import Union
 from loguru import logger
 from bilireq.grpc.dynamic import grpc_get_user_dynamics
 
-from core import BOT_Status
 from bot import BotConfig
+from core import BOT_Status
 from core.group_config import GroupPermission
-from library.bilibili_request import relation_modify
 from core.data import (
     add_sub,
     uid_exists,
@@ -21,6 +20,8 @@ from core.data import (
     unsub_uid_by_group,
 )
 
+from .bilibili_request import relation_modify
+
 
 async def subscribe_uid(uid: Union[str, int], groupid: Union[str, int]):
     """在某个群订阅某个 up"""
@@ -28,7 +29,7 @@ async def subscribe_uid(uid: Union[str, int], groupid: Union[str, int]):
     groupid = str(groupid)
     gp = GroupPermission(int(groupid))
     BOT_Status["init"] = False
-    while BOT_Status["dynamic_updating"]:
+    while BOT_Status["dynamic_updating"] and not BotConfig.Bilibili.use_login:
         await asyncio.sleep(0.1)
 
     if not uid:

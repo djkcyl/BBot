@@ -10,7 +10,7 @@ from graia.broadcast.builtin.event import ExceptionThrowed
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 
 from bot import BotConfig
-from library.text2image import text2image
+from utils.text2image import text2image
 
 
 channel = Channel.current()

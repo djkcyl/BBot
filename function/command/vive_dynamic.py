@@ -18,10 +18,10 @@ from graia.ariadne.message.parser.twilight import (
     WildcardMatch,
 )
 
-from library.uid_extract import uid_extract
+from utils.uid_extract import uid_extract
 from core.control import Interval, Permission
-from library.bilibili_request import get_b23_url
-from library.dynamic_shot import get_dynamic_screenshot
+from utils.bilibili_request import get_b23_url
+from utils.dynamic_shot import get_dynamic_screenshot
 
 channel = Channel.current()
 
