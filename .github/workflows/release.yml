@@ -26,10 +26,12 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.9.x"
+          python-version: "3.10.x"
 
       - name: Install Pyinstaller and Nuitka
-        run: pip install --upgrade wheel pyinstaller nuitka zstandard orderedset imageio
+        run: |
+          pip install --upgrade wheel pip
+          pip install --upgrade pyinstaller nuitka zstandard orderedset imageio
 
       - name: Install Dependencies
         run: pip install -r requirements.txt
@@ -43,7 +45,7 @@ jobs:
         run: pyinstaller main.spec
 
       - name: Build Nuitka Binary
-        run: nuitka --onefile --standalone --show-progress --output-dir=nuitka --windows-icon-from-ico=tv.png --user-package-configuration-file=nuitka.yml .\main.py
+        run: nuitka --onefile --standalone --show-progress --assume-yes-for-downloads --output-dir=nuitka --windows-icon-from-ico=tv.png --user-package-configuration-file=nuitka.yml .\main.py
 
       - name: Get commit hash
         id: commit
