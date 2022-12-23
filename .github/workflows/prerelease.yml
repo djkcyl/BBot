@@ -1,4 +1,4 @@
-name: Release
+name: PreRelease
 
 on:
   push:
@@ -11,7 +11,6 @@ on:
 jobs:
   build:
     name: Build
-    needs: release
     strategy:
       matrix:
         os:
