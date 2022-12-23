@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - dev
+      - web
 
   workflow_dispatch:
 
