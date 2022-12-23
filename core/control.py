@@ -46,7 +46,7 @@ class Permission:
         else:
             raise TypeError("member must be Member or int")
 
-        if user == 80000000:
+        if user == 80000000:  # 该号码为匿名 QQ 号
             raise ExecutionStop()
 
         if user in BotConfig.admins:

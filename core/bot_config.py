@@ -157,7 +157,6 @@ class _BotConfig(BaseModel, extra=Extra.ignore):
     @classmethod
     def load(cls, file: Path = DEFUALT_CONFIG_PATH, allow_create: bool = False):
         # 如果文件不存在
-        print(file.exists())
         if not file.exists():
             if allow_create:
                 cls._create_file(file)

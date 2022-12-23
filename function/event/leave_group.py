@@ -14,7 +14,7 @@ from graia.ariadne.event.mirai import (
 )
 
 from core.data import get_sub_by_group
-from library import unsubscribe_uid
+from utils.up_operation import unsubscribe_uid
 from bot import BotConfig
 from core.group_config import GroupPermission
 

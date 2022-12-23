@@ -19,9 +19,9 @@ from graia.ariadne.exception import UnknownTarget, AccountMuted, RemoteException
 
 from core import BOT_Status
 from bot import BotConfig
-from library.time_tools import calc_time_total
-from library.bilibili_request import get_b23_url
-from library import delete_group, delete_uid, set_name
+from utils.time_tools import calc_time_total
+from utils.bilibili_request import get_b23_url
+from utils.up_operation import delete_group, delete_uid, set_name
 from core.data import insert_live_push, get_all_uid, get_sub_by_uid
 
 channel = Channel.current()

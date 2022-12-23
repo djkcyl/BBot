@@ -3,9 +3,8 @@ name: Release
 on:
   push:
     branches:
-      - master
-    paths:
-      - pyproject.toml
+      - dev
+      - web
 
   workflow_dispatch:
 
@@ -52,11 +51,12 @@ jobs:
 
       - name: Rename Binary
         run: |
-          mv ./dist/$(python release.py --buildname) ./build/$(python release.py --name --package-tools pyinstaller)
-          mv ./nuitka/$(python release.py --buildname) ./build/$(python release.py --name --package-tools nuitka)
+          mv ./dist/$(python release.py --buildname) ./build/$(python release.py --name --package-tools pyinstaller --beta {{ steps.commit.outputs.hash }})
+          mv ./nuitka/$(python release.py --buildname) ./build/$(python release.py --name --package-tools nuitka --beta {{ steps.commit.outputs.hash }})
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v$(python release.py --version)
+          prerelease: true
+          tag_name: v$(python release.py --version --beta {{ steps.commit.outputs.hash }})
           files: build/*

@@ -7,9 +7,9 @@ from PIL import Image, ImageFont, ImageDraw
 from bilireq.exceptions import ResponseCodeError
 from bilireq.grpc.protos.bilibili.app.view.v1.view_pb2 import ViewReply
 
-from library.bilibili_request import hc, get_user_space_info
-
 from .strings import get_cut_str, num_fmt
+from .bilibili_request import hc, get_user_space_info
+
 
 font_path = Path(__file__).parent.parent.joinpath("static", "font")
 font_semibold = str(font_path.joinpath("sarasa-mono-sc-semibold.ttf"))

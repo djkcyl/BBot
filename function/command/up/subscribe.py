@@ -15,9 +15,9 @@ from graia.ariadne.message.parser.twilight import (
 )
 
 from core import BOT_Status
-from library import subscribe_uid
+from utils.up_operation import subscribe_uid
 from bot import BotConfig
-from library.uid_extract import uid_extract
+from utils.uid_extract import uid_extract
 from core.control import Interval, Permission
 
 channel = Channel.current()

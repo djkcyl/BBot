@@ -7,6 +7,7 @@ from pathlib import Path
 from loguru import logger
 
 from bot import BotConfig
+from utils.detect_package import is_package
 
 # read log_level and verify
 log_level = str(BotConfig.log_level).upper()
@@ -27,12 +28,12 @@ def in_screen():
     return psutil.Process().pid == 1
 
 
-if not in_screen():
-    richuru.install(level=log_level)
-else:
-    logger.info("检测到当前运行在 docker, screen 或 tmux 中，已禁用 richuru")
+if in_screen() or is_package:
+    logger.info("检测到当前运行在 docker、screen、tmux 中，或运行为打包（nuitka、pyinstaller）版本，已禁用 richuru")
     logger.remove(0)
     logger.add(sys.stderr, level=log_level, backtrace=True, diagnose=True)
+else:
+    richuru.install(level=log_level)
 
 # add latest logger
 logger.add(

@@ -13,10 +13,10 @@ from graia.ariadne.message.chain import MessageChain
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.element import Image, Voice, FlashImage, Source
 
-from library.b23_extract import b23_extract
+from utils.b23_extract import b23_extract
 from core.control import Interval, Permission
-from library.draw_bili_image import binfo_image_create
-from library.bilibili_request import get_b23_url, grpc_get_view_info
+from utils.draw_bili_image import binfo_image_create
+from utils.bilibili_request import get_b23_url, grpc_get_view_info
 
 channel = Channel.current()
 
@@ -59,7 +59,7 @@ async def main(app: Ariadne, group: Group, message: MessageChain, source: Source
         )
     aid = video_info.activity_season.arc.aid or video_info.arc.aid
     bvid = video_info.activity_season.bvid or video_info.bvid
-    await Interval.manual(aid)
+    await Interval.manual(aid + group.id)
     try:
         logger.info(f"开始生成视频信息图片：{aid}")
         b23_url = await get_b23_url(f"https://www.bilibili.com/video/{bvid}")

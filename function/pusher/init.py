@@ -20,11 +20,11 @@ from graia.ariadne.event.lifecycle import AccountLaunch
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from bilireq.grpc.dynamic import grpc_get_followed_dynamic_users, grpc_get_user_dynamics
 
-from library import delete_uid
+from utils.up_operation import delete_uid
 from bot import BotConfig
 from core import BOT_Status, Bili_Auth
 from core.data import get_all_uid, delete_sub_by_uid
-from library.bilibili_request import relation_modify, grpc_get_followed_dynamics_noads
+from utils.bilibili_request import relation_modify, grpc_get_followed_dynamics_noads
 
 
 inc = it(InterruptControl)
