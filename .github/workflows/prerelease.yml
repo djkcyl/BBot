@@ -54,8 +54,8 @@ jobs:
 
       - name: Rename Binary
         run: |
-          mv ./dist/$(python release.py --buildname) ./build/$(python release.py --name --package-tools pyinstaller --beta ${{ steps.commit.outputs.short }})
-          mv ./nuitka/$(python release.py --buildname) ./build/$(python release.py --name --package-tools nuitka --beta ${{ steps.commit.outputs.short }})
+          mv ./dist/$(python release.py --buildname --package-tools pyinstaller) ./build/$(python release.py --name --package-tools pyinstaller --beta ${{ steps.commit.outputs.short }})
+          mv ./nuitka/$(python release.py --buildname --package-tools nuitka) ./build/$(python release.py --name --package-tools nuitka --beta ${{ steps.commit.outputs.short }})
 
       # - name: Upload 
       #   uses: actions/upload-artifact@v2
