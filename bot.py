@@ -1,3 +1,4 @@
+import os
 import asyncio
 import contextlib
 
@@ -17,6 +18,8 @@ from core.log import logger
 from website import BotService
 from utils.fastapi import FastAPIService
 from core.announcement import base_telemetry
+
+os.environ["PLAYWRIGHT_BROWSERS_PATH"] = Path("static", "browser").as_posix()
 
 logger.info("BBot is starting...")
 

@@ -1,6 +1,7 @@
 import os
 import sys
 import psutil
+
 from pathlib import Path
 from loguru import logger
 from sentry_sdk import init as sentry_sdk_init
@@ -14,8 +15,8 @@ sentry_sdk_init(
 )
 
 if is_package:
-    s = psutil.Process().parent()
-    if s.name() not in ["powershell.exe", "cmd.exe"]:
+    s = psutil.Process().parent().parent()
+    if s.name() == "explorer.exe":
         Path("start.bat").write_text(
             """@echo off
 title BBot for Ariadne
@@ -33,8 +34,6 @@ for /f "tokens=*" %%a in ('dir /b /s /a-d bbot*.exe') do (
         print("Generated start.bat file")
         input("按回车键退出 Press Enter to exit")
         sys.exit(1)
-
-os.environ["PLAYWRIGHT_BROWSERS_PATH"] = Path("static", "browser").as_posix()
 
 
 # 加载配置项webui
