@@ -81,9 +81,15 @@ def load_config_webui(reason: str = "未知原因", err: dict = {}):
 
     @app.get("/")
     async def index():
-        return FileResponse(Path("website", "static", "init", "index.html"))
+        return FileResponse(
+            Path(__file__).parent.joinpath("website", "static", "init", "index.html")
+        )
 
-    app.mount("/", StaticFiles(directory=Path("website", "static", "init")), name="Init Page")
+    app.mount(
+        "/",
+        StaticFiles(directory=Path(__file__).parent.joinpath("website", "static", "init")),
+        name="Init Page",
+    )
 
     if isinstance(err, dict):
         valueerror_output(err)
