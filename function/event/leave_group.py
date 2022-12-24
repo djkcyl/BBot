@@ -13,10 +13,10 @@ from graia.ariadne.event.mirai import (
     BotLeaveEventDisband,
 )
 
+from core.bot_config import BotConfig
 from core.data import get_sub_by_group
-from utils.up_operation import unsubscribe_uid
-from bot import BotConfig
 from core.group_config import GroupPermission
+from utils.up_operation import unsubscribe_uid
 
 channel = Channel.current()
 

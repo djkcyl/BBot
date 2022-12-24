@@ -16,7 +16,7 @@ from graia.ariadne.message.parser.twilight import (
 
 
 from utils.up_operation import unsubscribe_uid
-from bot import BotConfig
+from core.bot_config import BotConfig
 from utils.uid_extract import uid_extract
 from core.control import Interval, Permission
 

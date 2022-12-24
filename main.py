@@ -102,8 +102,7 @@ def load_config_webui(reason: str = "未知原因", err: dict = {}):
 if __name__ == "__main__":
     for _ in range(3):
         try:
-            BotConfig = _BotConfig.load(allow_create=True)
-            BotConfig.save()
+            _BotConfig.load(allow_create=True)
             break
         except ValueError as e:
             load_config_webui(reason="配置文件填写错误", err=_BotConfig.valueerror_parser(e))

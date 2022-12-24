@@ -180,3 +180,6 @@ class _BotConfig(BaseModel, extra=Extra.ignore):
             yaml.dump(json.loads(self.json()), Dumper=NoAliasDumper, sort_keys=False),
             encoding="utf-8",
         )
+
+
+BotConfig = _BotConfig.load(allow_create=True)

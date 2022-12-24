@@ -10,7 +10,7 @@ from playwright._impl._api_types import TimeoutError
 from graiax.playwright.interface import PlaywrightContext
 from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2 import DynamicItem
 
-from bot import BotConfig
+from core.bot_config import BotConfig
 
 
 error_path = Path("data").joinpath("error")

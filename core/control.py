@@ -14,7 +14,7 @@ from graia.ariadne.event.message import GroupMessage
 from graia.broadcast.builtin.decorators import Depend
 from graia.ariadne.model import Member, MemberPerm, Friend
 
-from bot import BotConfig
+from core.bot_config import BotConfig
 
 
 class Permission:

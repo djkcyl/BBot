@@ -6,7 +6,7 @@ import contextlib
 from pathlib import Path
 from loguru import logger
 
-from bot import BotConfig
+from core.bot_config import BotConfig
 from utils.detect_package import is_package
 
 # read log_level and verify

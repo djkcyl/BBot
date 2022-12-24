@@ -7,7 +7,7 @@ from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.event.mirai import NewFriendRequestEvent
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 
-from bot import BotConfig
+from core.bot_config import BotConfig
 
 channel = Channel.current()
 

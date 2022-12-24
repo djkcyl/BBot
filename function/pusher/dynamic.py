@@ -24,11 +24,11 @@ from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2 import (
     DynModuleType,
 )
 
-from bot import BotConfig
 from core import BOT_Status
 from core.context import Context
-from utils.up_operation import delete_group, delete_uid, set_name
+from core.bot_config import BotConfig
 from utils.dynamic_shot import get_dynamic_screenshot
+from utils.up_operation import delete_group, delete_uid, set_name
 from utils.bilibili_request import (
     get_b23_url,
     dynamic_like,

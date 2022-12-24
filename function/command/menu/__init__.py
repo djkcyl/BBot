@@ -7,7 +7,7 @@ from graia.ariadne.message.chain import MessageChain
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import Twilight, RegexMatch
 
-from bot import BotConfig
+from core.bot_config import BotConfig
 from utils.text2image import text2image
 from core.control import Interval, Permission
 

@@ -12,7 +12,7 @@ from graia.ariadne.message.parser.twilight import (
 )
 
 from core.control import Permission
-from bot import BotConfig
+from core.bot_config import BotConfig
 
 channel = Channel.current()
 

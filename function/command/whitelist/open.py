@@ -7,7 +7,7 @@ from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import Twilight, FullMatch
 
 from core.control import Permission
-from bot import BotConfig
+from core.bot_config import BotConfig
 
 channel = Channel.current()
 

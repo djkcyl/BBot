@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from main import BotConfig
 from core.control import Permission
+from core.bot_config import BotConfig
 from core.bot_config import _BotConfig
 
 from .auth import verify_token

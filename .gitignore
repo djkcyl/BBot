@@ -9,3 +9,4 @@ data/
 docker_build
 build
 venv
+nuitka/

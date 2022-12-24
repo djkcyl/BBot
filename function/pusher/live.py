@@ -18,7 +18,7 @@ from graia.scheduler.timers import every_custom_seconds
 from graia.ariadne.exception import UnknownTarget, AccountMuted, RemoteException
 
 from core import BOT_Status
-from bot import BotConfig
+from core.bot_config import BotConfig
 from utils.time_tools import calc_time_total
 from utils.bilibili_request import get_b23_url
 from utils.up_operation import delete_group, delete_uid, set_name

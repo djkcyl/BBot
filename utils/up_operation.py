@@ -5,8 +5,8 @@ from typing import Union
 from loguru import logger
 from bilireq.grpc.dynamic import grpc_get_user_dynamics
 
-from bot import BotConfig
 from core import BOT_Status
+from core.bot_config import BotConfig
 from core.group_config import GroupPermission
 from core.data import (
     add_sub,

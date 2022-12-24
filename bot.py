@@ -13,13 +13,15 @@ from graia.amnesia.builtins.uvicorn import UvicornService
 from graia.amnesia.builtins.memcache import MemcacheService
 from graia.ariadne.entry import config, HttpClientConfig, WebsocketClientConfig
 
-from main import BotConfig
 from core.log import logger
 from website import BotService
+from core.bot_config import BotConfig
 from utils.fastapi import FastAPIService
+from utils.detect_package import is_package
 from core.announcement import base_telemetry
 
-os.environ["PLAYWRIGHT_BROWSERS_PATH"] = Path("static", "browser").as_posix()
+if not is_package:
+    os.environ["PLAYWRIGHT_BROWSERS_PATH"] = Path("static", "browser").as_posix()
 
 logger.info("BBot is starting...")
 

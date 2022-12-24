@@ -9,7 +9,7 @@ from graia.ariadne.event.lifecycle import AccountLaunch
 from graiax.playwright.interface import PlaywrightContext
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 
-from bot import BotConfig
+from core.bot_config import BotConfig
 from utils.bilibili_request import hc
 
 channel = Channel.current()

@@ -12,9 +12,9 @@ from graia.ariadne.model import Friend, Group, Member
 from graia.ariadne.typing import SendMessageAction, SendMessageException
 from graia.ariadne.exception import UnknownTarget, AccountMuted, RemoteException
 
-from bot import BotConfig
 from core import BOT_Status
 from core.context import Context
+from core.bot_config import BotConfig
 
 from .up_operation import delete_group
 
