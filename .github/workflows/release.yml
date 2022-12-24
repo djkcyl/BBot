@@ -12,6 +12,8 @@ on:
 jobs:
   build:
     name: Build
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     strategy:
       matrix:
         os:
@@ -53,19 +55,18 @@ jobs:
         id: commit
         uses: pr-mpt/actions-commit-hash@v2
 
+      - name: Get Release Version
+        id: version
+        run: |
+          echo "::set-output name=version::v$(python release.py --version --beta ${{ steps.commit.outputs.short }})"
+
       - name: Rename Binary
         run: |
           mv ./dist/$(python release.py --buildname --package-tools pyinstaller) ./build/$(python release.py --name --package-tools pyinstaller --beta ${{ steps.commit.outputs.short }})
           mv ./nuitka/$(python release.py --buildname --package-tools nuitka) ./build/$(python release.py --name --package-tools nuitka --beta ${{ steps.commit.outputs.short }})
 
-      # - name: Upload
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: ${{ matrix.os }}
-      #     path: build/*
-
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v$(python release.py --version)
+          tag_name: ${{ steps.version.outputs.version }}
           files: build/*
