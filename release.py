@@ -39,7 +39,7 @@ elif p.name:
     print(file_name)
 elif p.buildname:
     print(build_name)
-elif p.playwright:
+elif p.replace_playwright_path:
     playwright_package_path = pkg_resources.resource_filename("playwright", "driver")
     path = list(
         pathlib.Path(playwright_package_path, "package", ".local-browsers").glob(
