@@ -1,6 +1,7 @@
 import pathlib
 import platform
 import argparse
+import pkg_resources
 
 project_version = (
     pathlib.Path("pyproject.toml")
@@ -16,6 +17,7 @@ parser.add_argument("--name", action="store_true")
 parser.add_argument("--buildname", action="store_true")
 parser.add_argument("--package-tools", default="")
 parser.add_argument("--beta", default="")
+parser.add_argument("--replace-playwright-path", action="store_true")
 
 p = parser.parse_args()
 
@@ -37,3 +39,13 @@ elif p.name:
     print(file_name)
 elif p.buildname:
     print(build_name)
+elif p.playwright:
+    playwright_package_path = pkg_resources.resource_filename("playwright", "driver")
+    path = list(
+        pathlib.Path(playwright_package_path, "package", ".local-browsers").glob(
+            "chromium-*/chrome-*"
+        )
+    )[0]
+    chrome_relative_path = path.relative_to(pathlib.Path(playwright_package_path).parent)
+    yml_path = pathlib.Path("nuitka.yml")
+    yml_path.write_text(yml_path.read_text().replace("$PLAYWRIGHT", str(chrome_relative_path)))

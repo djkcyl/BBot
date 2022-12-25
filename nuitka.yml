@@ -1,10 +1,10 @@
-- module-name: __main__
-  data-files:
-    dirs:
-      - 'static'
-      - 'website\static'
-    patterns:
-      - "pyproject.toml"
+# - module-name: __main__
+#   data-files:
+#     dirs:
+#       - 'static'
+#       - 'website\static'
+#     patterns:
+#       - "pyproject.toml"
 
 - module-name: sentry_sdk.integrations
   implicit-imports:
@@ -45,5 +45,10 @@
   data-files:
     dirs:
       - 'driver'
+  dlls:
+    - from_filenames:
+        relative_path: '$PLAYWRIGHT'
+        prefixes:
+          - '*'
 
 # nuitka --standalone --show-progress --output-dir=build .\test.py

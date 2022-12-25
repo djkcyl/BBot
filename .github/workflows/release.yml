@@ -45,6 +45,9 @@ jobs:
           pip install --upgrade pyinstaller
           pyinstaller main.spec
 
+      - name: Replease Playwright Path
+        run: python release.py --replace-playwright-path
+
       - name: Build Nuitka Binary
         run: |
           pip uninstall -y pyinstaller
