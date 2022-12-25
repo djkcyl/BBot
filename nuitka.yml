@@ -1,10 +1,10 @@
-# - module-name: __main__
-#   data-files:
-#     dirs:
-#       - 'static'
-#       - 'website\static'
-#     patterns:
-#       - "pyproject.toml"
+- module-name: __main__
+  data-files:
+    dirs:
+      - 'static'
+      - 'website\static'
+    patterns:
+      - "pyproject.toml"
 
 - module-name: sentry_sdk.integrations
   implicit-imports:
