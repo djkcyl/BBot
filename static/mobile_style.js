@@ -2,11 +2,11 @@
  * @Author: KBD
  * @Date: 2022-12-26 13:45:30
  * @LastEditors: KBD
- * @LastEditTime: 2022-12-26 14:06:05
+ * @LastEditTime: 2022-12-26 14:49:43
  * @Description: 用于初始化手机动态页面的样式以及图片大小
  */
 // 检测当前环境是否能使用箭头函数
-const testFunction = "var t = () => {};";
+var testFunction = "var t = () => {};";
 try {
     test = new Function(testFunction);                    // 检验是否支持es6
     /*
@@ -33,13 +33,15 @@ try {
 
         // 找到图标容器dom
         const containerDom = document.querySelector(".bm-pics-block__container");
-        containerDom.style.paddingLeft = "0";               // 先把默认padding-left置为0
-        containerDom.style.paddingRight = "0";              // 先把默认padding-right置为0
-        containerDom.style.padding = "0 3.2vmin";           // 设置padding与单图片一致
-        containerDom.style.flexDirection = "column";        // 设置flex模式下以列形式排列
-        containerDom.style.gap = "15px";                    // 设置flex模式下每个容器间隔15px
-        containerDom.style.justifyContent = "center";       // flex - 垂直居中
-        containerDom.style.alignItems = "center";           // flex - 水平居中
+        if (containerDom) {
+            containerDom.style.paddingLeft = "0";               // 先把默认padding-left置为0
+            containerDom.style.paddingRight = "0";              // 先把默认padding-right置为0
+            containerDom.style.padding = "0 3.2vmin";           // 设置padding与单图片一致
+            containerDom.style.flexDirection = "column";        // 设置flex模式下以列形式排列
+            containerDom.style.gap = "15px";                    // 设置flex模式下每个容器间隔15px
+            containerDom.style.justifyContent = "center";       // flex - 垂直居中
+            containerDom.style.alignItems = "center";           // flex - 水平居中
+        }
 
         // 定义异步方法获取图片原尺寸(仅限于dom上的src路径的图片原尺寸)
         const getImageSize = async (url) => {
@@ -64,15 +66,15 @@ try {
 
         // 异步遍历dom进行设置
         imageItemDoms.forEach(async (item) => {
-            item.style.margin = "0";                          // 先把默认margin置为0
-            item.style.width = "360px";                       // 宽度默认撑满360px;
+            item.style.margin = "0";                           // 先把默认margin置为0
+            item.style.width = "360px";                        // 宽度默认撑满360px;
             try {
                 // 获取图片的真实路径(并判断是否有@);
-                const imgSrc = item.firstChild.src;             // 获取原app中图片的src
-                const imgSrcAtIndex = imgSrc.indexOf("@");      // 判断是否有@符
+                const imgSrc = item.firstChild.src;              // 获取原app中图片的src
+                const imgSrcAtIndex = imgSrc.indexOf("@");       // 判断是否有@符
                 const imageTrueUrl =
                     imgSrcAtIndex !== -1 ? imgSrc.slice(0, imgSrcAtIndex) : imgSrc;
-                item.firstChild.src = imageTrueUrl;             // 需要将真实的路径返回给image标签上(否则会失真)
+                item.firstChild.src = imageTrueUrl;              // 需要将真实的路径返回给image标签上(否则会失真)
 
                 // 获取图片原尺寸对象
                 const obj = await getImageSize(imageTrueUrl);
@@ -87,9 +89,10 @@ try {
             }
         });
     })();
+
 } catch (e) {
     /*
-     * @description: 初始化手机样式, 理论用不到, 现在浏览器应该都支持上面的方法
+     * @description: 初始化手机样式
      * @return {*}
     */
     (function initMobileStyle() {
@@ -118,13 +121,15 @@ try {
 
         // 找到图标容器dom
         const containerDom = document.getElementsByClassName("bm-pics-block__container")[0];
-        containerDom.style.paddingLeft = "0";               // 先把默认padding-left置为0
-        containerDom.style.paddingRight = "0";              // 先把默认padding-right置为0
-        containerDom.style.padding = "0 3.2vmin";           // 设置padding与单图片一致
-        containerDom.style.flexDirection = "column";        // 设置flex模式下以列形式排列
-        containerDom.style.gap = "15px";                    // 设置flex模式下每个容器间隔15px
-        containerDom.style.justifyContent = "center";       // flex - 垂直居中
-        containerDom.style.alignItems = "center";           // flex - 水平居中
+        if (containerDom) {
+            containerDom.style.paddingLeft = "0";               // 先把默认padding-left置为0
+            containerDom.style.paddingRight = "0";              // 先把默认padding-right置为0
+            containerDom.style.padding = "0 3.2vmin";           // 设置padding与单图片一致
+            containerDom.style.flexDirection = "column";        // 设置flex模式下以列形式排列
+            containerDom.style.gap = "15px";                    // 设置flex模式下每个容器间隔15px
+            containerDom.style.justifyContent = "center";       // flex - 垂直居中
+            containerDom.style.alignItems = "center";           // flex - 水平居中
+        }
 
         // 定义方法获取图片原尺寸(仅限于dom上的src路径的图片原尺寸)
         function getImageSize(url) {
@@ -149,15 +154,15 @@ try {
 
         // 遍历dom进行设置
         imageItemDoms.forEach(function (item) {
-            item.style.margin = "0";                          // 先把默认margin置为0
-            item.style.width = "360px";                       // 宽度默认撑满360px;
+            item.style.margin = "0";                           // 先把默认margin置为0
+            item.style.width = "360px";                        // 宽度默认撑满360px;
             try {
                 // 获取图片的真实路径(并判断是否有@);
-                const imgSrc = item.firstChild.src;             // 获取原app中图片的src
-                const imgSrcAtIndex = imgSrc.indexOf("@");      // 判断是否有@符
+                const imgSrc = item.firstChild.src;              // 获取原app中图片的src
+                const imgSrcAtIndex = imgSrc.indexOf("@");       // 判断是否有@符
                 const imageTrueUrl =
                     imgSrcAtIndex !== -1 ? imgSrc.slice(0, imgSrcAtIndex) : imgSrc;
-                item.firstChild.src = imageTrueUrl;             // 需要将真实的路径返回给image标签上(否则会失真)
+                item.firstChild.src = imageTrueUrl;              // 需要将真实的路径返回给image标签上(否则会失真)
 
                 // 获取图片原尺寸对象
                 getImageSize(imageTrueUrl).then(function (obj) {
