@@ -28,8 +28,10 @@ try {
 
         // 设置字体格式
         const cardDom = document.querySelector(".dyn-card");
-        cardDom.style.fontFamily = "Noto Sans CJK SC, sans-serif";
-        cardDom.style.overflowWrap = "break-word";
+        if (cardDom) {
+            cardDom.style.fontFamily = "Noto Sans CJK SC, sans-serif";
+            cardDom.style.overflowWrap = "break-word";
+        }
 
         // 找到图标容器dom
         const containerDom = document.querySelector(".bm-pics-block__container");
@@ -89,7 +91,6 @@ try {
             }
         });
     })();
-
 } catch (e) {
     /*
      * @description: 初始化手机样式
@@ -116,8 +117,10 @@ try {
 
         // 设置字体格式
         const cardDom = document.getElementsByClassName("dyn-card")[0];
-        cardDom.style.fontFamily = "Noto Sans CJK SC, sans-serif";
-        cardDom.style.overflowWrap = "break-word";
+        if (cardDom) {
+            cardDom.style.fontFamily = "Noto Sans CJK SC, sans-serif";
+            cardDom.style.overflowWrap = "break-word";
+        }
 
         // 找到图标容器dom
         const containerDom = document.getElementsByClassName("bm-pics-block__container")[0];
