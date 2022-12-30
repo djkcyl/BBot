@@ -22,6 +22,8 @@ from core.announcement import base_telemetry
 
 if not is_package:
     os.environ["PLAYWRIGHT_BROWSERS_PATH"] = Path("static", "browser").as_posix()
+else:
+    os.environ["PLAYWRIGHT_BROWSERS_PATH"] = "0"
 
 logger.info("BBot is starting...")
 
