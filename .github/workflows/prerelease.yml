@@ -45,7 +45,7 @@ jobs:
         run: pip install --upgrade pyinstaller
 
       - name: Build Pyinstaller Binary
-        run: python -m pyinstaller main.spec
+        run: pyinstaller main.spec
 
       - name: Replease Playwright Path
         run: python release.py --replace-playwright-path
