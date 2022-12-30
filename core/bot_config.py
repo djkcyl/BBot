@@ -183,4 +183,6 @@ class _BotConfig(BaseModel, extra=Extra.ignore):
         )
 
 
-BotConfig = _BotConfig.load(allow_create=True)
+BotConfig : _BotConfig = _BotConfig.load(
+    Path(__file__).parent.parent.joinpath("static", "bot_config.exp.yaml")
+)

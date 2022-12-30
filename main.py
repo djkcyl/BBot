@@ -6,8 +6,8 @@ from pathlib import Path
 from loguru import logger
 from sentry_sdk import init as sentry_sdk_init
 
-from core.bot_config import _BotConfig
 from utils.detect_package import is_package
+from core.bot_config import _BotConfig, BotConfig
 
 sentry_sdk_init(
     dsn="https://e7455ef7813c42e2b854bdd5c26adeb6@o1418272.ingest.sentry.io/6761179",
@@ -102,7 +102,7 @@ def load_config_webui(reason: str = "未知原因", err: dict = {}):
 if __name__ == "__main__":
     for _ in range(3):
         try:
-            _BotConfig.load(allow_create=True)
+            BotConfig.load(allow_create=True)
             break
         except ValueError as e:
             load_config_webui(reason="配置文件填写错误", err=_BotConfig.valueerror_parser(e))

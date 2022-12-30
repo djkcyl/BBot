@@ -3,12 +3,13 @@
 # https://github.com/djkcyl/BBot-Graia/wiki/fill-config
 
 Mirai:
-  mirai_host:        # **需要** 填入 mirai-api-http 的监听地址
-  verify_key:        # **需要** 填入 mirai 的密钥
-  account:           # **需要** 填入 bot 的 qq 号
+  mirai_host: https://localhost:8080  # **需要** 填入 mirai-api-http 的监听地址
+  verify_key: xxxxxxxxx               # **需要** 填入 mirai 的密钥
+  account: 123456789                  # **需要** 填入 bot 的 qq 号
 Debug:
   enable: false      # 是否开启 debug
   groups:            # 若开启 debug 则 **需要** 填入群号, list 里填 int
+    - 123456789
 Bilibili:
   mobile_style: true # 是否采用手机的 Web 样式进行截图
   use_login: false   # 是否登录 BiliBili 账号
@@ -25,8 +26,9 @@ Webui:
 log_level: INFO      # 控制台输出的日志等级
 name: BBot           # bot 的自称
 access_control: true # 是否开启白名单模式
-master:              # **需要** 填入 bot 主人的 qq 号
+master: 123456789    # **需要** 填入 bot 主人的 qq 号
 admins:              # 可以填入 bot 管理员的 qq 号, list 里填 int
+  - 123456789
 max_subsubscribe: 4  # 非 vip 群聊最大可订阅数量
 
 # 警告: 在 bot 第一次成功运行后配置文件将会被规范化, 此文件中的注释均会被清除, 
