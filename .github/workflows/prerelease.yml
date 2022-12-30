@@ -41,10 +41,11 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH: "0"
         run: playwright install chromium
 
+      - name: Install Pyinstaller
+        run: pip install --upgrade pyinstaller
+
       - name: Build Pyinstaller Binary
-        run: |
-          pip install --upgrade pyinstaller
-          pyinstaller main.spec
+        run: python -m pyinstaller main.spec
 
       - name: Replease Playwright Path
         run: python release.py --replace-playwright-path
