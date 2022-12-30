@@ -160,7 +160,8 @@ class _BotConfig(BaseModel, extra=Extra.ignore):
         if not file.exists():
             if allow_create:
                 cls._create_file(file)
-            raise FileNotFoundError
+            else:
+                raise FileNotFoundError
         return cls.parse_obj(cls._read_file())
 
     # 将配置保存至文件中
