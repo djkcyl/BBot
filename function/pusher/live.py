@@ -75,6 +75,7 @@ async def main(app: Ariadne):
                     # 判断是否在正在直播列表中
                     if up_id in BOT_Status["living"]:
                         continue
+                    logger.debug(f"[Live] {up} live_data: {live_data}")
                     BOT_Status["living"][up_id] = live_data["live_time"]  # 设定开播时间
                     # 获取直播信息
                     room_id = live_data["room_id"]
@@ -138,6 +139,7 @@ async def main(app: Ariadne):
                         up_id, True, len(get_sub_by_uid(up_id)), title, area_parent, area
                     )
                 elif up_id in BOT_Status["living"]:
+                    logger.debug(f"[Live] {up} live_data: {live_data}")
                     live_time = (
                         "，本次直播时长 "
                         + calc_time_total(time.time() - BOT_Status["living"][up_id])
@@ -174,7 +176,6 @@ async def main(app: Ariadne):
                                 group = await app.get_group(int(data.group))
                                 group = f"{group.name}（{group.id}）" if group else data.group
                                 logger.warning(f"[BiliBili推送] 推送失败，账号在 {group} 被禁言")
-
                             except RemoteException as e:
                                 if "resultType=46" in str(e):
                                     logger.error("[BiliBili推送] 推送失败，Bot 被限制发送群聊消息")
@@ -193,7 +194,6 @@ async def main(app: Ariadne):
                             except Exception:  # noqa
                                 capture_exception()
                                 logger.exception("[BiliBili推送] 推送失败，未知错误")
-
                             await asyncio.sleep(1)
                     insert_live_push(up_id, False, len(get_sub_by_uid(up_id)))
             else:

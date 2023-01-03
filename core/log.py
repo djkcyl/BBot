@@ -23,7 +23,7 @@ LOGPATH.mkdir(exist_ok=True)
 def in_screen():
     with contextlib.suppress(psutil.NoSuchProcess):
         for proc in psutil.Process().parents():
-            if proc.name() in ["screen", "tmux"]:
+            if proc.name() in ["screen", "tmux", "node"]:
                 return True
     return psutil.Process().pid == 1
 

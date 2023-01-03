@@ -27,9 +27,9 @@ async def main(app: Ariadne, group: Group, message: MessageChain, source: Source
         return
 
     message_str = message.as_persistent_string(binary=False)
-    if "b23.tv" in message_str:
-        message_str = await b23_extract(message_str) or message_str
     p = re.compile(r"av(\d{1,15})|BV(1[A-Za-z0-9]{2}4.1.7[A-Za-z0-9]{2})")
+    if not p.search(message_str) and ("b23.tv" in message_str or "b23.wtf" in message_str):
+        message_str = await b23_extract(message_str) or message_str
     video_number = p.search(message_str)
     if video_number:
         video_number = video_number[0]
