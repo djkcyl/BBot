@@ -6,7 +6,7 @@
 ![GitHub Repo stars](https://img.shields.io/github/stars/djkcyl/BBot?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/djkcyl/BBot?style=social)
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/djkcyl/BBot/Release)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/djkcyl/BBot/prerelease.yml?branch=web)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/djkcyl/BBot?color=brightgreen)
 ![GitHub all releases](https://img.shields.io/github/downloads/djkcyl/BBot/total)
 ![Platform](https://img.shields.io/badge/platform-linux_%7C_windows-lightgrey)
