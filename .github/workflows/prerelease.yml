@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    name: Build
+    name: Build Binary
     outputs:
       version: ${{ steps.version.outputs.version }}
     strategy:

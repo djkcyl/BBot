@@ -29,7 +29,7 @@ async def subscribe_uid(uid: Union[str, int], groupid: Union[str, int]):
     groupid = str(groupid)
     gp = GroupPermission(int(groupid))
     BOT_Status["init"] = False
-    while BOT_Status["dynamic_updating"] and not BotConfig.Bilibili.use_login:
+    while BOT_Status["dynamic_updating"] and BotConfig.Bilibili.use_login:
         await asyncio.sleep(0.1)
 
     if not uid:
@@ -83,7 +83,7 @@ async def unsubscribe_uid(uid, groupid, force=False):
     uid = str(uid)
     groupid = str(groupid)
     logger.info(f"正在群 {groupid} 取消订阅 {uid}")
-    while BOT_Status["dynamic_updating"] and not force:
+    while BOT_Status["dynamic_updating"] and not force and BotConfig.Bilibili.use_login:
         await asyncio.sleep(0.1)
     BOT_Status["init"] = False
 
