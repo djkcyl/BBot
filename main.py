@@ -94,7 +94,8 @@ def load_config_webui(reason: str = "未知原因", err: dict = {}):
     if isinstance(err, dict):
         valueerror_output(err)
     logger.critical(
-        f"由于 {reason} ，导致配置加载失败, 请打开浏览器访问 BBot 主机的 http://0.0.0.0:{port} 进行配置，或手动配置完成后使用 Ctrl+C 重载配置"
+        f"由于 {reason} ，导致配置加载失败, 请打开浏览器访问 BBot 主机的 http://0.0.0.0:{port} 进行配置，\
+        或手动配置（data/bot_config.yaml）完成后使用 Ctrl+C 重载配置"
     )
     uvicorn.run(app, host="0.0.0.0", port=int(port))
 
@@ -103,6 +104,9 @@ if __name__ == "__main__":
     for _ in range(3):
         try:
             BotConfig.load(allow_create=True)
+            if BotConfig.master == 123456789 or BotConfig.Mirai.verify_key == "xxxxxxxxx":
+                load_config_webui(reason="配置文件未填写")
+                continue
             break
         except ValueError as e:
             load_config_webui(reason="配置文件填写错误", err=_BotConfig.valueerror_parser(e))

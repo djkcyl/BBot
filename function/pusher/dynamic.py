@@ -210,15 +210,16 @@ async def push(app: Ariadne, dyn: DynamicItem):
         else:
             type_text = "发布了一条动态！"
 
-        await app.send_friend_message(
-            BotConfig.master,
-            MessageChain(
-                f"UP {up_name}（{up_id}）{type_text}\n",
-                dyn_img,
-                "\n",
-                await get_b23_url(f"https://t.bilibili.com/{dynid}"),
-            ),
-        )
+        if BotConfig.Event.push:
+            await app.send_friend_message(
+                BotConfig.master,
+                MessageChain(
+                    f"UP {up_name}（{up_id}）{type_text}\n",
+                    dyn_img,
+                    "\n",
+                    await get_b23_url(f"https://t.bilibili.com/{dynid}"),
+                ),
+            )
 
         for data in get_sub_by_uid(up_id):
             if BotConfig.Debug.enable and int(data.group) not in BotConfig.Debug.groups:

@@ -19,6 +19,8 @@ Bilibili:
 Event:
   mute: true         # 是否向管理员发送被禁言的事件提醒。
   permchange: true   # 是否向管理员发送权限变更的事件提醒。
+  push: true         # 是否向管理员发送推送的事件提醒。
+  subscribe: true    # 是否向管理员发送订阅的事件提醒。
 Webui:
   webui_host: "0.0.0.0"
   webui_port: 6080

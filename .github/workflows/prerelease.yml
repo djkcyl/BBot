@@ -96,7 +96,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }} 
 
-      - name: Build and push
+      - name: Build Image
         uses: docker/build-push-action@v3
         with:
           platforms: linux/amd64,linux/arm64

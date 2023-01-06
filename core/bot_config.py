@@ -79,6 +79,8 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
 class _Event(BaseModel, extra=Extra.ignore):
     mute: bool = True
     permchange: bool = True
+    push: bool = True
+    subscribe: bool = True
 
 
 class _Webui(BaseModel, extra=Extra.ignore):
@@ -183,6 +185,4 @@ class _BotConfig(BaseModel, extra=Extra.ignore):
         )
 
 
-BotConfig : _BotConfig = _BotConfig.load(
-    Path(__file__).parent.parent.joinpath("static", "bot_config.exp.yaml")
-)
+BotConfig: _BotConfig = _BotConfig.load(allow_create=True)
