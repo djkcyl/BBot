@@ -27,7 +27,7 @@ from core.data import insert_live_push, get_all_uid, get_sub_by_uid
 channel = Channel.current()
 
 
-@channel.use(SchedulerSchema(every_custom_seconds(1)))
+@channel.use(SchedulerSchema(every_custom_seconds(3)))
 async def main(app: Ariadne):
 
     if not BOT_Status["init"] or BOT_Status["init"] and len(get_all_uid()) == 0:
