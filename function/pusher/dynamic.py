@@ -8,7 +8,6 @@ from grpc.aio import AioRpcError
 from graia.ariadne.app import Ariadne
 from sentry_sdk import capture_exception
 from graia.ariadne.model import MemberPerm
-from bilireq.utils import ResponseCodeError
 from graia.ariadne.message.element import AtAll
 from graia.broadcast.exceptions import ExecutionStop
 from graia.ariadne.message.chain import MessageChain
@@ -16,6 +15,7 @@ from graia.ariadne.connection.util import UploadMethod
 from graia.scheduler.saya.schema import SchedulerSchema
 from graia.scheduler.timers import every_custom_seconds
 from bilireq.grpc.dynamic import grpc_get_user_dynamics
+from bilireq.exceptions import ResponseCodeError, GrpcError
 from graia.ariadne.exception import UnknownTarget, AccountMuted, RemoteException
 from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2 import (
     FoldType,
@@ -331,8 +331,14 @@ async def check_uid(app: Ariadne, uid):
     try:
         resp = await asyncio.wait_for(grpc_get_user_dynamics(int(uid)), timeout=10)
     except asyncio.TimeoutError:
-        logger.error(f"[BiliBili推送] {uid} 获取动态失败！")
+        logger.warning(f"[BiliBili推送] {uid} 获取动态超时！")
         return
+    except GrpcError as e:
+        logger.error(f"[BiliBili推送] {uid} 获取动态失败：[{e.code}] {e.msg}")
+        return
+    except Exception as e:  # noqa
+        capture_exception(e)
+        raise e
     if resp:
         resp = [
             x
