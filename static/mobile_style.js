@@ -38,7 +38,7 @@ async function getMobileStyle() {
     }
 
     // 定义异步方法获取图片原尺寸(仅限于dom上的src路径的图片原尺寸)
-    const getImageSize = async (url) => {
+    const getImageSize = (url) => {
         return new Promise((resolve, reject) => {
             const image = new Image();
             image.onload = () => {
@@ -70,7 +70,7 @@ async function getMobileStyle() {
             item.style.width = `${clientWidth}px`;
             try {
                 // 初始化url
-                let imageTrueUrl = "";
+                let imageTrueUrl;
 
                 // 获取原app中图片的src
                 const imgSrc = item.firstChild.src;
