@@ -1,5 +1,6 @@
 import re
 import time
+import httpx
 import contextlib
 
 from pathlib import Path
@@ -24,16 +25,6 @@ mobile_style_js = (
 
 
 async def get_dynamic_screenshot(dyn: DynamicItem):
-
-    async def img_hook(route: Route):
-        url = route.request.url
-        if re.match(r"hdslb.com/bfs/new_dyn", url) and abort_image:
-            # image_arg = url.split("@")
-            # image_format = ".webp" if "gif" in image_arg[1] else None
-            # image_url = f"{image_arg[0]}@{image_arg[1]}{image_format or ''}"
-            # await route.fetch(url=image_url)
-            await route.abort()
-
     dynid = dyn.extend.dyn_id_str
     st = int(time.time())
     app = Ariadne.current()
@@ -43,24 +34,24 @@ async def get_dynamic_screenshot(dyn: DynamicItem):
         try:
             page.on("requestfinished", network_request)
             page.on("requestfailed", network_requestfailed)
-            await page.route("**/bilibili.png", img_hook)
             if BotConfig.Bilibili.mobile_style:
-                abort_image = True
-                url = f"https://m.bilibili.com/dynamic/{dynid}"
                 await page.set_viewport_size({"width": 460, "height": 1280})
+                url = f"https://m.bilibili.com/dynamic/{dynid}"
                 with contextlib.suppress(TimeoutError):
                     await page.goto(url, wait_until="networkidle", timeout=20000)
                 if "bilibili.com/404" in url:
                     logger.warning(f"[Bilibili推送] {dynid} 动态不存在")
                     break
-                abort_image = False
                 await page.add_script_tag(content=mobile_style_js)
+                a = await page.wait_for_function("getMobileStyle()")
+                logger.debug(f"js executed: {a}")
                 await page.wait_for_load_state("networkidle")
                 await page.wait_for_load_state("domcontentloaded")
                 card = await page.query_selector(".dyn-card")
                 assert card
                 clip = await card.bounding_box()
                 assert clip
+                logger.debug(f"loaded: {clip}")
             else:
                 url = f"https://t.bilibili.com/{dynid}"
                 await page.set_viewport_size({"width": 2560, "height": 1080})

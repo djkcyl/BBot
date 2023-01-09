@@ -36,7 +36,7 @@ async def main(app: Ariadne):
             )
 
         page = browser_context.context.pages[0]
-        version = await page.evaluate("() => navigator.appVersion")
+        version = await page.evaluate("navigator.appVersion")
         logger.info(f"[BiliBili推送] 浏览器启动完成，当前版本 {version}")
         await page.close()
     except Exception as e:
