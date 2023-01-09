@@ -52,8 +52,7 @@ try {
                 image.onload = () => {
                     // 图片加载成功返回对象(包含长宽)
                     resolve({
-                        width: image.width,
-                        height: image.height,
+                        width: image.width, height: image.height,
                     });
                 };
                 image.onerror = () => {
@@ -71,11 +70,20 @@ try {
             item.style.margin = "0";                           // 先把默认margin置为0
             item.style.width = "360px";                        // 宽度默认撑满360px;
             try {
+
+                let imageTrueUrl = "";                          // 初始化url
+
                 // 获取图片的真实路径(并判断是否有@);
                 const imgSrc = item.firstChild.src;              // 获取原app中图片的src
                 const imgSrcAtIndex = imgSrc.indexOf("@");       // 判断是否有@符
-                const imageTrueUrl =
-                    imgSrcAtIndex !== -1 ? imgSrc.slice(0, imgSrcAtIndex) : imgSrc;
+
+                // 判断git图片
+                if (imgSrc.indexOf(".gif@") > 0) {
+                    imageTrueUrl = imgSrc.slice(0, imgSrc.indexOf(".gif@") + 5) + ".webp";
+                } else {
+                    imageTrueUrl = imgSrcAtIndex !== -1 ? imgSrc.slice(0, imgSrcAtIndex) : imgSrc;
+                }
+
                 item.firstChild.src = imageTrueUrl;              // 需要将真实的路径返回给image标签上(否则会失真)
 
                 // 获取图片原尺寸对象
@@ -141,8 +149,7 @@ try {
                 image.onload = function () {
                     // 图片加载成功返回对象(包含长宽)
                     resolve({
-                        width: image.width,
-                        height: image.height,
+                        width: image.width, height: image.height,
                     });
                 };
                 image.onerror = function () {
@@ -160,11 +167,20 @@ try {
             item.style.margin = "0";                           // 先把默认margin置为0
             item.style.width = "360px";                        // 宽度默认撑满360px;
             try {
+
+                let imageTrueUrl = "";                           // 初始化url
+
                 // 获取图片的真实路径(并判断是否有@);
                 const imgSrc = item.firstChild.src;              // 获取原app中图片的src
                 const imgSrcAtIndex = imgSrc.indexOf("@");       // 判断是否有@符
-                const imageTrueUrl =
-                    imgSrcAtIndex !== -1 ? imgSrc.slice(0, imgSrcAtIndex) : imgSrc;
+
+                // 判断git图片
+                if (imgSrc.indexOf(".gif@") > 0) {
+                    imageTrueUrl = imgSrc.slice(0, imgSrc.indexOf(".gif@") + 5) + ".webp";
+                } else {
+                    imageTrueUrl = imgSrcAtIndex !== -1 ? imgSrc.slice(0, imgSrcAtIndex) : imgSrc;
+                }
+
                 item.firstChild.src = imageTrueUrl;              // 需要将真实的路径返回给image标签上(否则会失真)
 
                 // 获取图片原尺寸对象
