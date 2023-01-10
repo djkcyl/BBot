@@ -1,15 +1,13 @@
-import re
 import time
-import httpx
 import contextlib
 
 from pathlib import Path
 from loguru import logger
 from graia.ariadne import Ariadne
 from sentry_sdk import capture_exception
+from playwright.async_api._generated import Request
 from playwright._impl._api_types import TimeoutError
 from graiax.playwright.interface import PlaywrightContext
-from playwright.async_api._generated import Request, Route
 from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2 import DynamicItem
 
 from core.bot_config import BotConfig
