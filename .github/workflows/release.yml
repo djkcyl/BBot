@@ -62,12 +62,12 @@ jobs:
       - name: Get Release Version
         id: version
         run: |
-          echo "::set-output name=version::v$(python release.py --version --beta ${{ steps.commit.outputs.short }})"
+          echo "::set-output name=version::v$(python release.py --version)"
 
       - name: Rename Binary
         run: |
-          mv ./dist/$(python release.py --buildname --package-tools pyinstaller) ./build/$(python release.py --name --package-tools pyinstaller --beta ${{ steps.commit.outputs.short }})
-          mv ./nuitka/$(python release.py --buildname --package-tools nuitka) ./build/$(python release.py --name --package-tools nuitka --beta ${{ steps.commit.outputs.short }})
+          mv ./dist/$(python release.py --buildname --package-tools pyinstaller) ./build/$(python release.py --name --package-tools pyinstaller)
+          mv ./nuitka/$(python release.py --buildname --package-tools nuitka) ./build/$(python release.py --name --package-tools nuitka)
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
