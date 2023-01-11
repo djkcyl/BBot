@@ -1,6 +1,6 @@
-from typing import Union
+from typing import Optional, Union
 from loguru import logger
-from datetime import datetime
+from datetime import datetime, timedelta
 from peewee import (
     Cast,
     Model,
@@ -12,7 +12,7 @@ from peewee import (
 )
 
 
-data_version = 2
+data_version = 3
 db = SqliteDatabase("data/data.db")
 
 
@@ -34,6 +34,17 @@ class DynamicPush(BaseModel):
 
     class Meta:
         table_name = "dynamic_push"
+
+
+class GroupPush(BaseModel):
+    """群推送记录"""
+
+    group = CharField()
+    dyn_id = CharField()
+    push_time = DateTimeField(default=datetime.now)
+
+    class Meta:
+        table_name = "group_push"
 
 
 class LivePush(BaseModel):
@@ -60,10 +71,21 @@ class SubList(BaseModel):
     group = CharField()
     atall = BooleanField(default=False)
     live = BooleanField(default=True)
+    live_tips = CharField(null=True)
     dynamic = BooleanField(default=True)
 
     class Meta:
         table_name = "sub_list"
+
+
+class TalkCount(BaseModel):
+    """消息统计"""
+
+    time = DateTimeField()
+    count = IntegerField()
+
+    class Meta:
+        table_name = "talk_count"
 
 
 class DataVersion(BaseModel):
@@ -75,20 +97,25 @@ class DataVersion(BaseModel):
         table_name = "data_version"
 
 
-db.create_tables([DynamicPush, LivePush, SubList, DataVersion], safe=True)
+db.create_tables([DynamicPush, GroupPush, LivePush, SubList, TalkCount, DataVersion], safe=True)
 
 
 if not DataVersion.select().exists():
     logger.warning(f"数据库版本记录不存在，正在创建，当前版本：{data_version}")
-    DataVersion(version=2).save()
+    DataVersion(version=data_version).save()
 elif DataVersion.get().version != data_version:
-    logger.warning(f"数据库版本不匹配，当前版本：{data_version}，数据库版本：{DataVersion.get().version}，正在更新")
+    logger.warning(f"数据库版本不匹配，当前当前最新版本：{data_version}，正在更新")
     while DataVersion.get().version != data_version:
         if DataVersion.get().version == 1:
             logger.warning("当前数据版本为 1，正在更新至 2")
             # 将 LivePush 表中的 statu 字段改为 status
             db.execute_sql("ALTER TABLE live_push RENAME COLUMN statu TO status")
             DataVersion.update(version=2).execute()
+        elif DataVersion.get().version == 2:
+            logger.warning("当前数据版本为 2，正在更新至 3")
+            # 在 SubList 表中添加 live_tips 字段，允许为空
+            db.execute_sql("ALTER TABLE sub_list ADD COLUMN live_tips VARCHAR(255) NULL")
+            DataVersion.update(version=3).execute()
 
     logger.success("数据库更新完成")
 
@@ -158,13 +185,6 @@ def get_sub_by_uid(uid: Union[str, int]) -> list[SubList]:
     return list(SubList.select().where(SubList.uid == str(uid)).order_by(SubList.group))
 
 
-def uid_in_group_exists(uid: Union[str, int], group: Union[str, int]) -> bool:
-    """检查uid是否在该群订阅中"""
-    return bool(
-        SubList.select().where(SubList.uid == str(uid), SubList.group == str(group)).exists()
-    )
-
-
 def get_sub_data(uid: Union[str, int], group: Union[str, int]) -> SubList:
     """获取订阅数据"""
     return SubList.get(SubList.uid == str(uid), SubList.group == str(group))
@@ -195,3 +215,57 @@ def unsub_uid_by_group(uid: Union[str, int], group: Union[str, int]):
 def delete_sub_by_uid(uid: Union[str, int]):
     """删除该uid的所有订阅"""
     SubList.delete().where(SubList.uid == str(uid)).execute()
+
+
+def add_talk_count():
+    """添加聊天计数"""
+    now_time = datetime.now().replace(minute=0, second=0, microsecond=0)
+    # 如果当前时间已经存在记录，则计数加一，否则新建一条记录
+    if TalkCount.select().where(TalkCount.time == now_time).exists():
+        TalkCount.update(count=TalkCount.count + 1).where(TalkCount.time == now_time).execute()
+    else:
+        TalkCount(time=now_time, count=1).save()
+
+
+def get_talk_count(from_time: datetime, to_time: datetime) -> list[dict[str, int]]:
+    """获取指定范围内的每个整点小时的消息量"""
+    return [
+        {
+            "time": int(x.timestamp()),
+            "count": TalkCount.get(TalkCount.time == x).count
+            if TalkCount.select().where(TalkCount.time == x).exists()
+            else 0,
+        }
+        for x in [
+            from_time.replace(minute=0, second=0, microsecond=0) + timedelta(hours=i)
+            for i in range(int((to_time - from_time).total_seconds() // 3600))
+        ]
+    ]
+
+
+def get_push_count(
+    from_time: Optional[datetime] = None, to_time: Optional[datetime] = None
+) -> int:
+    """获取并返回指定范围内的推送计数"""
+    if from_time and to_time:
+        return (
+            DynamicPush.select()
+            .where(DynamicPush.push_time >= from_time, DynamicPush.push_time <= to_time)
+            .count()
+        )
+    else:
+        return DynamicPush.select().count()
+
+
+# 添加动态推送至群的记录
+def insert_dyn_push_to_group(dyn_id: Union[str, int], group: Union[str, int]):
+    GroupPush(dyn_id=str(dyn_id), group=str(group)).save()
+
+
+# 判断该动态是否在该群推送过
+def is_dyn_pushed_in_group(dyn_id: Union[str, int], group: Union[str, int]) -> bool:
+    return bool(
+        GroupPush.select()
+        .where(GroupPush.dyn_id == str(dyn_id), GroupPush.group == str(group))
+        .exists()
+    )

@@ -7,6 +7,7 @@ from pathlib import Path
 from loguru import logger
 from graia.saya import Channel
 from bilireq.login import Login
+from grpc.aio import AioRpcError
 from graia.ariadne.app import Ariadne
 from graia.ariadne.model import Friend
 from graia.broadcast.interrupt import Waiter
@@ -15,15 +16,15 @@ from bilireq.exceptions import ResponseCodeError
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.event.message import FriendMessage
 from graia.broadcast.interrupt import InterruptControl
-from graia.ariadne.event.lifecycle import ApplicationLaunched
+from graia.ariadne.event.lifecycle import AccountLaunch
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from bilireq.grpc.dynamic import grpc_get_followed_dynamic_users, grpc_get_user_dynamics
 
-from library import delete_uid
+from utils.up_operation import delete_uid
 from core.bot_config import BotConfig
 from core import BOT_Status, Bili_Auth
-from data import get_all_uid, delete_sub_by_uid
-from library.bilibili_request import relation_modify, grpc_get_followed_dynamics_noads
+from core.data import get_all_uid, delete_sub_by_uid
+from utils.bilibili_request import relation_modify, grpc_get_followed_dynamics_noads
 
 
 inc = it(InterruptControl)
@@ -66,7 +67,7 @@ async def init_dyn_id(up_uid):
         logger.warning(f"[BiliBili推送] UP {up_uid} 动态获取失败")
 
 
-@channel.use(ListenerSchema(listening_events=[ApplicationLaunched]))
+@channel.use(ListenerSchema(listening_events=[AccountLaunch]))
 async def init(app: Ariadne):
 
     await asyncio.sleep(1)
@@ -170,7 +171,19 @@ async def init(app: Ariadne):
 
         # 初始化
         subid_list = get_all_uid()
-        resp = await grpc_get_followed_dynamic_users(auth=Bili_Auth)
+        for retry in range(3):
+            try:
+                resp = await grpc_get_followed_dynamic_users(auth=Bili_Auth)
+                break
+            except AioRpcError as e:
+                logger.error(f"[Bilibili推送] 获取关注列表失败，正在重试：{e}")
+                await asyncio.sleep(5)
+                continue
+        else:
+            error_msg = "[Bilibili推送] 获取关注列表失败，重试次数过多，正在退出"
+            logger.critical(error_msg)
+            await app.send_friend_message(BotConfig.master, MessageChain(error_msg))
+            sys.exit(1)
         followed_list = resp.items
 
         if Path("data").joinpath(".lock").exists():
@@ -264,6 +277,7 @@ async def init(app: Ariadne):
                 MessageChain(f"[BiliBili推送] 将对 {sub_num} 个 UP 进行监控，初始化完成"),
             )
             BOT_Status["init"] = True
+            BOT_Status["started"] = True
 
     else:
         logger.info("[BiliBili推送] 未使用登录模式，正在初始化")
@@ -290,3 +304,4 @@ async def init(app: Ariadne):
             MessageChain(f"[BiliBili推送] 将对 {sub_sum} 个 UP 进行监控，初始化完成"),
         )
         BOT_Status["init"] = True
+        BOT_Status["started"] = True

@@ -7,7 +7,6 @@ import time
 
 from asyncio import Lock
 from typing import Optional
-from graia.saya import Channel
 from collections import defaultdict
 from typing import DefaultDict, Set, Tuple, Union
 from graia.broadcast.exceptions import ExecutionStop
@@ -15,9 +14,7 @@ from graia.ariadne.event.message import GroupMessage
 from graia.broadcast.builtin.decorators import Depend
 from graia.ariadne.model import Member, MemberPerm, Friend
 
-from .bot_config import BotConfig
-
-channel = Channel.current()
+from core.bot_config import BotConfig
 
 
 class Permission:
@@ -32,7 +29,7 @@ class Permission:
     DEFAULT = USER
 
     @classmethod
-    def get(cls, member: Union[Member, int]) -> int:
+    def get(cls, member: Union[Member, int, str]) -> int:
         """
         获取用户的权限
 
@@ -43,13 +40,13 @@ class Permission:
         if isinstance(member, Member):
             user = member.id
             user_permission = member.permission
-        elif isinstance(member, int):
-            user = member
+        elif isinstance(member, (int, str)):
+            user = int(member)
             user_permission = None
         else:
             raise TypeError("member must be Member or int")
 
-        if user == 80000000:
+        if user == 80000000:  # 该号码为匿名 QQ 号
             raise ExecutionStop()
 
         if user in BotConfig.admins:

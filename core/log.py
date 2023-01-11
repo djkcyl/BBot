@@ -1,9 +1,13 @@
+import sys
+import psutil
 import richuru
+import contextlib
 
 from pathlib import Path
 from loguru import logger
 
 from core.bot_config import BotConfig
+from utils.detect_package import is_package
 
 # read log_level and verify
 log_level = str(BotConfig.log_level).upper()
@@ -12,10 +16,24 @@ if log_level not in ["TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "C
     log_level = "INFO"
 
 # ensure logs dir exist
-LOGPATH = Path("logs")
+LOGPATH = Path("data", "logs")
 LOGPATH.mkdir(exist_ok=True)
 
-richuru.install(level=log_level)
+
+def in_screen():
+    with contextlib.suppress(psutil.NoSuchProcess):
+        for proc in psutil.Process().parents():
+            if proc.name() in ["screen", "tmux", "node"]:
+                return True
+    return psutil.Process().pid == 1
+
+
+if in_screen() or is_package:
+    logger.info("检测到当前运行在 docker、screen、tmux 中，或运行为打包（nuitka、pyinstaller）版本，已禁用 richuru")
+    logger.remove(0)
+    logger.add(sys.stderr, level=log_level, backtrace=True, diagnose=True)
+else:
+    richuru.install(level=log_level)
 
 # add latest logger
 logger.add(
@@ -26,7 +44,6 @@ logger.add(
     rotation="00:00",
     retention="1 years",
     compression="tar.xz",
-    colorize=False,
     level="INFO",
 )
 
@@ -39,7 +56,6 @@ logger.add(
     rotation="00:00",
     retention="15 days",
     compression="tar.xz",
-    colorize=False,
     level="DEBUG",
 )
 
@@ -52,7 +68,6 @@ logger.add(
     rotation="00:00",
     retention="15 days",
     compression="tar.xz",
-    colorize=False,
     level="WARNING",
 )
 

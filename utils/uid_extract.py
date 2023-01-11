@@ -3,7 +3,7 @@ import re
 from loguru import logger
 from typing import Union, Optional
 
-from data import get_sub_by_group
+from core.data import get_sub_by_group
 
 from .b23_extract import b23_extract
 from .bilibili_request import search_user

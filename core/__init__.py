@@ -1,6 +1,7 @@
 from bilireq.auth import Auth
 
 BOT_Status = {
+    "started": False,
     "living": {},
     "offset": None,
     "init": False,

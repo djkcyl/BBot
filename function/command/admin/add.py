@@ -12,7 +12,7 @@ from graia.ariadne.message.parser.twilight import (
 )
 
 from core.control import Permission
-from core.bot_config import BotConfig, save_config
+from core.bot_config import BotConfig
 
 channel = Channel.current()
 
@@ -36,7 +36,7 @@ async def main(app: Ariadne, friend: Friend, adminid: RegexResult):
                 await app.send_friend_message(friend, MessageChain("该账号已是管理员"))
             else:
                 BotConfig.admins.append(int(say))
-                save_config()
+                BotConfig.save()
                 await app.send_friend_message(friend, MessageChain("成功将该账号设定为管理员"))
         else:
             await app.send_friend_message(friend, MessageChain("管理员账号仅可为数字"))

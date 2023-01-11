@@ -11,7 +11,7 @@ from graia.ariadne.message.parser.twilight import Twilight, FullMatch
 
 from core import BOT_Status
 from core.control import Permission
-from library.text2image import text2image
+from utils.text2image import text2image
 
 channel = Channel.current()
 

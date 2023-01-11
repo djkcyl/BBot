@@ -3,38 +3,47 @@ import sys
 from loguru import logger
 from graia.saya import Channel
 from graia.ariadne.app import Ariadne
+from sentry_sdk import capture_exception
 from graia.ariadne.message.chain import MessageChain
+from graia.ariadne.event.lifecycle import AccountLaunch
 from graiax.playwright.interface import PlaywrightContext
-from graia.ariadne.event.lifecycle import ApplicationLaunched
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 
 from core.bot_config import BotConfig
-from library.bilibili_request import hc
+from utils.bilibili_request import hc
 
 channel = Channel.current()
 
 
-@channel.use(ListenerSchema(listening_events=[ApplicationLaunched]))
+@channel.use(ListenerSchema(listening_events=[AccountLaunch]))
 async def main(app: Ariadne):
     """
     Graia 成功启动
     """
-    if BotConfig.Bilibili.use_browser:
-        try:
-            logger.info("正在获取浏览器版本")
-            browser_context = app.launch_manager.get_interface(PlaywrightContext)
-            if not BotConfig.Bilibili.mobile_style:
-                await browser_context.context.add_cookies(
-                    [{"name": "hit-dyn-v2", "value": "1", "domain": ".bilibili.com", "path": "/"}]
-                )
-                
-            page = browser_context.context.pages[0]
-            version = await page.evaluate("() => navigator.appVersion")
-            logger.info(f"[BiliBili推送] 浏览器启动完成，当前版本 {version}")
-            await page.close()
-        except Exception as e:
-            logger.error(f"[BiliBili推送] 浏览器启动失败 {e}")
-            sys.exit(1)
+    try:
+        logger.info("正在获取浏览器版本")
+        browser_context = app.launch_manager.get_interface(PlaywrightContext)
+        if not BotConfig.Bilibili.mobile_style:
+            await browser_context.context.add_cookies(
+                [
+                    {
+                        "name": "hit-dyn-v2",
+                        "value": "1",
+                        "domain": ".bilibili.com",
+                        "path": "/",
+                    }
+                ]
+            )
+
+        page = browser_context.context.pages[0]
+        version = await page.evaluate("navigator.appVersion")
+        logger.info(f"[BiliBili推送] 浏览器启动完成，当前版本 {version}")
+        logger.debug(await browser_context.context.cookies())
+        await page.close()
+    except Exception as e:
+        capture_exception(e)
+        logger.error(f"[BiliBili推送] 浏览器启动失败 {e}")
+        sys.exit(1)
 
     logger.info("[BiliBili推送] 正在获取首页 Cookie")
     await hc.get("https://bilibili.com/", follow_redirects=True)

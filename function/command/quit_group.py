@@ -13,7 +13,7 @@ from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import Twilight, RegexMatch
 
 from core.control import Interval, Permission
-from library.strings import generate_verify_code
+from utils.strings import generate_verify_code
 
 saya = Saya.current()
 channel = Channel.current()

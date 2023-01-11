@@ -10,41 +10,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  release:
-    name: Release
-    runs-on: ubuntu-latest
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
-      version: ${{ steps.get_version.outputs.version }}
-    steps:
-      - name: Prepare environment
-        uses: actions/checkout@v2
-      - name: Setup Python
-        uses: actions/setup-python@v4
-      - name: Get version
-        id: get_version
-        run: echo "::set-output name=version::$(python release.py --version)"
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ steps.get_version.outputs.version }}
-          release_name: v${{ steps.get_version.outputs.version }}
-          draft: false
-          prerelease: false
-
   build:
-    name: Build
-    needs: release
+    name: Build Binary
     outputs:
-      file: ${{ steps.filename.outputs.file }}
-      buildname: ${{ steps.filename.outputs.buildname }}
+      version: ${{ steps.version.outputs.version }}
     strategy:
       matrix:
         os:
-          - ubuntu-latest
+          - ubuntu-20.04
           - windows-latest
 
     runs-on: ${{ matrix.os }}
@@ -56,37 +29,75 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.9.x"
-      
-      - name: Install Poetry
-        run: pip install poetry
 
-      - name: Install dependencies
-        run: poetry install
-      
-      - name: Install Pyinstaller
-        run: poetry run pip install pyinstaller
+      - name: Install Dependencies
+        run: |
+          pip install --upgrade wheel pip
+          pip install -r requirements.txt
 
       - name: Install Playwright Browsers
         env:
           PLAYWRIGHT_BROWSERS_PATH: "0"
-        run: poetry run playwright install chromium
+        run: playwright install chromium
 
-      - name: Build Binary
-        run: poetry run pyinstaller main.spec
+      - name: Install Pyinstaller
+        run: pip install --upgrade pyinstaller
 
-      - name: Get Name
-        id: filename
+      - name: Build Pyinstaller Binary
+        run: pyinstaller main.spec
+
+      - name: Replease Playwright Path
+        run: python release.py --replace-playwright-path
+
+      - name: Build Nuitka Binary
         run: |
-          echo "::set-output name=filename::$(python release.py --name)"
-          echo "::set-output name=buildname::$(python release.py --buildname)"
+          pip uninstall -y pyinstaller
+          pip install nuitka zstandard ordered-set
+          python -m nuitka --onefile --standalone --show-progress --assume-yes-for-downloads --output-dir=nuitka --windows-icon-from-ico=tv.ico --user-package-configuration-file=nuitka.yml main.py
 
-      - name: Upload assets
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get commit hash
+        id: commit
+        uses: pr-mpt/actions-commit-hash@v2
+
+      - name: Get Release Version
+        id: version
+        run: |
+          echo "::set-output name=version::v$(python release.py --version --beta ${{ steps.commit.outputs.short }})"
+
+      - name: Rename Binary
+        run: |
+          mv ./dist/$(python release.py --buildname --package-tools pyinstaller) ./build/$(python release.py --name --package-tools pyinstaller --beta ${{ steps.commit.outputs.short }})
+          mv ./nuitka/$(python release.py --buildname --package-tools nuitka) ./build/$(python release.py --name --package-tools nuitka --beta ${{ steps.commit.outputs.short }})
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
         with:
-          upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: ./dist/${{ steps.filename.outputs.buildname }}
-          asset_name: ${{ steps.filename.outputs.filename }}
-          asset_content_type: application/octet-stream
+          tag_name: ${{ steps.version.outputs.version }}
+          files: build/*
+
+  docker:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare environment
+        uses: actions/checkout@v2
+      
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }} 
+
+      - name: Build Image
+        uses: docker/build-push-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: 
+            ${{ secrets.DOCKER_USERNAME }}/bbot:latest

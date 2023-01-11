@@ -1,9 +1,10 @@
 import json
+
 from pathlib import Path
 from typing import Union
 from graia.ariadne.model import Group
 
-from .bot_config import BotConfig
+from core.bot_config import BotConfig
 
 
 grouplist_file = Path("data/group_list.json")

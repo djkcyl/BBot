@@ -1,12 +1,12 @@
 <div align="center">
 
-![BBot-Graia](https://socialify.git.ci/djkcyl/BBot-Graia/image?description=1&descriptionEditable=A%20BiliBili%20dynamic%20and%20live%20bot%20using%20the%20gRPC%20interface&font=Inter&logo=https%3A%2F%2Fgithub.com%2Fdjkcyl%2FBBot-Graia%2Fraw%2Fmaster%2Flogo.png&name=1&owner=1&pattern=Circuit%20Board&theme=Light)
+![BBot-Graia](https://socialify.git.ci/djkcyl/BBot/image?description=1&font=Inter&logo=https%3A%2F%2Fgithub.com%2Fdjkcyl%2FBBot%2Fblob%2Fmaster%2Flogo.png%3Fraw%3Dtrue&owner=1&pattern=Circuit%20Board&theme=Dark)
   
 # BBot for Ariadne
 ![GitHub Repo stars](https://img.shields.io/github/stars/djkcyl/BBot?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/djkcyl/BBot?style=social)
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/djkcyl/BBot/Release)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/djkcyl/BBot/prerelease.yml?branch=web)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/djkcyl/BBot?color=brightgreen)
 ![GitHub all releases](https://img.shields.io/github/downloads/djkcyl/BBot/total)
 ![Platform](https://img.shields.io/badge/platform-linux_%7C_windows-lightgrey)
@@ -42,7 +42,7 @@ B，也代表 BiliBili，这个 Bot 将专注于哔哩哔哩的推送等服务
 ## 特色
 
 - 大量使用并发 **gRPC 接口**，推送效率远超使用 REST Api 的哔哩哔哩机器人且目前未见有风控（-421）风险
-- 使用登录和非登录两种方案，对于财大气粗的用户可以登录后再次提升效率
+- ~~使用登录和非登录两种方案，对于财大气粗的用户可以登录后再次提升效率~~ **不建议使用**
 - 动态使用 Web 端截图，虽然会吃那么点性能，~~但这都是值得的~~
 - 可自由配置是否在群内 @全体成员、对于直播和动态的分别控制等
 - 可针对不同群聊对订阅的 UP 主进行昵称替换

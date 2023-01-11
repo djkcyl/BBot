@@ -1,18 +1,22 @@
 import asyncio
+import contextlib
 
 from loguru import logger
 from datetime import datetime
 from graia.saya import Channel
+from grpc.aio import AioRpcError
 from graia.ariadne.app import Ariadne
+from sentry_sdk import capture_exception
 from graia.ariadne.model import MemberPerm
-from bilireq.utils import ResponseCodeError
 from graia.ariadne.message.element import AtAll
+from graia.broadcast.exceptions import ExecutionStop
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.connection.util import UploadMethod
 from graia.scheduler.saya.schema import SchedulerSchema
 from graia.scheduler.timers import every_custom_seconds
 from bilireq.grpc.dynamic import grpc_get_user_dynamics
-from graia.ariadne.exception import UnknownTarget, AccountMuted
+from bilireq.exceptions import ResponseCodeError, GrpcError
+from graia.ariadne.exception import UnknownTarget, AccountMuted, RemoteException
 from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2 import (
     FoldType,
     DynamicItem,
@@ -21,27 +25,30 @@ from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2 import (
 )
 
 from core import BOT_Status
+from core.context import Context
 from core.bot_config import BotConfig
-from library import delete_group, delete_uid, set_name
-from library.dynamic_shot import get_dynamic_screenshot
-from library.bilibili_request import (
+from utils.dynamic_shot import get_dynamic_screenshot
+from utils.up_operation import delete_group, delete_uid, set_name
+from utils.bilibili_request import (
     get_b23_url,
     dynamic_like,
     grpc_get_dynamic_details,
     grpc_get_followed_dynamics_noads,
 )
-from data import (
+from core.data import (
     uid_exists,
     get_all_uid,
     is_dyn_pushed,
     get_sub_by_uid,
     insert_dynamic_push,
+    is_dyn_pushed_in_group,
+    insert_dyn_push_to_group,
 )
 
 channel = Channel.current()
 
 
-@channel.use(SchedulerSchema(every_custom_seconds(0.001)))
+@channel.use(SchedulerSchema(every_custom_seconds(3)))
 async def main(app: Ariadne):
 
     logger.debug("[Dynamic Pusher] Dynamic Pusher running now...")
@@ -66,6 +73,10 @@ async def main(app: Ariadne):
     if BotConfig.Bilibili.use_login:
         try:
             dynall = await asyncio.wait_for(grpc_get_followed_dynamics_noads(), timeout=10)
+        except AioRpcError as e:
+            logger.error(f"[Dynamic] Get dynamic list failed: {e.details()}")
+            BOT_Status["dynamic_updating"] = False
+            return
         except asyncio.TimeoutError:
             logger.debug("[Dynamic] Get dynamic list failed")
             BOT_Status["dynamic_updating"] = False
@@ -107,6 +118,7 @@ async def main(app: Ariadne):
         else:
             logger.error("[Dynamic] Gotten dynamic is empty")
             logger.error(dynall)
+
     else:
         # 把uid分组，每组发送一次请求
         check_list = [
@@ -115,7 +127,7 @@ async def main(app: Ariadne):
         ]
         logger.debug(f"Get {sub_sum} uid, split to {len(check_list)} groups")
         for subid_group in check_list:
-            logger.debug(f"Gathering {len(subid_group)} uid")
+            logger.debug(f"Gathering {len(subid_group)} uid: {' '.join(subid_group)}")
             await asyncio.gather(
                 *[check_uid(app, uid) for uid in subid_group], return_exceptions=True
             )
@@ -124,11 +136,6 @@ async def main(app: Ariadne):
     BOT_Status["dynamic_updating"] = False
     logger.debug("[Dynamic] Updating finished")
     await asyncio.sleep(0.5)
-
-
-@channel.use(SchedulerSchema(every_custom_seconds(2)))
-async def debug():
-    logger.debug(BOT_Status)
 
 
 async def push(app: Ariadne, dyn: DynamicItem):
@@ -145,36 +152,40 @@ async def push(app: Ariadne, dyn: DynamicItem):
 
     if uid_exists(up_id):
         logger.info(
-            f"[BiliBili推送] {dynid} | {up_name} 更新了动态，共有 {len(get_sub_by_uid(up_id))} 个群订阅了该 UP"
+            f"[BiliBili推送] {dynid} | {up_name}({up_id}) 更新了动态，共有 {len(get_sub_by_uid(up_id))} 个群订阅了该 UP"
         )
         # 判断折叠动态
         module_type_list = [i.module_type for i in dyn.modules]
         if DynModuleType.module_fold in module_type_list:
-            logger.debug(f"[Dynamic] {dynid} is folded")
+            logger.debug(f"[Dynamic] {dynid} | {up_name}({up_id}) is folded")
             fold = dyn.modules[module_type_list.index(DynModuleType.module_fold)]
             if fold.module_fold.fold_type == FoldType.FoldTypeUnite:
                 fold_ids = fold.module_fold.fold_ids
-                logger.debug(f"[Dynamic] fold_ids: {fold_ids}")
+                logger.debug(f"[Dynamic] {dynid} | {up_name}({up_id}) fold_ids: {fold_ids}")
                 details = await grpc_get_dynamic_details(fold_ids)
                 for dynamic in details.list:
                     try:
                         if is_dyn_pushed(dynamic.extend.dyn_id_str):
-                            logger.debug(f"[Dynamic] {dynid} is pushed, skip")
+                            logger.debug(
+                                f"[Dynamic] {dynid} | {up_name}({up_id}) is pushed, skip"
+                            )
                             continue
                     except ValueError:
                         continue
                     await push(app, dynamic)
 
-        logger.debug(f"[Dynamic] Getting screenshot of {dynid}")
+        logger.debug(f"[Dynamic] Getting screenshot of {dynid} | {up_name}({up_id})")
         shot_image = await get_dynamic_screenshot(dyn)
 
         if shot_image:
-            logger.debug(f"[Dynamic] Get dynamic screenshot {dynid}")
+            logger.debug(f"[Dynamic] Get dynamic screenshot {dynid} | {up_name}({up_id})")
             dyn_img = await app.upload_image(shot_image, UploadMethod.Group)
-            logger.debug(f"[Dynamic] Upload dynamic screenshot {dynid}")
+            logger.debug(f"[Dynamic] Upload dynamic screenshot {dynid} | {up_name}({up_id})")
         else:
-            logger.debug(f"[Dynamic] Get dynamic screenshot {dynid} failed")
-            err_msg = f"[BiliBili推送] {dynid} | {up_name} 更新了动态，截图失败"
+            logger.debug(
+                f"[Dynamic] Get dynamic screenshot {dynid} | {up_name}({up_id}) failed"
+            )
+            err_msg = f"[BiliBili推送] {dynid} | {up_name}({up_id}) 更新了动态，截图失败"
             logger.error(err_msg)
             await app.send_friend_message(BotConfig.master, MessageChain(err_msg))
             BOT_Status["dynamic_updating"] = False
@@ -199,15 +210,16 @@ async def push(app: Ariadne, dyn: DynamicItem):
         else:
             type_text = "发布了一条动态！"
 
-        await app.send_friend_message(
-            BotConfig.master,
-            MessageChain(
-                f"UP {up_name}（{up_id}）{type_text}\n",
-                dyn_img,
-                "\n",
-                await get_b23_url(f"https://t.bilibili.com/{dynid}"),
-            ),
-        )
+        if BotConfig.Event.push:
+            await app.send_friend_message(
+                BotConfig.master,
+                MessageChain(
+                    f"UP {up_name}（{up_id}）{type_text}\n",
+                    dyn_img,
+                    "\n",
+                    await get_b23_url(f"https://t.bilibili.com/{dynid}"),
+                ),
+            )
 
         for data in get_sub_by_uid(up_id):
             if BotConfig.Debug.enable and int(data.group) not in BotConfig.Debug.groups:
@@ -232,29 +244,74 @@ async def push(app: Ariadne, dyn: DynamicItem):
                         msg = ["@全体成员 "] + msg
                         msg.append(f"\n\n注：{BotConfig.name} 没有权限@全体成员")
                 try:
-                    logger.debug(f"[Dynamic] Send dynamic {dynid} to {data.group}")
+                    if is_dyn_pushed_in_group(dynid, data.group):
+                        logger.debug(
+                            f"[Dynamic] {dynid} | {up_name}({up_id}) is pushed in group {data.group}, skip"
+                        )
+                        continue
+                    logger.debug(
+                        f"[Dynamic] Send dynamic {dynid} | {up_name}({up_id}) to {data.group}"
+                    )
+                    Context.push_type.set("dynamic")
+                    Context.push_id.set(dynid)
                     await app.send_group_message(
                         int(data.group),
                         MessageChain(msg),
                     )
-                    await asyncio.sleep(1)
+                    insert_dyn_push_to_group(dynid, data.group)
+                    await asyncio.sleep(2)
                 except UnknownTarget:
-                    delete = await delete_group(data.group)
-                    logger.info(
-                        f"[BiliBili推送] {dynid} | 推送失败，找不到该群 {data.group}，已删除该群订阅的 {len(delete)} 个 UP"
+                    logger.warning(
+                        f"[BiliBili推送] {dynid} | {up_name}({up_id}) 推送失败，找不到该群 {data.group}，正在取消订阅"
                     )
+                    delete = await delete_group(data.group)
+                    logger.warning(f"[BiliBili推送] 已删除群 {data.group} 订阅的 {len(delete)} 个 UP")
+                    with contextlib.suppress(UnknownTarget):
+                        await app.quit_group(int(data.group))
                 except AccountMuted:
                     group = await app.get_group(int(data.group))
                     group = f"{group.name}（{group.id}）" if group else data.group
-                    logger.warning(f"[BiliBili推送] {dynid} | 推送失败，账号在 {group} 被禁言")
-                except Exception: # noqa
-                    logger.exception(f"[BiliBili推送] {dynid} | 推送失败，未知错误")
+                    logger.warning(
+                        f"[BiliBili推送] {dynid} | {up_name}({up_id}) 推送失败，账号在 {group} 被禁言"
+                    )
+                except RemoteException as e:
+                    if "resultType=46" in str(e):
+                        logger.error(
+                            f"[BiliBili推送] {dynid} | {up_name}({up_id}) 推送失败，Bot 被限制发送群聊消息"
+                        )
+                        await app.send_friend_message(
+                            BotConfig.master,
+                            MessageChain("Bot 被限制发送群聊消息（46 代码），请尽快处理后发送 /init 重新开启推送进程"),
+                        )
+                        BOT_Status["dynamic_updating"] = True
+                        BOT_Status["init"] = False
+                        raise ExecutionStop() from e
+                    elif "resultType=110" in str(e):  # 110: 可能为群被封
+                        logger.warning(
+                            f"[BiliBili推送] {dynid} | {up_name}({up_id}) 推送失败，Bot 因未知原因被移出群聊"
+                        )
+                        delete = await delete_group(data.group)
+                        logger.warning(f"[BiliBili推送] 已删除群 {data.group} 订阅的 {len(delete)} 个 UP")
+                        with contextlib.suppress(UnknownTarget):
+                            await app.quit_group(int(data.group))
+                    elif "reason=AT_ALL_LIMITED" in str(e):
+                        logger.warning(
+                            f"[BiliBili推送] {dynid} | {up_name}({up_id}) 推送失败，Bot 在该群 @全体成员 次数已达上限"
+                        )
+                        await app.send_group_message(int(data.group), MessageChain(msg[1:]))
+                        await asyncio.sleep(1)
+                    else:
+                        capture_exception()
+                        logger.exception(f"[BiliBili推送] {dynid} | {up_name}({up_id}) 推送失败，未知错误")
+                except Exception:  # noqa
+                    capture_exception()
+                    logger.exception(f"[BiliBili推送] {dynid} | {up_name}({up_id}) 推送失败，未知错误")
         if BotConfig.Bilibili.use_login:
             try:
                 await dynamic_like(dynid)
-                logger.info(f"[BiliBili推送] {dynid} | 动态点赞成功")
+                logger.info(f"[BiliBili推送] {dynid} | {up_name}({up_id}) 动态点赞成功")
             except ResponseCodeError as e:
-                logger.error(f"[BiliBili推送] {dynid} | 动态点赞失败：{e}")
+                logger.error(f"[BiliBili推送] {dynid} | {up_name}({up_id}) 动态点赞失败：{e}")
         insert_dynamic_push(
             up_id,
             up_name,
@@ -264,7 +321,9 @@ async def push(app: Ariadne, dyn: DynamicItem):
             len(get_sub_by_uid(up_id)),
         )
     else:
-        logger.warning(f"[BiliBili推送] {dynid} | 没有找到订阅 UP {up_name}（{up_id}）的群，已退订！")
+        logger.warning(
+            f"[BiliBili推送] {dynid} | {up_name}({up_id}) 没有找到订阅 UP {up_name}（{up_id}）的群，已退订！"
+        )
         await delete_uid(up_id)
 
 
@@ -272,8 +331,14 @@ async def check_uid(app: Ariadne, uid):
     try:
         resp = await asyncio.wait_for(grpc_get_user_dynamics(int(uid)), timeout=10)
     except asyncio.TimeoutError:
-        logger.error(f"[BiliBili推送] {uid} 获取动态失败！")
+        logger.warning(f"[BiliBili推送] {uid} 获取动态超时！")
         return
+    except GrpcError as e:
+        logger.error(f"[BiliBili推送] {uid} 获取动态失败：[{e.code}] {e.msg}")
+        return
+    except Exception as e:  # noqa
+        capture_exception(e)
+        raise e
     if resp:
         resp = [
             x
@@ -289,7 +354,7 @@ async def check_uid(app: Ariadne, uid):
                 up_id = str(dyn.modules[0].module_author.author.mid)
                 up_name = dyn.modules[0].module_author.author.name
                 dynid = int(dyn.extend.dyn_id_str)
-                logger.debug(f"[Dynamic] Check dynamic {dynid}, {up_name}({up_id})")
+                logger.debug(f"[Dynamic] Check dynamic {dynid} | {up_name}({up_id})")
                 try:
                     if (
                         dynid <= BOT_Status["offset"][up_id]
@@ -310,3 +375,8 @@ async def check_uid(app: Ariadne, uid):
 
 class ScreenshotError(Exception):
     pass
+
+
+@channel.use(SchedulerSchema(every_custom_seconds(2)))
+async def debug():
+    logger.debug(BOT_Status)

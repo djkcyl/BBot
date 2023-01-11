@@ -1,6 +1,6 @@
 import asyncio
-
 import contextlib
+
 from typing import Union
 from loguru import logger
 from bilireq.grpc.dynamic import grpc_get_user_dynamics
@@ -8,8 +8,7 @@ from bilireq.grpc.dynamic import grpc_get_user_dynamics
 from core import BOT_Status
 from core.bot_config import BotConfig
 from core.group_config import GroupPermission
-from library.bilibili_request import relation_modify
-from data import (
+from core.data import (
     add_sub,
     uid_exists,
     get_sub_data,
@@ -19,8 +18,9 @@ from data import (
     get_sub_by_group,
     delete_sub_by_uid,
     unsub_uid_by_group,
-    uid_in_group_exists,
 )
+
+from .bilibili_request import relation_modify
 
 
 async def subscribe_uid(uid: Union[str, int], groupid: Union[str, int]):
@@ -29,7 +29,7 @@ async def subscribe_uid(uid: Union[str, int], groupid: Union[str, int]):
     groupid = str(groupid)
     gp = GroupPermission(int(groupid))
     BOT_Status["init"] = False
-    while BOT_Status["dynamic_updating"]:
+    while BOT_Status["dynamic_updating"] and BotConfig.Bilibili.use_login:
         await asyncio.sleep(0.1)
 
     if not uid:
@@ -50,7 +50,7 @@ async def subscribe_uid(uid: Union[str, int], groupid: Union[str, int]):
     except IndexError:
         BOT_Status["init"] = True
         return f"该 UP（{uid}）未发送任何动态，订阅失败"
-    if uid_in_group_exists(uid, groupid):
+    if uid_in_group(uid, groupid):
         BOT_Status["init"] = True
         return f"本群已订阅 UP {up_name}（{uid}），请勿重复订阅"
     if len(get_sub_by_group(groupid)) >= BotConfig.max_subsubscribe and not gp.is_vip():
@@ -78,16 +78,16 @@ async def subscribe_uid(uid: Union[str, int], groupid: Union[str, int]):
     return f"成功在本群订阅 UP {up_name}（{uid}）"
 
 
-async def unsubscribe_uid(uid, groupid):
+async def unsubscribe_uid(uid, groupid, force=False):
     """在某个群退订某个 up"""
     uid = str(uid)
     groupid = str(groupid)
     logger.info(f"正在群 {groupid} 取消订阅 {uid}")
-    while BOT_Status["dynamic_updating"]:
+    while BOT_Status["dynamic_updating"] and not force and BotConfig.Bilibili.use_login:
         await asyncio.sleep(0.1)
     BOT_Status["init"] = False
 
-    if not uid_in_group_exists(uid, groupid):
+    if not uid_in_group(uid, groupid):
         BOT_Status["init"] = True
         logger.info(f"群 {groupid} 未订阅 {uid}")
         return f"本群未订阅该 UP（{uid}）"
@@ -163,10 +163,11 @@ def set_atall(uid, groupid, atall):
         return False
 
 
-async def delete_group(groupid):
+async def delete_group(groupid) -> list[str]:
     """删除某个群的所有订阅"""
     remove_list = []
+    logger.info(f"正在删除群 {groupid} 的所有订阅")
     for data in get_sub_by_group(groupid):
-        await unsubscribe_uid(data.uid, data.group)
+        await unsubscribe_uid(data.uid, data.group, True)
         remove_list.append(data.uid)
     return remove_list

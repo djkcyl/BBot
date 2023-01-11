@@ -3,28 +3,31 @@ import asyncio
 
 from loguru import logger
 from graia.saya import Channel
-from httpx import TimeoutException
+from json import JSONDecodeError
+from httpx import TransportError
 from graia.ariadne.app import Ariadne
+from sentry_sdk import capture_exception
 from graia.ariadne.model import MemberPerm
+from bilireq.live import get_rooms_info_by_uids
+from graia.broadcast.exceptions import ExecutionStop
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.connection.util import UploadMethod
 from graia.ariadne.message.element import Image, AtAll
 from graia.scheduler.saya.schema import SchedulerSchema
 from graia.scheduler.timers import every_custom_seconds
-from graia.ariadne.exception import UnknownTarget, AccountMuted
-from bilireq.live import get_rooms_info_by_uids
+from graia.ariadne.exception import UnknownTarget, AccountMuted, RemoteException
 
 from core import BOT_Status
 from core.bot_config import BotConfig
-from library.time_tools import calc_time_total
-from library.bilibili_request import get_b23_url
-from library import delete_group, delete_uid, set_name
-from data import insert_live_push, get_all_uid, get_sub_by_uid
+from utils.time_tools import calc_time_total
+from utils.bilibili_request import get_b23_url
+from utils.up_operation import delete_group, delete_uid, set_name
+from core.data import insert_live_push, get_all_uid, get_sub_by_uid
 
 channel = Channel.current()
 
 
-@channel.use(SchedulerSchema(every_custom_seconds(1)))
+@channel.use(SchedulerSchema(every_custom_seconds(3)))
 async def main(app: Ariadne):
 
     if not BOT_Status["init"] or BOT_Status["init"] and len(get_all_uid()) == 0:
@@ -38,15 +41,22 @@ async def main(app: Ariadne):
         if up not in sub_list:
             del BOT_Status["living"][up]
     try:
-        status_infos = await get_rooms_info_by_uids(sub_list)
-    except TimeoutException as timeout_error:
-        logger.warning(f"获取直播间信息超时: {timeout_error}")
-        await asyncio.sleep(5)
-        BOT_Status["live_updating"] = False
-        return
+        try:
+            status_infos = await get_rooms_info_by_uids(sub_list)
+        except (TransportError, JSONDecodeError) as error:
+            logger.warning(f"获取直播间状态失败: {type(error)} {error}")
+            await asyncio.sleep(5)
+            BOT_Status["live_updating"] = False
+            return
+        except RuntimeError as error:
+            if "The connection pool was closed while" not in str(error):
+                raise error
+            BOT_Status["live_updating"] = False
+            return
     except Exception:  # noqa
+        capture_exception()
         logger.exception("获取直播间状态失败:")
-        await asyncio.sleep(5)
+        await asyncio.sleep(30)
         BOT_Status["live_updating"] = False
         return
     if status_infos:
@@ -58,10 +68,14 @@ async def main(app: Ariadne):
                 # if up_id in BOT_Status["skip_uid"]:
                 #     continue
                 # 如果存在直播信息则为已开播
+                logger.debug(
+                    f"[Live] {up_name}({up_id}) live_status: {live_data['live_status']}"
+                )
                 if live_data["live_status"] == 1:
                     # 判断是否在正在直播列表中
                     if up_id in BOT_Status["living"]:
                         continue
+                    logger.debug(f"[Live] {up} live_data: {live_data}")
                     BOT_Status["living"][up_id] = live_data["live_time"]  # 设定开播时间
                     # 获取直播信息
                     room_id = live_data["room_id"]
@@ -125,6 +139,7 @@ async def main(app: Ariadne):
                         up_id, True, len(get_sub_by_uid(up_id)), title, area_parent, area
                     )
                 elif up_id in BOT_Status["living"]:
+                    logger.debug(f"[Live] {up} live_data: {live_data}")
                     live_time = (
                         "，本次直播时长 "
                         + calc_time_total(time.time() - BOT_Status["living"][up_id])
@@ -161,7 +176,24 @@ async def main(app: Ariadne):
                                 group = await app.get_group(int(data.group))
                                 group = f"{group.name}（{group.id}）" if group else data.group
                                 logger.warning(f"[BiliBili推送] 推送失败，账号在 {group} 被禁言")
-
+                            except RemoteException as e:
+                                if "resultType=46" in str(e):
+                                    logger.error("[BiliBili推送] 推送失败，Bot 被限制发送群聊消息")
+                                    await app.send_friend_message(
+                                        BotConfig.master,
+                                        MessageChain(
+                                            "Bot 被限制发送群聊消息（46 代码），请尽快处理后发送 /init 重新开启推送进程"
+                                        ),
+                                    )
+                                    BOT_Status["dynamic_updating"] = True
+                                    BOT_Status["init"] = False
+                                    raise ExecutionStop() from e
+                                else:
+                                    capture_exception()
+                                    logger.exception("[BiliBili推送] 推送失败，未知错误")
+                            except Exception:  # noqa
+                                capture_exception()
+                                logger.exception("[BiliBili推送] 推送失败，未知错误")
                             await asyncio.sleep(1)
                     insert_live_push(up_id, False, len(get_sub_by_uid(up_id)))
             else:
