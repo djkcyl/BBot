@@ -57,6 +57,10 @@ def load_config_webui(reason: str = "未知原因", err: dict = {}):
     app = FastAPI(docs_url=None, redoc_url=None)
     port = os.getenv("BBOT_WEBUI_PORT", 6080)
 
+    @app.get("/api/status")
+    async def status():
+        return {"status": "starting", "reason": reason, "error": err}
+
     @app.get("/api/config/load")
     async def load_config(config: dict):
         try:

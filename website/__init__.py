@@ -16,6 +16,10 @@ async def root():
     return FileResponse(STATIC_PATH.joinpath("html", "index.html"))
 
 
+async def status():
+    return {"status": "ok"}
+
+
 class BotService(Launchable):
     id: str = "webapi/bbot"
 
@@ -38,6 +42,7 @@ class BotService(Launchable):
                 allow_headers=["*"],
             )
             app.get("/")(root)
+            app.get("/api/status")(status)
             app.mount(
                 "/",
                 StaticFiles(directory=STATIC_PATH.joinpath("html")),

@@ -2,21 +2,57 @@
  * @Author: KBD
  * @Date: 2022-12-26 13:45:30
  * @LastEditors: KBD
- * @LastEditTime: 2022-12-26 14:49:43
+ * @LastEditTime: 2023-01-11 15:18:13
  * @Description: 用于初始化手机动态页面的样式以及图片大小
  */
 async function getMobileStyle() {
-    // 删除关注dom
-    const followDom = document.querySelector(".dyn-header__following");
-    followDom && followDom.remove();
+    // 删除dom的Object, 可以自行添加 (className需要增加'.'为前缀, id需要增加'#'为前缀)
+    const deleteDoms = {
+        // 关注dom
+        followDoms: [".dyn-header__following", ".easy-follow-btn"],
+        // 分享dom
+        shareDoms: [".dyn-share"],
+        // 打开程序dom
+        openAppBtnDoms: [".dynamic-float-btn", ".float-openapp"],
+        // 导航dom
+        navDoms: [".m-navbar", ".opus-nav"],
+        // 获取更多dom
+        readMoreDoms: [".opus-read-more"],
+        // 全屏弹出Dom
+        openAppDialogDoms: [".openapp-dialog"],
+        // 评论区dom
+        commentsDoms: [".v-switcher"],
+    }
 
-    // 删除分享dom
-    const shareDom = document.querySelector(".dyn-share");
-    shareDom && shareDom.remove();
+    // 遍历对象的值, 并将多数组扁平化, 再遍历进行删除操作
+    Object.values(deleteDoms).flat(1).forEach(domTag => {
+        const deleteDom = document.querySelector(domTag);
+        deleteDom && deleteDom.remove();
+    })
 
-    // 删除打开程序dom
-    const openAppBtnDom = document.querySelector(".dynamic-float-btn");
-    openAppBtnDom && openAppBtnDom.remove();
+    // 新版动态需要移除对应 class 达到跳过点击事件, 解除隐藏的目的 
+    const contentDom = document.querySelector(".opus-module-content");
+    contentDom && contentDom.classList.remove("limit");
+
+    // 新版动态需要给 bm-pics-block 的父级元素设置 flex 以及 column
+    const newContainerDom = document.querySelector(".bm-pics-block")?.parentElement;
+    if (newContainerDom) {
+        // 设置为 flex
+        newContainerDom.style.display = "flex";
+        // 设置为竖向排列
+        newContainerDom.style.flexDirection = "column";
+        // flex - 垂直居中
+        newContainerDom.style.justifyContent = "center";
+        // flex - 水平居中
+        newContainerDom.style.alignItems = "center";
+    }
+
+    // 设置 mopus 的 paddingTop 为 0
+    const mOpusDom = document.querySelector(".m-opus");
+    if (mOpusDom) {
+        mOpusDom.style.paddingTop = "0";
+        mOpusDom.style.minHeight = "0";
+    }
 
     // 设置字体格式
     const cardDom = document.querySelector(".dyn-card");
@@ -32,8 +68,6 @@ async function getMobileStyle() {
         containerDom.style.paddingLeft = "0";
         // 先把默认padding-right置为0
         containerDom.style.paddingRight = "0";
-        // 设置padding与单图片一致
-        containerDom.style.padding = "0 3.2vmin";
         // 设置flex模式下以列形式排列
         containerDom.style.flexDirection = "column";
         // 设置flex模式下每个容器间隔15px
@@ -100,4 +134,8 @@ async function getMobileStyle() {
             item.style.height = "auto";
         }
     }))
+}
+
+window.onload = () => {
+    getMobileStyle();
 }

@@ -14,7 +14,55 @@
 </head>
 
 <body>
-    <h1>Hello World</h1>
+    <h1 id="hello">Webui 正在开发中，请手动修改配置文件后点击此处</h1>
+    <!-- 点击空白处来访问 api/config/stop 完成配置 -->
+    <script>
+        var canClick = true
+
+        document.body.onclick = async function () {
+            if (!canClick) {
+                return
+            }
+            canClick = false
+            fetch('/api/config/stop')
+
+            // 修改网页内容为 请稍等
+            document.getElementById('hello').innerText = '请稍等'
+
+            // 等待1秒
+            await new Promise(resolve => setTimeout(resolve, 1000))
+
+            // 轮询 api/status 直到返回 json 值的 "status" 为 "ok"，若为 "starting" 则返回 "reason" 和 "error" 的值，若超时则提示错误
+            while (true) {
+                try {
+                    const res = await fetch('/api/status')
+                    const json = await res.json()
+                    if (json.status === 'ok') {
+                        // 重定向到 /
+                        window.location.href = '/'
+                    } else if (json.status === 'starting') {
+                        // 若 error 为 {} 则不显示
+                        if (Object.keys(json.error).length === 0) {
+                            document.getElementById('hello').innerText = json.reason
+                        } else {
+                            document.getElementById('hello').innerText = json.reason + ' ' + JSON.stringify(json.error)
+                        }
+                        canClick = true
+                        break
+                    } else {
+                        document.getElementById('hello').innerText = '未知错误'
+                        canClick = true
+                        break
+                    }
+                } catch (e) {
+                    document.getElementById('hello').innerText = '请求失败，请检查控制台输出后重试'
+                    console.log(e)
+                    canClick = true
+                    break
+                }
+            }
+        }
+    </script>
 </body>
 
 </html>
