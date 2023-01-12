@@ -54,12 +54,42 @@ async function getMobileStyle() {
         mOpusDom.style.minHeight = "0";
     }
 
-    // 设置字体格式
-    const cardDom = document.querySelector(".dyn-card");
-    if (cardDom) {
-        cardDom.style.fontFamily = "Noto Sans CJK SC, sans-serif";
-        cardDom.style.overflowWrap = "break-word";
-    }
+    // Beta: 自行添加在线字体(未来考虑添加本地离线字体), PS: 字体的优先度将按照顺序执行
+    const needLoadFontList = [
+        {
+            fontUrl: "https://cdn.jsdelivr.net/gh/irozhi/HarmonyOS-Sans/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Medium.woff",
+            fontFamily: "HarmonyOS_Medium_woff",
+        },
+        {
+            fontUrl: "https://cdn.jsdelivr.net/gh/irozhi/HarmonyOS-Sans/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Medium.woff2",
+            fontFamily: "HarmonyOS_Medium_woff2",
+        }
+    ];
+
+    // Beta: 字体按需加载方法
+    (() => {
+        const code = needLoadFontList.reduce((defaultString, fontObject) => {
+            return defaultString + `@font-face { font-family: ${fontObject.fontFamily};src: url('${fontObject.fontUrl}'); }`;
+        }, "");
+        const style = document.createElement("style");
+        style.rel = "stylesheet";
+        style.appendChild(document.createTextNode(code));
+        const head = document.getElementsByTagName("head")[0];
+        head.appendChild(style);
+    })();
+
+    // Beta: 需要替换内容字体的dom
+    const contentFonts = [".dyn-card"]
+
+    // Beta: 设置字体样式
+    contentFonts.forEach(domName => {
+        const contentFontDom = document.querySelector(domName);
+        if (contentFontDom) {
+            // 动态加字体, 并给与默认值sans-serif
+            contentFontDom.style.fontFamily = needLoadFontList.reduce((defaultString, fontObject) => defaultString + fontObject.fontFamily + ",", "") + "sans-serif";
+            contentFontDom.style.overflowWrap = "break-word";
+        }
+    })
 
     // 找到图标容器dom
     const containerDom = document.querySelector(".bm-pics-block__container");
