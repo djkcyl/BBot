@@ -105,7 +105,7 @@ async def get_mobile_screenshot(page: Page, dynid: str):
     await page.wait_for_load_state("networkidle")
     await page.wait_for_load_state("domcontentloaded")
 
-    # 判断字体是否加载完成
+    # 判断字体图片等是否加载完成
     need_wait = ["imageComplete", "fontsLoaded"]
     await asyncio.gather(*[page.wait_for_function(f"{i}()") for i in need_wait])
 
