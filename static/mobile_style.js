@@ -18,12 +18,41 @@ async function getMobileStyle() {
     const openAppBtnDom = document.querySelector(".dynamic-float-btn");
     openAppBtnDom && openAppBtnDom.remove();
 
-    // 设置字体格式
-    const cardDom = document.querySelector(".dyn-card");
-    if (cardDom) {
-        cardDom.style.fontFamily = "Noto Sans CJK SC, sans-serif";
-        cardDom.style.overflowWrap = "break-word";
-    }
+    // Beta: 自行添加在线字体(未来考虑添加本地离线字体)
+    const needLoadFontList = [
+        {
+            fontUrl: "https://cdn.jsdelivr.net/gh/irozhi/HarmonyOS-Sans/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Medium.woff",
+            fontFamily: "HarmonyOS_Medium_woff",
+        },
+        {
+            fontUrl: "https://cdn.jsdelivr.net/gh/irozhi/HarmonyOS-Sans/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Medium.woff2",
+            fontFamily: "HarmonyOS_Medium_woff2",
+        }
+    ];
+
+    // Beta: 字体按需加载方法
+    (() => {
+        const code = needLoadFontList.reduce((accumulator, currentValue) => {
+            return accumulator + `@font-face { font-family: ${currentValue.fontFamily};src: url('${currentValue.fontUrl}'); }`;
+        }, "");
+        const style = document.createElement("style");
+        style.rel = "stylesheet";
+        style.appendChild(document.createTextNode(code));
+        const head = document.getElementsByTagName("head")[0];
+        head.appendChild(style);
+    })();
+
+    // Beta: 需要替换内容字体的dom
+    const contentFonts = [".dyn-card"]
+
+    // Beta: 设置字体样式
+    contentFonts.forEach(domName => {
+        const contentFontDom = document.querySelector(domName);
+        if (contentFontDom) {
+            contentFontDom.style.fontFamily = needLoadFontList.reduce((p, c) => p + c.fontFamily + ",", "") + "sans-serif";
+            contentFontDom.style.overflowWrap = "break-word";
+        }
+    })
 
     // 找到图标容器dom
     const containerDom = document.querySelector(".bm-pics-block__container");
