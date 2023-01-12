@@ -52,10 +52,11 @@ async def main(app: Ariadne, group: Group, at: ElementResult, anything: RegexRes
                 BotConfig.master,
                 MessageChain(f"群 {group.name}（{group.id}）正在退订 UP：{uid}\n{msg}"),
             )
-            await app.send_group_message(
-                group,
-                MessageChain(msg),
-            )
+            if BotConfig.Event.subscribe:
+                await app.send_group_message(
+                    group,
+                    MessageChain(msg),
+                )
         else:
             await app.send_group_message(
                 group,

@@ -79,6 +79,8 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
 class _Event(BaseModel, extra=Extra.ignore):
     mute: bool = True
     permchange: bool = True
+    push: bool = True
+    subscribe: bool = True
 
 
 class _Webui(BaseModel, extra=Extra.ignore):
@@ -160,7 +162,8 @@ class _BotConfig(BaseModel, extra=Extra.ignore):
         if not file.exists():
             if allow_create:
                 cls._create_file(file)
-            raise FileNotFoundError
+            else:
+                raise FileNotFoundError
         return cls.parse_obj(cls._read_file())
 
     # 将配置保存至文件中
@@ -182,4 +185,4 @@ class _BotConfig(BaseModel, extra=Extra.ignore):
         )
 
 
-BotConfig = _BotConfig.load(allow_create=True)
+BotConfig: _BotConfig = _BotConfig.load(allow_create=True)

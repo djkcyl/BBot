@@ -1,23 +1,20 @@
 name: PreRelease
 
 on:
-  push:
-    branches:
-      - dev
-      - web
-
   workflow_dispatch:
 
 jobs:
   build:
-    name: Build
+    name: Build Binary
     outputs:
       version: ${{ steps.version.outputs.version }}
     strategy:
       matrix:
         os:
           - ubuntu-20.04
+          # - bbot-ubuntu
           - windows-latest
+          # - bbot-windows
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -39,10 +36,11 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH: "0"
         run: playwright install chromium
 
+      - name: Install Pyinstaller
+        run: pip install --upgrade pyinstaller
+
       - name: Build Pyinstaller Binary
-        run: |
-          pip install --upgrade pyinstaller
-          pyinstaller main.spec
+        run: pyinstaller main.spec
 
       - name: Replease Playwright Path
         run: python release.py --replace-playwright-path
@@ -73,3 +71,30 @@ jobs:
           prerelease: true
           tag_name: ${{ steps.version.outputs.version }}
           files: build/*
+
+  docker:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare environment
+        uses: actions/checkout@v2
+      
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }} 
+
+      - name: Build Image
+        uses: docker/build-push-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: 
+            ${{ secrets.DOCKER_USERNAME }}/bbot:dev

@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    name: Build
+    name: Build Binary
     outputs:
       version: ${{ steps.version.outputs.version }}
     strategy:
@@ -40,10 +40,11 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH: "0"
         run: playwright install chromium
 
+      - name: Install Pyinstaller
+        run: pip install --upgrade pyinstaller
+
       - name: Build Pyinstaller Binary
-        run: |
-          pip install --upgrade pyinstaller
-          pyinstaller main.spec
+        run: pyinstaller main.spec
 
       - name: Replease Playwright Path
         run: python release.py --replace-playwright-path
@@ -61,15 +62,42 @@ jobs:
       - name: Get Release Version
         id: version
         run: |
-          echo "::set-output name=version::v$(python release.py --version --beta ${{ steps.commit.outputs.short }})"
+          echo "::set-output name=version::v$(python release.py --version)"
 
       - name: Rename Binary
         run: |
-          mv ./dist/$(python release.py --buildname --package-tools pyinstaller) ./build/$(python release.py --name --package-tools pyinstaller --beta ${{ steps.commit.outputs.short }})
-          mv ./nuitka/$(python release.py --buildname --package-tools nuitka) ./build/$(python release.py --name --package-tools nuitka --beta ${{ steps.commit.outputs.short }})
+          mv ./dist/$(python release.py --buildname --package-tools pyinstaller) ./build/$(python release.py --name --package-tools pyinstaller)
+          mv ./nuitka/$(python release.py --buildname --package-tools nuitka) ./build/$(python release.py --name --package-tools nuitka)
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.version.outputs.version }}
           files: build/*
+
+  docker:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare environment
+        uses: actions/checkout@v2
+      
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }} 
+
+      - name: Build Image
+        uses: docker/build-push-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: 
+            ${{ secrets.DOCKER_USERNAME }}/bbot:latest

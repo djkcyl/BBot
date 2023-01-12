@@ -20,9 +20,10 @@ from utils.fastapi import FastAPIService
 from utils.detect_package import is_package
 from core.announcement import base_telemetry
 
-if not is_package:
-    os.environ["PLAYWRIGHT_BROWSERS_PATH"] = Path("static", "browser").as_posix()
 
+os.environ["PLAYWRIGHT_BROWSERS_PATH"] = (
+    "0" if is_package else Path("static", "browser").as_posix()
+)
 logger.info("BBot is starting...")
 
 base_telemetry()

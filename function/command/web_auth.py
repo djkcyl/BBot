@@ -1,8 +1,8 @@
 from datetime import timedelta
 from graia.saya import Channel
 from graia.ariadne.app import Ariadne
-from graia.ariadne.message.element import At
 from graia.ariadne.model import Member, Group
+from graia.ariadne.message.element import At, Source
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.event.message import GroupMessage
 from graia.amnesia.builtins.memcache import Memcache
@@ -27,7 +27,7 @@ channel = Channel.current()
     )
 )
 async def main(
-    app: Ariadne, group: Group, member: Member, message: MessageChain, anything: RegexResult
+    app: Ariadne, group: Group, member: Member, source: Source, anything: RegexResult
 ):
 
     if anything.matched and (key := anything.result):
@@ -37,9 +37,7 @@ async def main(
             if not await memcache.get(key.display):
                 await memcache.set(key.display, str(member.id), timedelta(seconds=120))
                 await app.send_group_message(
-                    group, MessageChain(At(member), " 认证成功"), quote=message
+                    group, MessageChain(At(member), " 认证成功"), quote=source
                 )
         else:
-            await app.send_group_message(
-                group, MessageChain(At(member), " 认证失败"), quote=message
-            )
+            await app.send_group_message(group, MessageChain(At(member), " 认证失败"), quote=source)
