@@ -1,5 +1,6 @@
-import asyncio
+import re
 import time
+import asyncio
 import contextlib
 
 from pathlib import Path
@@ -12,6 +13,8 @@ from graiax.playwright.interface import PlaywrightContext
 from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2 import DynamicItem
 
 from core.bot_config import BotConfig
+
+from .fonts_provider import fill_font
 
 
 error_path = Path("data").joinpath("error")
@@ -30,6 +33,7 @@ async def get_dynamic_screenshot(dyn: DynamicItem):
     browser_context = app.launch_manager.get_interface(PlaywrightContext).context
     for i in range(3):
         page = await browser_context.new_page()
+        await page.route(re.compile("^https://static.graiax/fonts/(.+)$"), fill_font)
         try:
             page.on("requestfinished", network_request)
             page.on("requestfailed", network_requestfailed)
@@ -92,6 +96,7 @@ async def get_mobile_screenshot(page: Page, dynid: str):
     url = f"https://m.bilibili.com/dynamic/{dynid}"
 
     await page.set_viewport_size({"width": 460, "height": 720})
+
     with contextlib.suppress(TimeoutError):
         await page.goto(url, wait_until="networkidle", timeout=20000)
 

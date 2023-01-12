@@ -58,13 +58,13 @@ async function getMobileStyle() {
     // 自行添加在线字体(字体的优先度将按照顺序执行)
     const needLoadFontList = [
         {
-            fontUrl: "https://cdn.jsdelivr.net/gh/irozhi/HarmonyOS-Sans/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Medium.woff",
-            fontFamily: "HarmonyOS_Medium_woff",
-        },
-        {
-            fontUrl: "https://cdn.jsdelivr.net/gh/irozhi/HarmonyOS-Sans/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Medium.woff2",
+            fontUrl: "https://static.graiax/fonts/HarmonyOS_Sans_SC_Medium.woff2",
             fontFamily: "HarmonyOS_Medium_woff2",
-        }
+        },
+        // {
+        //     fontUrl: "https://cdn.jsdelivr.net/gh/irozhi/HarmonyOS-Sans/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Medium.woff2",
+        //     fontFamily: "HarmonyOS_Medium_woff2",
+        // }
     ];
 
     // 字体按需加载方法
