@@ -79,7 +79,7 @@ async function getMobileStyle() {
     })();
 
     // Beta: 需要替换内容字体的dom
-    const contentFonts = [".dyn-card"]
+    const contentFonts = [".dyn-card", ".opus-modules"]
 
     // Beta: 设置字体样式
     contentFonts.forEach(domName => {
@@ -164,6 +164,34 @@ async function getMobileStyle() {
             item.style.height = "auto";
         }
     }))
+}
+
+async function imageComplete() {
+    // 判断图片的 complete 参数是否都为 true
+    const imageItemDoms = document.querySelectorAll(".bm-pics-block__item");
+    const imageItemDomsArray = Array.from(imageItemDoms);
+    const imageItemDomsArrayLength = imageItemDomsArray.length;
+    let imageItemDomsArrayComplete = 0;
+    imageItemDomsArray.forEach(item => {
+        if (item.firstChild.complete) {
+            imageItemDomsArrayComplete++;
+        }
+    })
+    if (imageItemDomsArrayComplete === imageItemDomsArrayLength) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+async function fontsLoaded() {
+    // 判断字体是否都加载完成
+    const fonts = document.fonts.status;
+    if (fonts === "loaded") {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 window.onload = () => {

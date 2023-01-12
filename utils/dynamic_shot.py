@@ -1,3 +1,4 @@
+import asyncio
 import time
 import contextlib
 
@@ -103,6 +104,10 @@ async def get_mobile_screenshot(page: Page, dynid: str):
     logger.debug(f"js executed: {a}")
     await page.wait_for_load_state("networkidle")
     await page.wait_for_load_state("domcontentloaded")
+
+    # 判断字体是否加载完成
+    need_wait = ["imageComplete", "fontsLoaded"]
+    await asyncio.gather(*[page.wait_for_function(f"{i}()") for i in need_wait])
 
     card = await page.query_selector(".opus-modules" if "opus" in page.url else ".dyn-card")
     assert card
