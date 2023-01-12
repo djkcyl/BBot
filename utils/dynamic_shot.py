@@ -5,8 +5,8 @@ from pathlib import Path
 from loguru import logger
 from graia.ariadne import Ariadne
 from sentry_sdk import capture_exception
-from playwright.async_api._generated import Request
 from playwright._impl._api_types import TimeoutError
+from playwright.async_api._generated import Request, Page
 from graiax.playwright.interface import PlaywrightContext
 from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2 import DynamicItem
 
@@ -33,60 +33,14 @@ async def get_dynamic_screenshot(dyn: DynamicItem):
             page.on("requestfinished", network_request)
             page.on("requestfailed", network_requestfailed)
             if BotConfig.Bilibili.mobile_style:
-                await page.set_viewport_size({"width": 460, "height": 720})
-
-                url = f"https://m.bilibili.com/dynamic/{dynid}"
-                with contextlib.suppress(TimeoutError):
-                    await page.goto(url, wait_until="networkidle", timeout=20000)
-
-                if "bilibili.com/404" in page.url:
-                    logger.warning(f"[Bilibili推送] {dynid} 动态不存在")
-                    break
-
-                await page.add_script_tag(content=mobile_style_js)
-                a = await page.wait_for_function("getMobileStyle()")
-                logger.debug(f"js executed: {a}")
-
-                await page.wait_for_load_state("networkidle")
-                await page.wait_for_load_state("domcontentloaded")
-
-                card = await page.query_selector(
-                    ".opus-modules" if "opus" in page.url else ".dyn-card"
-                )
-                assert card
-                clip = await card.bounding_box()
-                assert clip
-                logger.debug(f"loaded: {clip}")
-
+                page, clip = await get_mobile_screenshot(page, dynid)
             else:
-                url = f"https://t.bilibili.com/{dynid}"
-                await page.set_viewport_size({"width": 2560, "height": 1080})
-                with contextlib.suppress(TimeoutError):
-                    await page.goto(url, wait_until="networkidle", timeout=20000)
-                if "bilibili.com/404" in page.url:
-                    logger.warning(f"[Bilibili推送] {dynid} 动态不存在")
-                    break
-                card = await page.query_selector(".card")
-                assert card
-                clip = await card.bounding_box()
-                assert clip
-                bar = await page.query_selector(".bili-dyn-action__icon")
-                assert bar
-                bar_bound = await bar.bounding_box()
-                assert bar_bound
-                clip["height"] = bar_bound["y"] - clip["y"] - 2
-            image = await page.screenshot(
-                clip=clip,
-                # clip=None if "opus" in page.url else clip,
-                full_page=True,
-                type="jpeg",
-                quality=98,
-            )
-            await page.close()
-            return image
+                page, clip = await get_pc_screenshot(page, dynid)
+            return await page.screenshot(clip=clip, full_page=True, type="jpeg", quality=98)
+        except Notfound:
+            logger.error(f"[Bilibili推送] {dynid} 动态不存在")
         except Exception as e:  # noqa
-            url = page.url
-            if "bilibili.com/404" in url:
+            if "bilibili.com/404" in page.url:
                 logger.error(f"[Bilibili推送] {dynid} 动态不存在")
                 break
             elif type(e) == AssertionError:
@@ -108,6 +62,7 @@ async def get_dynamic_screenshot(dyn: DynamicItem):
                     type="jpeg",
                     quality=80,
                 )
+        finally:
             with contextlib.suppress():
                 await page.close()
 
@@ -130,3 +85,56 @@ def network_requestfailed(request: Request):
     fail = request.failure
     method = request.method
     logger.warning(f"[RequestFailed] [{method} {fail}] << {url}")
+
+
+async def get_mobile_screenshot(page: Page, dynid: str):
+    url = f"https://m.bilibili.com/dynamic/{dynid}"
+
+    await page.set_viewport_size({"width": 460, "height": 720})
+    with contextlib.suppress(TimeoutError):
+        await page.goto(url, wait_until="networkidle", timeout=20000)
+
+    if "bilibili.com/404" in page.url:
+        logger.warning(f"[Bilibili推送] {dynid} 动态不存在")
+        raise Notfound
+
+    await page.add_script_tag(content=mobile_style_js)
+    a = await page.wait_for_function("getMobileStyle()")
+    logger.debug(f"js executed: {a}")
+    await page.wait_for_load_state("networkidle")
+    await page.wait_for_load_state("domcontentloaded")
+
+    card = await page.query_selector(".opus-modules" if "opus" in page.url else ".dyn-card")
+    assert card
+    clip = await card.bounding_box()
+    assert clip
+    logger.debug(f"loaded: {clip}")
+    return page, clip
+
+
+async def get_pc_screenshot(page: Page, dynid: str):
+    url = f"https://t.bilibili.com/{dynid}"
+
+    await page.set_viewport_size({"width": 2560, "height": 1080})
+    with contextlib.suppress(TimeoutError):
+        await page.goto(url, wait_until="networkidle", timeout=20000)
+
+    if "bilibili.com/404" in page.url:
+        logger.warning(f"[Bilibili推送] {dynid} 动态不存在")
+        raise Notfound
+
+    card = await page.query_selector(".card")
+    assert card
+    clip = await card.bounding_box()
+    assert clip
+    bar = await page.query_selector(".bili-dyn-action__icon")
+    assert bar
+    bar_bound = await bar.bounding_box()
+    assert bar_bound
+    clip["height"] = bar_bound["y"] - clip["y"] - 2
+    logger.debug(f"loaded: {clip}")
+    return page, clip
+
+
+class Notfound(Exception):
+    pass
