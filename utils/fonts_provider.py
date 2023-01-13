@@ -3,11 +3,10 @@ import httpx
 from yarl import URL
 from pathlib import Path
 from loguru import logger
-from typing import Literal
 from playwright.async_api import Request, Route
 
 
-font_path = Path(__file__).parent.parent.joinpath("static", "font")
+font_path = Path("data", "font")
 font_mime_map = {
     "collection": "font/collection",
     "otf": "font/otf",
@@ -16,6 +15,7 @@ font_mime_map = {
     "woff": "font/woff",
     "woff2": "font/woff2",
 }
+font_path.mkdir(parents=True, exist_ok=True)
 
 
 async def get_font(font: str):
