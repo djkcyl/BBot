@@ -50,6 +50,8 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
     use_login: bool = False
     mobile_style: bool = True
     concurrency: int = 5
+    dynamic_font: str = "HarmonyOS_Sans_SC_Medium.woff2"
+    dynamic_font_source: str = "local"
 
     # 验证是否可以登录
     @validator("use_login", always=True)

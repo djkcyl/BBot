@@ -19,11 +19,7 @@ from .fonts_provider import fill_font
 
 error_path = Path("data").joinpath("error")
 error_path.mkdir(parents=True, exist_ok=True)
-mobile_style_js = (
-    Path(__file__)
-    .parent.parent.joinpath("static", "mobile_style.js")
-    .read_text(encoding="utf-8")
-)
+mobile_style_js = Path(__file__).parent.parent.joinpath("static", "mobile_style.js")
 
 
 async def get_dynamic_screenshot(dyn: DynamicItem):
@@ -33,7 +29,7 @@ async def get_dynamic_screenshot(dyn: DynamicItem):
     browser_context = app.launch_manager.get_interface(PlaywrightContext).context
     for i in range(3):
         page = await browser_context.new_page()
-        await page.route(re.compile("^https://static.graiax/fonts/(.+)$"), fill_font)
+        await page.route(re.compile("^https://fonts.bbot/(.+)$"), fill_font)
         try:
             page.on("requestfinished", network_request)
             page.on("requestfailed", network_requestfailed)
@@ -44,18 +40,18 @@ async def get_dynamic_screenshot(dyn: DynamicItem):
             return await page.screenshot(clip=clip, full_page=True, type="jpeg", quality=98)
         except Notfound:
             logger.error(f"[Bilibili推送] {dynid} 动态不存在")
+        except AssertionError:
+            logger.exception(f"[BiliBili推送] {dynid} 动态截图失败，正在重试：")
+            await page.screenshot(
+                path=f"{error_path}/{dynid}_{i}_{st}.jpg",
+                full_page=True,
+                type="jpeg",
+                quality=80,
+            )
         except Exception as e:  # noqa
             if "bilibili.com/404" in page.url:
                 logger.error(f"[Bilibili推送] {dynid} 动态不存在")
                 break
-            elif type(e) == AssertionError:
-                logger.exception(f"[BiliBili推送] {dynid} 动态截图失败，正在重试：")
-                await page.screenshot(
-                    path=f"{error_path}/{dynid}_{i}_{st}.jpg",
-                    full_page=True,
-                    type="jpeg",
-                    quality=80,
-                )
             elif "waiting until" in str(e):
                 logger.error(f"[BiliBili推送] {dynid} 动态截图超时，正在重试：")
             else:
@@ -104,13 +100,17 @@ async def get_mobile_screenshot(page: Page, dynid: str):
         logger.warning(f"[Bilibili推送] {dynid} 动态不存在")
         raise Notfound
 
-    await page.add_script_tag(content=mobile_style_js)
-    a = await page.wait_for_function("getMobileStyle()")
-    logger.debug(f"js executed: {a}")
-    await page.wait_for_load_state("networkidle")
-    await page.wait_for_load_state("domcontentloaded")
+    await page.add_script_tag(path=mobile_style_js)
+    await page.wait_for_function("getMobileStyle()")
+
+    await page.evaluate(
+        f"setFont('{BotConfig.Bilibili.dynamic_font}', '{BotConfig.Bilibili.dynamic_font_source}')"
+    )
 
     # 判断字体是否加载完成
+    await page.wait_for_timeout(
+        200 if BotConfig.Bilibili.dynamic_font_source == "remote" else 50
+    )
     need_wait = ["imageComplete", "fontsLoaded"]
     await asyncio.gather(*[page.wait_for_function(f"{i}()") for i in need_wait])
 
