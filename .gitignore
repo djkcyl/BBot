@@ -4,9 +4,10 @@ test.py
 .vscode/
 package
 .idea/
-static/browser/
+**/static/browser/
 data/
 docker_build
 build
 venv
 nuitka/
+dist/

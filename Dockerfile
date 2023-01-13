@@ -13,7 +13,7 @@ RUN --mount=type=tmpfs,target=/var/cache/apt/archives \
     --mount=type=tmpfs,target=/tmp \
     sed -i 's/main/main non-free/g' /etc/apt/sources.list && \
     playwright install --with-deps chromium
-COPY . .
+COPY ./graiax_bbot .
 VOLUME /bbot/data
 EXPOSE 6080
 CMD ["python", "main.py"]

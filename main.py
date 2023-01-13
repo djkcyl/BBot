@@ -1,13 +1,15 @@
 import os
 import sys
 import psutil
+import asyncio
+import contextlib
 
 from pathlib import Path
 from loguru import logger
 from sentry_sdk import init as sentry_sdk_init
 
-from utils.detect_package import is_package
-from core.bot_config import _BotConfig, BotConfig
+from graiax_bbot.utils.detect_package import is_package
+from graiax_bbot.core.bot_config import _BotConfig, BotConfig
 
 sentry_sdk_init(
     dsn="https://e7455ef7813c42e2b854bdd5c26adeb6@o1418272.ingest.sentry.io/6761179",
@@ -43,16 +45,7 @@ def load_config_webui(reason: str = "未知原因", err: dict = {}):
     from fastapi.staticfiles import StaticFiles
     from starlette.responses import FileResponse
 
-    def valueerror_output(err: dict):
-        err_info = []
-        pos_maxlen = 0
-        for err_pos in err:
-            err_msg = err[err_pos]
-            pos_maxlen = max(pos_maxlen, len(err_pos))
-            err_info.append([err_pos, err_msg])
-        logger.critical("以下配置项填写错误: ")
-        for err in err_info:
-            logger.critical(f"{err[0].ljust(pos_maxlen)} => {err[1]}")
+    from graiax_bbot.core.bot_config import valueerror_output
 
     app = FastAPI(docs_url=None, redoc_url=None)
     port = os.getenv("BBOT_WEBUI_PORT", 6080)
@@ -123,4 +116,8 @@ if __name__ == "__main__":
         logger.critical("配置加载失败超过 3 次, 请检查配置文件后重新启动")
         sys.exit(1)
 
-    import bot  # noqa
+    from graiax_bbot.bot import app
+
+    with contextlib.suppress(KeyboardInterrupt, asyncio.exceptions.CancelledError):
+        app.launch_blocking()
+    logger.info("BBot is shut down.")

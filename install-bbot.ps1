@@ -2,7 +2,7 @@ $pythonFullVersion = "3.10.8" # 填写你需要的 Python 版本
 $compatiblePythonVersion = "3.9" # 填写可以兼容的 Python 版本
 $installPathName = "bbot" # 填写安装路径名，可代指 bot 的名字
 $gitRepo = "https://github.com/djkcyl/BBot-Graia.git" # 填写你的 bot 的 git 仓库地址
-$gitBranch = "web" # 填写仓库分支
+$gitBranch = "master" # 填写仓库分支
 $mainFile = "main.py" # 填写你的 bot 的主文件名
 
 # 以下内容请不要修改

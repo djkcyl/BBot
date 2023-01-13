@@ -98,3 +98,14 @@ jobs:
           push: true
           tags: 
             ${{ secrets.DOCKER_USERNAME }}/bbot:dev
+
+  pypi:
+    name: Upload to PyPI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare environment
+        uses: actions/checkout@v2
+      - name: Build and publish to pypi
+        uses: JRubics/poetry-publish@v1.16
+        with:
+          pypi_token: ${{ secrets.PYPI_TOKEN }}

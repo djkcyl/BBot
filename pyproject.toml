@@ -1,9 +1,17 @@
 [tool.poetry]
-name = "bbot-graia"
-version = "1.2.0-b4.hotfix.1"
+name = "graiax-bbot"
+version = "1.2.0"
 description = "一个用于 QQ 群内高效推送哔哩哔哩 UP 动态及直播的机器人"
 authors = ["djkcyl <cyl@cyllive.cn>"]
 license = "AGPL3.0"
+readme = "readme.md"
+homepage = "https://github.com/djkcyl/BBot-Graia"
+repository = "https://github.com/djkcyl/BBot-Graia/tree/master/graiax-bbot"
+documentation = "https://github.com/djkcyl/BBot-Graia/blob/master/readme.md"
+keywords = ["graia", "graiax", "bilibili", "qqbot", "grpc", "playwright", "fastapi", "bot"]
+
+[tool.poetry.scripts]
+bbot = 'graiax_bbot.__main__:main'
 
 [tool.poetry.dependencies]
 python = "^3.9"

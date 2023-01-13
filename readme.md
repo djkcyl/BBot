@@ -69,6 +69,7 @@ Docker 部署请查看 [这里](https://github.com/djkcyl/BBot-Graia/wiki/Docker
 - [x] 可能会增加不需要浏览器的动态截图获取方式
 - [x] 增加 Docker 部署方案
 - [x] 自定义动态页字体
+- [x] 上传至 PyPI 并支持 CLI 方式启动
 - [ ] **增加 Web 端管理界面**
 - [ ] 增加简单的推送数据分析及报告
 - [ ] 丰富管理员指令
