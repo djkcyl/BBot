@@ -1,7 +1,13 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import copy_metadata
 
-datas = [('static/font', 'static/font'), ('static/bot_config.exp.yaml', 'static'), ('website/static', 'website/static'), ('static/mobile_style.js', 'static'), ('pyproject.toml', './')]
+datas = [
+    ('graiax_bbot/static/font', 'graiax_bbot/static/font'), 
+    ('graiax_bbot/static/bot_config.exp.yaml', 'graiax_bbot/static'), 
+    ('graiax_bbot/website/static', 'graiax_bbot/website/static'), 
+    ('graiax_bbot/static/mobile_style.js', 'graiax_bbot/static'), 
+    ('pyproject.toml', './')
+]
 datas += copy_metadata('graia-ariadne')
 datas += copy_metadata('graia-amnesia')
 datas += copy_metadata('graia-saya')

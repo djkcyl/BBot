@@ -1,8 +1,8 @@
 - module-name: __main__
   data-files:
     dirs:
-      - 'static'
-      - 'website\static'
+      - 'graiax_bbot/static'
+      - 'graiax_bbot/website/static'
     patterns:
       - "pyproject.toml"
 
