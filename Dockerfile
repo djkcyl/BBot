@@ -7,13 +7,13 @@ RUN --mount=type=tmpfs,target=/var/cache/apt/archives \
 COPY requirements.txt .
 RUN --mount=type=tmpfs,target=/tmp \
     pip install --no-cache-dir -r requirements.txt
-ENV PLAYWRIGHT_BROWSERS_PATH "static/browser"
+ENV PLAYWRIGHT_BROWSERS_PATH "graiax_bbot/static/browser"
 RUN --mount=type=tmpfs,target=/var/cache/apt/archives \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
     --mount=type=tmpfs,target=/tmp \
     sed -i 's/main/main non-free/g' /etc/apt/sources.list && \
     playwright install --with-deps chromium
-COPY ./graiax_bbot .
+COPY . .
 VOLUME /bbot/data
 EXPOSE 6080
 CMD ["python", "main.py"]
