@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bbot-graia"
-version = "1.2.0-b3"
+version = "1.2.0-b4"
 description = "一个用于 QQ 群内高效推送哔哩哔哩 UP 动态及直播的机器人"
 authors = ["djkcyl <cyl@cyllive.cn>"]
 license = "AGPL3.0"

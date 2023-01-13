@@ -3,7 +3,7 @@ import yaml
 
 from pathlib import Path
 from loguru import logger
-from typing import Optional
+from typing import Optional, Literal
 from pydantic import AnyHttpUrl, BaseModel, Extra, validator
 
 DEFUALT_CONFIG_PATH = Path("data", "bot_config.yaml")
@@ -50,8 +50,8 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
     use_login: bool = False
     mobile_style: bool = True
     concurrency: int = 5
-    dynamic_font: str = "HarmonyOS_Sans_SC_Medium.woff2"
-    dynamic_font_source: str = "local"
+    dynamic_font: Optional[str] = "HarmonyOS_Sans_SC_Medium.woff2"
+    dynamic_font_source: Optional[Literal["local", "remote", "system"]] = "local"
 
     # 验证是否可以登录
     @validator("use_login", always=True)
