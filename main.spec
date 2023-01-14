@@ -2,10 +2,10 @@
 from PyInstaller.utils.hooks import copy_metadata
 
 datas = [
-    ('graiax_bbot/static/font', 'graiax_bbot/static/font'), 
-    ('graiax_bbot/static/bot_config.exp.yaml', 'graiax_bbot/static'), 
-    ('graiax_bbot/website/static', 'graiax_bbot/website/static'), 
-    ('graiax_bbot/static/mobile_style.js', 'graiax_bbot/static'), 
+    ('bbot/static/font', 'bbot/static/font'), 
+    ('bbot/static/bot_config.exp.yaml', 'bbot/static'), 
+    ('bbot/website/static', 'bbot/website/static'), 
+    ('bbot/static/mobile_style.js', 'bbot/static'), 
     ('pyproject.toml', './')
 ]
 datas += copy_metadata('graia-ariadne')

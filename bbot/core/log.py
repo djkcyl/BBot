@@ -24,13 +24,13 @@ LOGPATH.mkdir(exist_ok=True)
 def in_screen():
     with contextlib.suppress(psutil.NoSuchProcess):
         for proc in psutil.Process().parents():
-            if proc.name() in ["screen", "tmux", "node"]:
-                return True
+            if proc.name() in ["screen", "tmux", "node", "python"]:
+                return proc.name() != "node" or "vscode" not in str(proc.cmdline())
     return psutil.Process().pid == 1
 
 
 if in_screen() or is_package:
-    logger.info("检测到当前运行在 docker、screen、tmux 中，或运行为打包（nuitka、pyinstaller）版本，已禁用 richuru")
+    logger.info("检测到当前运行在各类容器中，或运行为打包（nuitka、pyinstaller）版本，已禁用 richuru")
     logger.remove(0)
     logger.add(sys.stderr, level=log_level, backtrace=True, diagnose=True)
 else:

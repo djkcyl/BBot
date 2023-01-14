@@ -70,6 +70,6 @@ saya = it(Saya)
 
 with saya.module_context():
 
-    saya.require("graiax_bbot.function")
+    saya.require("bbot.function")
 
 from . import function  # noqa
