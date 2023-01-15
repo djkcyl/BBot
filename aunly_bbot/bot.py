@@ -70,6 +70,6 @@ saya = it(Saya)
 
 with saya.module_context():
 
-    saya.require("bbot.function")
+    saya.require("aunly_bbot.function")
 
 from . import function  # noqa

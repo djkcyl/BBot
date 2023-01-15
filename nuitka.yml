@@ -1,8 +1,8 @@
 - module-name: __main__
   data-files:
     dirs:
-      - 'bbot/static'
-      - 'bbot/website/static'
+      - 'aunly_bbot/static'
+      - 'aunly_bbot/website/static'
     patterns:
       - "pyproject.toml"
 

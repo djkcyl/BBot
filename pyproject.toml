@@ -11,7 +11,7 @@ documentation = "https://github.com/djkcyl/BBot-Graia/blob/master/readme.md"
 keywords = ["graia", "graiax", "bilibili", "qqbot", "grpc", "playwright", "fastapi", "bot"]
 
 [tool.poetry.scripts]
-bbot = 'bbot.__main__:main'
+bbot = 'aunly_bbot.__main__:main'
 
 [tool.poetry.dependencies]
 python = "^3.9"

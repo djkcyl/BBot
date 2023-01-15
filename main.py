@@ -3,7 +3,7 @@ import psutil
 
 from pathlib import Path
 
-from bbot.utils.detect_package import is_package
+from aunly_bbot.utils.detect_package import is_package
 
 if is_package:
     s = psutil.Process().parent().parent()
@@ -30,6 +30,6 @@ for /f "tokens=*" %%a in ('dir /b /s /a-d bbot*.exe') do (
 
 
 if __name__ == "__main__":
-    from bbot.cli.run import run_bot
+    from aunly_bbot.cli.run import run_bot
 
     run_bot()
