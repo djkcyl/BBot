@@ -6,7 +6,6 @@ from starlette.websockets import WebSocketDisconnect
 from websockets.exceptions import ConnectionClosedOK
 
 from ....core.control import Permission
-
 from .auth import verify_token, UnauthorizedException
 
 

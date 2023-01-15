@@ -2,7 +2,7 @@ from graia.ariadne.app import Ariadne
 from fastapi import APIRouter, Depends, status
 
 from .auth import verify_token, can_manage_groups, can_manage_group
-from ..model import Info, GroupListResponse, MemberListResponse, MemberItem
+from ....model.fastapi import Info, GroupListResponse, MemberListResponse, MemberItem
 
 router = APIRouter(tags=["Users"])
 

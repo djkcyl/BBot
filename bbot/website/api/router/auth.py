@@ -15,8 +15,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from ....core.control import Permission
 from ....core.data import get_sub_by_group
 from ....core.group_config import GroupPermission
-
-from ..model import AuthResponse, Token, KeyResponse, InfoResponse, Info, GroupItem
+from ....model.fastapi import AuthResponse, Token, KeyResponse, InfoResponse, Info, GroupItem
 
 router = APIRouter(tags=["Auth"])
 

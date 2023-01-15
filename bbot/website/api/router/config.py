@@ -1,11 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
+from .auth import verify_token
 from ....core.control import Permission
 from ....core.bot_config import BotConfig
 from ....core.bot_config import _BotConfig
-
-from .auth import verify_token
-from ..model import Info, ConfigResponse
+from ....model.fastapi import Info, ConfigResponse
 
 
 router = APIRouter(tags=["Config"])

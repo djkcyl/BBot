@@ -1,11 +1,10 @@
-import sys
 import json
 import yaml
+import click
 
 from pathlib import Path
-from loguru import logger
 from typing import Optional, Literal
-from pydantic import AnyHttpUrl, BaseModel, Extra, validator
+from pydantic import AnyHttpUrl, BaseModel, Extra, validator, ValidationError
 
 DEFUALT_CONFIG_PATH = Path("data", "bot_config.yaml")
 
@@ -24,25 +23,25 @@ class _Debug(BaseModel, extra=Extra.ignore):
     @validator("groups")
     def specification_groups(cls, groups):
         if type(groups) == int:
-            logger.warning("groups 格式为 int, 已重置为 list[groups]")
+            click.secho("groups 格式为 int, 已重置为 list[groups]", fg="bright_yellow")
             return [groups]
         elif type(groups) == list:
             return groups
         else:
-            logger.warning("debug.groups 为空或格式不为 list, 已重置为 None")
+            click.secho("debug.groups 为空或格式不为 list, 已重置为 None", fg="bright_yellow")
 
     # 验证是否可以开启 debug
     @validator("enable")
     def can_use_login(cls, enable, values):
         if not enable:
             return enable
-        logger.info("已检测到开启Debug模式")
+        click.secho("已检测到开启 Debug 模式", fg="bright_yellow")
         try:
             if values["groups"]:
                 return enable
             raise KeyError
         except KeyError as key_err:
-            raise ValueError("已启用 debug 但未填入合法的群号") from key_err
+            raise ValueError("已启用 Debug 但未填入合法的群号") from key_err
 
 
 class _Bilibili(BaseModel, extra=Extra.ignore):
@@ -59,7 +58,7 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
     def can_use_login(cls, use_login, values):
         if not use_login:
             return use_login
-        logger.info("已检测到开启BiliBili登录模式")
+        click.secho("已检测到开启 BiliBili 登录模式，不推荐使用", fg="bright_yellow", bold=True)
         try:
             if isinstance(values["username"], int) and isinstance(values["password"], str):
                 return use_login
@@ -70,10 +69,10 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
     @validator("concurrency")
     def limit_concurrency(cls, concurrency):
         if concurrency > 50:
-            logger.warning("gRPC 并发数超过 50，已自动调整为 50")
+            click.secho("gRPC 并发数超过 50，已自动调整为 50", fg="bright_yellow")
             return 50
         elif concurrency < 1:
-            logger.warning("gRPC 并发数小于 1，已自动调整为 1")
+            click.secho("gRPC 并发数小于 1，已自动调整为 1", fg="bright_yellow")
             return 1
         else:
             return concurrency
@@ -109,12 +108,12 @@ class _BotConfig(BaseModel, extra=Extra.ignore):
     @validator("admins")
     def verify_admins(cls, admins, values):
         if type(admins) == int:
-            logger.warning("admins 格式为 int, 已重置为 list[admins]")
+            click.secho("admins 格式为 int, 已重置为 list[admins]", fg="bright_yellow")
             admins = [admins]
         elif type(admins) != list or not admins:
             if "master" not in values:
                 raise ValueError("未查询到合法的 master")
-            logger.warning("admins 为空或格式不为 list, 已重置为 list[master]")
+            click.secho("admins 为空或格式不为 list, 已重置为 list[master]", fg="bright_yellow")
             return [values["master"]]
         try:
             if "master" not in values:
@@ -122,22 +121,8 @@ class _BotConfig(BaseModel, extra=Extra.ignore):
             if values["master"] in admins:
                 return admins
         except KeyError:
-            logger.warning("admins 内未包含 master 账号, 已自动添加")
+            click.secho("admins 内未包含 master 账号, 已自动添加", fg="bright_yellow")
             return admins.append(values["master"])
-
-    # 从模板创建配置文件
-    @staticmethod
-    def _create_file(file: Path = DEFUALT_CONFIG_PATH):
-        if not file.parent.exists():
-            logger.warning("配置文件目录不存在，已自动创建")
-            file.parent.mkdir(parents=True, exist_ok=True)
-        file.write_text(
-            Path(__file__)
-            .parent.parent.joinpath("static")
-            .joinpath("bot_config.exp.yaml")
-            .read_text(encoding="utf-8"),
-            encoding="utf-8",
-        )
 
     # 读取配置文件
     @staticmethod
@@ -146,61 +131,37 @@ class _BotConfig(BaseModel, extra=Extra.ignore):
         # 兼容旧配置, 将配置文件中的小写的配置项转为大写
         for old_config in ["mirai", "debug", "bilibili", "event"]:
             if old_config in bot_config:
-                logger.warning(f"检测到旧版配置项, 转化为新版配置项: {old_config} => {old_config.capitalize()}")
+                click.secho(
+                    f"检测到旧版配置项, 转化为新版配置项: {old_config} => {old_config.capitalize()}",
+                    fg="bright_yellow",
+                )
                 bot_config[old_config.capitalize()] = bot_config[old_config]
                 del bot_config[old_config]
         return bot_config
 
     # ValueError解析
     @staticmethod
-    def valueerror_parser(e: ValueError):
+    def valueerror_parser(e: ValidationError):
         return {
             ".".join([str(x) for x in err["loc"]]): err["msg"] for err in json.loads(e.json())
         }
 
     # 从配置文件中加载配置
     @classmethod
-    def load(cls, file: Path = DEFUALT_CONFIG_PATH, allow_create: bool = False):
+    def load(cls, file: Path = DEFUALT_CONFIG_PATH):
         # 如果文件不存在
         if not file.exists():
-            if allow_create:
-                cls._create_file(file)
-            else:
-                raise FileNotFoundError
+            raise FileNotFoundError
         return cls.parse_obj(cls._read_file())
 
     # 将配置保存至文件中
-    def save(self, file: Path = DEFUALT_CONFIG_PATH, allow_create: bool = False):
+    def save(self, file: Path = DEFUALT_CONFIG_PATH):
         class NoAliasDumper(yaml.SafeDumper):
             def ignore_aliases(self, data):
                 return True
 
-        # 如果文件不存在
-        if not file.exists():
-            if allow_create:
-                self._create_file(file)
-            else:
-                raise FileNotFoundError
         # 写入文件
         file.write_text(
             yaml.dump(json.loads(self.json()), Dumper=NoAliasDumper, sort_keys=False),
             encoding="utf-8",
         )
-
-
-def valueerror_output(err: dict):
-    err_info = []
-    pos_maxlen = 0
-    for err_pos, err_msg in err.items():
-        pos_maxlen = max(pos_maxlen, len(err_pos))
-        err_info.append([err_pos, err_msg])
-    logger.critical("以下配置项填写错误: ")
-    for err in err_info:
-        logger.critical(f"{err[0].ljust(pos_maxlen)} => {err[1]}")
-
-
-try:
-    BotConfig: _BotConfig = _BotConfig.load(allow_create=True)
-except ValueError as e:
-    valueerror_output(_BotConfig.valueerror_parser(e))
-    sys.exit(1)

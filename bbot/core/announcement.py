@@ -4,7 +4,7 @@ from loguru import logger
 from importlib import metadata
 
 try:
-    package = metadata.requires("graiax-bbot")
+    package = metadata.requires("bbot")
 except Exception:
     package = None
 
@@ -16,7 +16,7 @@ RAW_TOML = TOML_PATH.read_text(encoding="utf-8") if TOML_PATH.exists() else ""
 PROJECT_VERSION = (
     RAW_TOML.split("version = ")[1].split("\n")[0].strip('"')
     if RAW_TOML
-    else metadata.version("graiax-bbot")
+    else metadata.version("bbot")
 )
 
 ARIADNE_VERSION = (
