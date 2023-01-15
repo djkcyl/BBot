@@ -1,7 +1,5 @@
 import click
 
-from pathlib import Path
-
 
 @click.group()
 def main():
@@ -10,10 +8,6 @@ def main():
 
 @click.command()
 def run():
-    if not Path("data", "bot_config.yaml").exists():
-        click.secho("未找到配置文件，请先使用 bbot config 命令进行配置。", fg="red", bold=True)
-        return
-
     from .run import run_bot
 
     run_bot()
@@ -21,7 +15,6 @@ def run():
 
 @click.command()
 def config():
-
     from .config import click_config
 
     click_config()

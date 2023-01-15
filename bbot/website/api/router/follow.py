@@ -2,11 +2,11 @@ from graia.ariadne.app import Ariadne
 from fastapi import APIRouter, Depends, status
 from graia.ariadne.message.chain import MessageChain
 
-from ....utils.up_operation import subscribe_uid, unsubscribe_uid
-from ....core.data import get_sub_by_group, uid_in_group
-
 from .auth import verify_token, can_manage_group
-from ..model import Info, FollowListResponse, FollowItem, AddFollowResponse
+from ....core.data import get_sub_by_group, uid_in_group
+from ....utils.up_operation import subscribe_uid, unsubscribe_uid
+from ....model.fastapi import Info, FollowListResponse, FollowItem, AddFollowResponse
+
 
 router = APIRouter(tags=["Follow"])
 
