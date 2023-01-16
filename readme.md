@@ -50,7 +50,7 @@ B，也代表 BiliBili，这个 Bot 将专注于哔哩哔哩的推送等服务
 
 ## 使用
 
-### pip 一键安装
+pip 一键安装
 
 ```shell
  > pip install aunly-bbot
