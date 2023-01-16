@@ -50,6 +50,25 @@ B，也代表 BiliBili，这个 Bot 将专注于哔哩哔哩的推送等服务
 
 ## 使用
 
+### pip 一键安装
+
+```shell
+ > pip install aunly-bbot
+ > bbot 
+
+   Usage: bbot [OPTIONS] COMMAND [ARGS]...
+
+   Options:
+   --help  Show this message and exit.
+
+   Commands:
+   config  BBot 配置向导
+   run     运行 BBot
+
+ > bbot run
+```
+
+
 **[BBot 使用文档](https://github.com/djkcyl/BBot-Graia/wiki)**
 
 Docker 部署请查看 [这里](https://github.com/djkcyl/BBot-Graia/wiki/Docker)
