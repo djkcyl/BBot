@@ -34,19 +34,6 @@ async function getMobileStyle() {
     const contentDom = document.querySelector(".opus-module-content");
     contentDom && contentDom.classList.remove("limit");
 
-    // 新版动态需要给 bm-pics-block 的父级元素设置 flex 以及 column
-    const newContainerDom = document.querySelector(".bm-pics-block")?.parentElement;
-    if (newContainerDom) {
-        // 设置为 flex
-        newContainerDom.style.display = "flex";
-        // 设置为竖向排列
-        newContainerDom.style.flexDirection = "column";
-        // flex - 垂直居中
-        newContainerDom.style.justifyContent = "center";
-        // flex - 水平居中
-        newContainerDom.style.alignItems = "center";
-    }
-
     // 设置 mopus 的 paddingTop 为 0
     const mOpusDom = document.querySelector(".m-opus");
     if (mOpusDom) {
@@ -60,42 +47,84 @@ async function getMobileStyle() {
         dynCardDom.style.fontFamily = "unset";
     }
 
-    // 找到图标容器dom
-    const containerDom = document.querySelector(".bm-pics-block__container");
-    if (containerDom) {
-        // 先把默认 padding-left 置为0
-        containerDom.style.paddingLeft = "0";
-        // 先把默认 padding-right 置为0
-        containerDom.style.paddingRight = "0";
-        // 设置 flex 模式下以列形式排列
-        containerDom.style.flexDirection = "column";
-        // 设置 flex 模式下每个容器间隔15px
-        containerDom.style.gap = "15px";
-        // flex - 垂直居中
-        containerDom.style.justifyContent = "center";
-        // flex - 水平居中
-        containerDom.style.alignItems = "center";
-    }
+    // 获取图片容器的所有 dom 数组
+    const imageItemDoms = Array.from(document.querySelectorAll(".bm-pics-block__item"));
 
-    // 获取图片容器的所有 dom
-    const imageItemDoms = document.querySelectorAll(".bm-pics-block__item");
+    // 获取图片长宽比例
+    const getImageRatio = (url) => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.src = url;
+            img.onload = () => {
+                resolve(img.width / img.height);
+            }
+            img.onerror = () => {
+                reject();
+            }
+        })
+    };
+
+    // 图片长宽比例的数组
+    const ratioList = [];
 
     // 异步遍历图片 dom
-    Array.from(imageItemDoms).map(async (item) => {
-        // 获取屏幕比例的 90% 宽度
-        const clientWidth = window.innerWidth * 0.9;
-        // 先把默认 margin 置为 0
-        item.style.margin = "0";
-        // 宽度默认撑满屏幕宽度 90%;
-        item.style.width = `${clientWidth}px`;
+    await Promise.all(imageItemDoms.map(async (item) => {
         // 获取原app中图片的src
         const imgSrc = item.firstChild.src;
         // 判断是否有 @ 符
         const imgSrcAtIndex = imgSrc.indexOf("@");
         // 将所有图片转换为 .webp 格式节省加载速度, 并返回给原来的 image 标签
         item.firstChild.src = imgSrcAtIndex !== -1 ? imgSrc.slice(0, imgSrcAtIndex + 1) + ".webp" : imgSrc;
-        // 设置自动高度
-        item.style.height = "auto";
+        // 获取图片的宽高比
+        ratioList.push(await getImageRatio(item.firstChild.src));
+    })).then(() => {
+        // 获取图片比例数组中接近 1 的数量 isAllOneLength
+        const isAllOneLength = ratioList.filter(item => item >= 0.9 && item <= 1.1).length
+        // 判断图片是否为 9 图: 是则判断 isAllOneLength 是否超过图片比例数组半数, 不是则判断是否为 3 的倍数
+        const isAllOne = ratioList.length === 9 ? isAllOneLength > ratioList.length / 2 : isAllOneLength > 0 && isAllOneLength % 3 === 0 && ratioList.length > 3;
+        // 说明可能为组装的拼图, 如果不是则放大为大图
+        if (!isAllOne) {
+            // 找到图标容器dom
+            const containerDom = document.querySelector(".bm-pics-block__container");
+            if (containerDom) {
+                // 先把默认 padding-left 置为0
+                containerDom.style.paddingLeft = "0";
+                // 先把默认 padding-right 置为0
+                containerDom.style.paddingRight = "0";
+                // 设置 flex 模式下以列形式排列
+                containerDom.style.flexDirection = "column";
+                // 设置 flex 模式下每个容器间隔15px
+                containerDom.style.gap = "15px";
+                // flex - 垂直居中
+                containerDom.style.justifyContent = "center";
+                // flex - 水平居中
+                containerDom.style.alignItems = "center";
+            }
+
+            // 新版动态需要给 bm-pics-block 的父级元素设置 flex 以及 column
+            const newContainerDom = document.querySelector(".bm-pics-block")?.parentElement;
+            if (newContainerDom) {
+                // 设置为 flex
+                newContainerDom.style.display = "flex";
+                // 设置为竖向排列
+                newContainerDom.style.flexDirection = "column";
+                // flex - 垂直居中
+                newContainerDom.style.justifyContent = "center";
+                // flex - 水平居中
+                newContainerDom.style.alignItems = "center";
+            }
+
+            imageItemDoms.forEach(item => {
+                // 获取屏幕比例的 90% 宽度
+                const clientWidth = window.innerWidth * 0.9;
+                // 先把默认 margin 置为 0
+                item.style.margin = "0";
+                // 宽度默认撑满屏幕宽度 90%;
+                item.style.width = `${clientWidth}px`;
+                // 设置自动高度
+                item.style.height = "auto";
+            })
+        }
     })
 }
 
@@ -143,7 +172,8 @@ function setFont(font = "", fontSource = "local") {
         } else {
             const needLoadFont = needLoadFontList.reduce((defaultString, fontObject) => defaultString + fontObject.fontFamily + ",", "");
             appDom.style.fontFamily = needLoadFont + emojiFont + ",sans-serif";
-        };
+        }
+        ;
         appDom.style.overflowWrap = "break-word";
     }
 
