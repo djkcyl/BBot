@@ -1,4 +1,5 @@
 import os
+import sys
 
 from creart import it
 from pathlib import Path
@@ -15,6 +16,7 @@ from .core.log import logger
 from .website import BotService
 from .core.bot_config import BotConfig
 from .utils.fastapi import FastAPIService
+from .utils.verify_mah import verify_mirai
 from .utils.detect_package import is_package
 from .core.announcement import base_telemetry
 
@@ -26,7 +28,12 @@ logger.info("BBot is starting...")
 
 base_telemetry()
 
+
 host = BotConfig.Mirai.mirai_host
+if verify_mirai(host, BotConfig.Mirai.account, BotConfig.Mirai.verify_key):
+    logger.success("Mirai HTTP API 验证成功！")
+else:
+    sys.exit(1)
 app_config = config(
     BotConfig.Mirai.account,
     BotConfig.Mirai.verify_key,
