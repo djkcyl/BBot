@@ -3,9 +3,9 @@ import re
 from loguru import logger
 from typing import Union, Optional
 
-from ..core.data import get_sub_by_group
 
 from .b23_extract import b23_extract
+from ..core.data import get_sub_by_group
 from .bilibili_request import search_user
 
 
@@ -50,7 +50,7 @@ async def uid_extract(text: str, groupid: Optional[Union[int, str]] = None):
         logger.debug(f"[UID Extract] Searching UID in BiliBili: {text_u}")
         resp = await search_user(text_u)
         logger.debug(f"[UID Extract] Search result: {resp}")
-        if resp["numResults"]:
+        if resp and resp["numResults"]:
             for result in resp["result"]:
                 if result["uname"] == text_u:
                     logger.debug(f"[UID Extract] Found User: {result}")
