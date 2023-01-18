@@ -36,7 +36,8 @@ import aunly_bbot.function.event.new_friend
 import aunly_bbot.function.event.prem_change
 import aunly_bbot.function.pusher.init
 import aunly_bbot.function.pusher.dynamic
-import aunly_bbot.function.pusher.live  # noqa
+import aunly_bbot.function.pusher.live
+import aunly_bbot.function.scheduler.version_update  # noqa
 
 # import function.scheduler.refresh_token  # noqa
 
