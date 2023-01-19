@@ -56,7 +56,7 @@ async function getMobileStyle() {
             const img = new Image();
             img.src = url;
             img.onload = () => {
-                resolve(img.width / img.height);
+                resolve(img.height / img.width);
             }
             img.onerror = () => {
                 reject();
@@ -67,6 +67,7 @@ async function getMobileStyle() {
     // 图片长宽比例的数组
     const ratioList = [];
 
+    // TODO: 算法待优化
     // 异步遍历图片 dom
     await Promise.all(imageItemDoms.map(async (item) => {
         // 获取原app中图片的src
@@ -78,9 +79,8 @@ async function getMobileStyle() {
         // 获取图片的宽高比
         ratioList.push(await getImageRatio(item.firstChild.src));
     })).then(() => {
-        // 获取图片比例数组中接近 1 的数量 isAllOneLength
-        const isAllOneLength = ratioList.filter(item => item >= 0.9 && item <= 1.1).length
-        // 判断图片是否为 9 图: 是则判断 isAllOneLength 是否超过图片比例数组半数, 不是则判断是否为 3 的倍数
+        // 判断 ratioList 中超过 1 的个数为 3 的倍数 且 ratioList 的长度大于 3
+        const isAllOneLength = ratioList.filter(item => item >= 0.9 && item <= 1.1).length;
         const isAllOne = ratioList.length === 9 ? isAllOneLength > ratioList.length / 2 : isAllOneLength > 0 && isAllOneLength % 3 === 0 && ratioList.length > 3;
         // 说明可能为组装的拼图, 如果不是则放大为大图
         if (!isAllOne) {
@@ -124,6 +124,17 @@ async function getMobileStyle() {
                 // 设置自动高度
                 item.style.height = "auto";
             })
+        } else {
+            imageItemDoms.forEach(async (item) => {
+                // 获取当前图片标签的 src
+                const imgSrc = item.firstChild.src;
+                // 获取 @ 符的索引
+                const imgSrcAtIndex = imgSrc.indexOf("@");
+                // 获取图片比例
+                const ratio = await getImageRatio(item.firstChild.src);
+                // 如果比例大于 3 即为长图, 则获取 header 图
+                item.firstChild.src = ratio > 3 ? imgSrc.slice(0, imgSrcAtIndex + 1) + "260w_260h_!header.webp" : imgSrc.slice(0, imgSrcAtIndex + 1) + "260w_260h_1e_1c.webp";
+            });
         }
     })
 }
