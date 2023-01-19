@@ -22,6 +22,8 @@ async function getMobileStyle() {
         openAppDialogDoms: [".openapp-dialog"],
         // 评论区 dom
         commentsDoms: [".v-switcher"],
+        // 打开商品 dom
+        openGoodsDoms: [".bm-link-card-goods__one__action", ".dyn-goods__one__action"],
     }
 
     // 遍历对象的值, 并将多数组扁平化, 再遍历进行删除操作
