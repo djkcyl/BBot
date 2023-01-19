@@ -23,3 +23,11 @@ async def get_remote_version():
             resp = await client.get("https://pypi.org/pypi/aunly-bbot/json")
             resp = resp.json()
             return list(resp["releases"].keys())[-1]
+
+
+async def update_version():
+    local_version = get_local_version()
+    remote_version = await get_remote_version()
+
+    if local_version and remote_version and local_version < remote_version:
+        return [local_version, remote_version]
