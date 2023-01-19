@@ -1,5 +1,7 @@
 import sys
+import asyncio
 
+import contextlib
 from loguru import logger
 from graia.saya import Channel
 from graia.ariadne.app import Ariadne
@@ -11,6 +13,7 @@ from graia.saya.builtins.broadcast.schema import ListenerSchema
 
 from ...core.bot_config import BotConfig
 from ...utils.bilibili_request import hc
+from ...utils.update_version import update_version
 
 channel = Channel.current()
 
@@ -20,6 +23,11 @@ async def main(app: Ariadne):
     """
     Graia 成功启动
     """
+    update = await update_version()
+    if update:
+        logger.warning(f"[版本更新] 检测到新版本：{update[0]} > {update[1]}")
+        with contextlib.suppress(Exception):
+            await asyncio.sleep(5)
     try:
         logger.info("正在获取浏览器版本")
         browser_context = app.launch_manager.get_interface(PlaywrightContext)
