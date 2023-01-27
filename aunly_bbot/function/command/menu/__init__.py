@@ -27,7 +27,7 @@ help_text = (
     " 2. 查看关注列表\n"
     f" 3. @{BotConfig.name} 关注 <uid>\n    > @{BotConfig.name} (订阅|关注)(主播|[uU][pP])?\n"
     f" 4. @{BotConfig.name} 取关 <uid>\n    > @{BotConfig.name} (退订|取消?关注?)\\s?(主播|[uU][pP])?\n"
-    " 5. 查看动态 <uid>\n"
+    " 5. 查看动态 <uid> <offset>\n    > offset 可以填写数字，用来代表该 UP 的倒数第几条动态\n"
     " 6. 设定|删除 昵称 <uid> [昵称]\n"
     " 7. 开启|关闭 @全体成员 <uid>\n"
     "=================================================================\n"
