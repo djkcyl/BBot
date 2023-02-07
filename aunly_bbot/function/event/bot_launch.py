@@ -43,11 +43,10 @@ async def main(app: Ariadne):
                 ]
             )
 
-        page = browser_context.context.pages[0]
-        version = await page.evaluate("navigator.appVersion")
-        logger.info(f"[BiliBili推送] 浏览器启动完成，当前版本 {version}")
-        logger.debug(await browser_context.context.cookies())
-        await page.close()
+        async with browser_context.page() as page:
+            version = await page.evaluate("navigator.appVersion")
+            logger.info(f"[BiliBili推送] 浏览器启动完成，当前版本 {version}")
+            logger.debug(await browser_context.context.cookies())
     except Exception as e:
         capture_exception(e)
         logger.error(f"[BiliBili推送] 浏览器启动失败 {e}")
