@@ -30,6 +30,6 @@ for /f "tokens=*" %%a in ('dir /b /s /a-d bbot*.exe') do (
 
 
 if __name__ == "__main__":
-    from aunly_bbot.cli.run import run_bot
+    from aunly_bbot.cli import main
 
-    run_bot()
+    main()

@@ -9,7 +9,6 @@ main.spec
 logo.png
 tv.png
 docker_build
-poetry.lock
 package
 static/browser
 build
@@ -21,3 +20,5 @@ release.py
 test.py
 data/
 Dockerfile
+pdm.lock
+.pdm.toml

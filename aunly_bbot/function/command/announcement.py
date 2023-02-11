@@ -20,7 +20,7 @@ channel = Channel.current()
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight([FullMatch("公告"), "anything" @ WildcardMatch()])],
+        inline_dispatchers=[Twilight([FullMatch("/公告"), "anything" @ WildcardMatch()])],
         decorators=[Permission.require(Permission.MASTER)],
     )
 )

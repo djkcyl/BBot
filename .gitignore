@@ -11,3 +11,4 @@ build
 venv
 nuitka/
 dist/
+.pdm.toml

@@ -5,6 +5,11 @@ from pathlib import Path
 from loguru import logger
 from playwright.async_api import Request, Route
 
+DEFUALT_DYNAMIC_FONT = (
+    "https://cdn.jsdelivr.net"
+    "/gh/irozhi/HarmonyOS-Sans/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Medium.woff2"
+)
+
 
 font_path = Path("data", "font")
 font_mime_map = {
@@ -18,7 +23,7 @@ font_mime_map = {
 font_path.mkdir(parents=True, exist_ok=True)
 
 
-async def get_font(font: str):
+async def get_font(font: str = DEFUALT_DYNAMIC_FONT):
     logger.debug(f"font: {font}")
     url = URL(font)
     if url.is_absolute():

@@ -10,9 +10,9 @@ from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import (
     Twilight,
     FullMatch,
+    RegexMatch,
+    ParamMatch,
     RegexResult,
-    ArgumentMatch,
-    WildcardMatch,
 )
 
 from ...utils.uid_extract import uid_extract
@@ -30,8 +30,8 @@ channel = Channel.current()
             Twilight(
                 [
                     FullMatch("查看动态"),
-                    "test" @ ArgumentMatch("--test", action="store_true", optional=True),
-                    "anything" @ WildcardMatch(),
+                    "up" @ ParamMatch(),
+                    "offset" @ RegexMatch(r"\d+", optional=True),
                 ]
             )
         ],
@@ -42,10 +42,11 @@ async def main(
     app: Ariadne,
     group: Group,
     source: Source,
-    anything: RegexResult,
+    up: RegexResult,
+    offset: RegexResult,
 ):
 
-    if not (uid := await uid_extract(anything.result.display, group.id)):
+    if not (uid := await uid_extract(up.result.display, group.id)):
         return await app.send_group_message(
             group,
             MessageChain("未找到该 UP，请输入正确的 UP 群内昵称、UP 名、UP UID或 UP 首页链接"),
@@ -61,12 +62,19 @@ async def main(
         capture_exception(e)
         return await app.send_group_message(group, MessageChain(f"获取动态失败：{e}"), quote=source)
 
+    offset_num = int(offset.result.display) - 1 if offset.result else 0
+
     if res.list:
         if len(res.list) > 1:
-            if res.list[0].modules[0].module_author.is_top:
-                dyn = res.list[1]
-            else:
-                dyn = res.list[0]
+            try:
+                if res.list[0].modules[0].module_author.is_top:
+                    dyn = res.list[1 + offset_num]
+                else:
+                    dyn = res.list[0 + offset_num]
+            except IndexError:
+                return await app.send_group_message(
+                    group, MessageChain("你输入的数字过大，该 UP 的最后一页动态没有这么多条"), quote=source
+                )
         else:
             dyn = res.list[0]
         shot_image = await get_dynamic_screenshot(dyn)

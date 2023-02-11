@@ -1,6 +1,7 @@
 import asyncio
 import secrets
 
+from loguru import logger
 from typing import Optional
 from datetime import timezone
 from jose import JWTError, jwt
@@ -17,14 +18,13 @@ from ....core.data import get_sub_by_group
 from ....core.group_config import GroupPermission
 from ....model.fastapi import AuthResponse, Token, KeyResponse, InfoResponse, Info, GroupItem
 
-router = APIRouter(tags=["Auth"])
-
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+SECRET_KEY = secrets.token_hex(64)
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_DAY = 7
 
-
+router = APIRouter(tags=["Auth"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/verify_key")
+logger.info(f"已生成 API 密钥: {SECRET_KEY[:8]}{'*' * 20}{SECRET_KEY[-8:]}")
 
 
 class UnauthorizedException(HTTPException):
