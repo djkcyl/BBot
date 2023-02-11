@@ -10,3 +10,5 @@ BOT_Status = {
 }
 
 Bili_Auth = Auth()
+
+cache = {}

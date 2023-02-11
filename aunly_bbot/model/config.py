@@ -103,6 +103,7 @@ class _BotConfig(BaseModel, extra=Extra.ignore):
     admins: Optional[list[int]]
     max_subsubscribe: int = 4
     access_control: bool = True
+    update_check: bool = True
 
     # 验证 admins 列表
     @validator("admins")

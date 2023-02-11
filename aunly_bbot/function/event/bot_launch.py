@@ -1,7 +1,6 @@
 import sys
 import asyncio
 
-import contextlib
 from loguru import logger
 from graia.saya import Channel
 from graia.ariadne.app import Ariadne
@@ -21,15 +20,21 @@ channel = Channel.current()
 @channel.use(ListenerSchema(listening_events=[AccountLaunch]))
 async def main(app: Ariadne):
     """
-    Graia 成功启动
+    Graia 成功启动并链接到 Mirai HTTP API 后执行的函数
     """
-    update = await update_version()
-    if update:
-        logger.warning(f"[版本更新] 检测到新版本：{update[0]} > {update[1]}")
-        with contextlib.suppress(Exception):
-            await asyncio.sleep(5)
+    if BotConfig.update_check:
+        update = await update_version()
+        if update:
+            old_version, new_version = update
+            logger.warning(f"[版本更新] 检测到新版本：{new_version} > {old_version}")
+            await app.send_friend_message(
+                BotConfig.master, MessageChain(f"检测到新版本：{new_version} > {old_version}")
+            )
+        else:
+            logger.success("[版本更新] 当前版本为最新版本")
+
     try:
-        logger.info("正在获取浏览器版本")
+        logger.info("[Playwright] 正在获取浏览器版本")
         browser_context = app.launch_manager.get_interface(PlaywrightContext)
         if not BotConfig.Bilibili.mobile_style:
             await browser_context.context.add_cookies(
@@ -53,8 +58,17 @@ async def main(app: Ariadne):
         sys.exit(1)
 
     logger.info("[BiliBili推送] 正在获取首页 Cookie")
-    await hc.get("https://bilibili.com/", follow_redirects=True)
-    logger.debug(hc.cookies)
+
+    for _ in range(3):
+        try:
+            await hc.get("https://bilibili.com/", follow_redirects=True)
+            break
+        except Exception as e:
+            logger.error(f"[BiliBili推送] 获取首页 Cookie 失败 {e}，正在重试")
+            await asyncio.sleep(2)
+    else:
+        logger.error("[BiliBili推送] 获取首页 Cookie 失败，已达最大重试次数")
+        sys.exit(1)
 
     logger.info("Graia 成功启动")
     group_list = await app.get_group_list()

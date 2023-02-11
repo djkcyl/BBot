@@ -19,8 +19,9 @@ async def main(app: Ariadne):
     update = await update_version()
 
     if update:
-        logger.warning(f"[版本更新] 检测到新版本：{update[0]} > {update[1]}")
+        old_version, new_version = update
+        logger.warning(f"[版本更新] 检测到新版本：{new_version} > {old_version}")
         await app.send_friend_message(
             BotConfig.master,
-            MessageChain(f"检测到 BBot 版本更新：{update[0]} > {update[1]}，请及时更新以避免出现问题。"),
+            MessageChain(f"检测到 BBot 版本更新：{new_version} > {old_version}，建议及时更新以避免出现问题并获取最新功能。"),
         )

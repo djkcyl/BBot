@@ -24,7 +24,7 @@ Event:
   push: true         # 是否向管理员发送推送的事件提醒。
   subscribe: true    # 是否向管理员发送订阅的事件提醒。
 Webui:
-  webui_host: "0.0.0.0"
+  webui_host: "127.0.0.1"
   webui_port: 6080
   webui_enable: true
 log_level: INFO      # 控制台输出的日志等级
@@ -34,6 +34,7 @@ master: 123456789    # **需要** 填入 bot 主人的 qq 号
 admins:              # 可以填入 bot 管理员的 qq 号, list 里填 int
   - 123456789
 max_subsubscribe: 4  # 非 vip 群聊最大可订阅数量
+update_check: true   # 是否检查更新
 
 # 警告: 在 bot 第一次成功运行后配置文件将会被规范化, 此文件中的注释均会被清除, 
 # 并且配置项顺序可能会出现变动, 若需要查看配置项的详细信息可参考配置文档

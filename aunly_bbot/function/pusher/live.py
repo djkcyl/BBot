@@ -29,7 +29,6 @@ channel = Channel.current()
 
 @channel.use(SchedulerSchema(every_custom_seconds(3)))
 async def main(app: Ariadne):
-
     if not BOT_Status["init"] or BOT_Status["init"] and len(get_all_uid()) == 0:
         await asyncio.sleep(5)
         return
@@ -83,9 +82,14 @@ async def main(app: Ariadne):
                     area_parent = live_data["area_v2_parent_name"]
                     area = live_data["area_v2_name"]
                     room_area = f"{area_parent} / {area}"
-                    cover_img = await app.upload_image(
-                        await Image(url=live_data["cover_from_user"]).get_bytes(),
-                        UploadMethod.Group,
+                    cover_img_url = live_data.get("cover_from_user", live_data.get("keyframe"))
+                    cover_img = (
+                        await app.upload_image(
+                            await Image(url=cover_img_url).get_bytes(),
+                            UploadMethod.Group,
+                        )
+                        if cover_img_url
+                        else None
                     )
                     set_name(up_id, up_name)
                     logger.info(f"[BiliBili推送] {up_name} 开播了 - {room_area} - {title}")
@@ -107,7 +111,7 @@ async def main(app: Ariadne):
                             msg = [
                                 f"{nick}在 {room_area} 区开播啦 ！\n标题：{title}\n",
                                 cover_img,
-                                "\n",
+                                "\n" if cover_img else "",
                                 await get_b23_url(f"https://live.bilibili.com/{room_id}"),
                             ]
 

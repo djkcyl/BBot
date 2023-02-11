@@ -16,7 +16,7 @@
 ![QQ](https://img.shields.io/badge/Tencent_QQ-2948531755-ff69b4)
 
 ![Python Version](https://img.shields.io/badge/python-3.9-blue)
-![Poetry Using](https://img.shields.io/badge/poetry-using-blue)
+[![pdm-managed](https://img.shields.io/badge/pdm-managed-blueviolet)](https://pdm.fming.dev)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 ![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/djkcyl/bbot)
 
@@ -89,6 +89,7 @@ Docker 部署请查看 [这里](https://github.com/djkcyl/BBot-Graia/wiki/Docker
 - [x] 增加 Docker 部署方案
 - [x] 自定义动态页字体
 - [x] 上传至 PyPI 并支持 CLI 方式启动
+- [x] 迁移至 PDM
 - [ ] **增加 Web 端管理界面**
 - [ ] 增加简单的推送数据分析及报告
 - [ ] 丰富管理员指令
