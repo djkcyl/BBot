@@ -3,6 +3,7 @@ import contextlib
 
 from pathlib import Path
 from importlib import metadata
+from packaging.version import parse
 
 
 def get_local_version():
@@ -30,4 +31,4 @@ async def update_version():
     remote_version = await get_remote_version()
 
     if local_version and remote_version and local_version < remote_version:
-        return [local_version, remote_version]
+        return parse(local_version), parse(remote_version)

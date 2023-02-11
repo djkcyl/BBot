@@ -20,7 +20,7 @@ async def status():
     return {"status": "ok"}
 
 
-class BotService(Launchable):
+class BotWebService(Launchable):
     id: str = "webapi/bbot"
 
     @property
@@ -41,11 +41,11 @@ class BotService(Launchable):
                 allow_methods=["*"],
                 allow_headers=["*"],
             )
-            app.get("/")(root)
+            app.include_router(router, prefix="/api")
             app.get("/api/status")(status)
+            app.get("/")(root)
             app.mount(
                 "/",
                 StaticFiles(directory=STATIC_PATH.joinpath("html")),
                 name="static",
             )
-            app.include_router(router, prefix="/api")

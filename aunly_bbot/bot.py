@@ -1,5 +1,6 @@
 import os
 import sys
+import asyncio
 
 from creart import it
 from pathlib import Path
@@ -12,10 +13,12 @@ from graia.amnesia.builtins.uvicorn import UvicornService
 from graia.amnesia.builtins.memcache import MemcacheService
 from graia.ariadne.entry import config, HttpClientConfig, WebsocketClientConfig
 
+from .core import cache
 from .core.log import logger
-from .website import BotService
+from .website import BotWebService
 from .core.bot_config import BotConfig
 from .utils.fastapi import FastAPIService
+from .utils.fonts_provider import get_font
 from .utils.verify_mah import verify_mirai
 from .utils.detect_package import is_package
 from .core.announcement import base_telemetry
@@ -28,6 +31,9 @@ logger.info("BBot is starting...")
 
 base_telemetry()
 
+logger.info("正在下载字体...")
+asyncio.run(get_font())
+logger.success("字体下载完成！")
 
 host = BotConfig.Mirai.mirai_host
 if verify_mirai(host, BotConfig.Mirai.account, BotConfig.Mirai.verify_key):
@@ -46,6 +52,7 @@ app.config(install_log=True)
 
 app.launch_manager.add_service(
     PlaywrightService(
+        browser_type="firefox",
         user_data_dir=Path("data").joinpath("browser"),
         device_scale_factor=2 if BotConfig.Bilibili.mobile_style else 1.25,
         user_agent=(
@@ -69,14 +76,17 @@ app.launch_manager.add_service(
 app.launch_manager.add_service(
     UvicornService(host=BotConfig.Webui.webui_host, port=int(BotConfig.Webui.webui_port))
 )
-app.launch_manager.add_service(BotService())
+app.launch_manager.add_service(BotWebService())
 
 app.create(GraiaScheduler)
 saya = it(Saya)
 
 
 with saya.module_context():
-
-    saya.require("aunly_bbot.function")
+    if cache.get("test"):
+        logger.info("正在进入测试模式...")
+        saya.require("aunly_bbot.test")
+    else:
+        saya.require("aunly_bbot.function")
 
 from . import function  # noqa

@@ -44,6 +44,7 @@ class CliConfig:
         self.master()
         self.admins()
         self.max_subscriptions()
+        self.update_check()
 
         if data.get("session", None):
             httpx.post(
@@ -331,6 +332,15 @@ class CliConfig:
             annotation="使用键盘的 ↑ 和 ↓ 来选择, 按回车确认",
         ).prompt()
         self.config["access_control"] = access_control.name == "是（开启）"
+
+    def update_check(self):
+        update_check = ListPrompt(
+            "是否开启更新检查？",
+            [Choice("是（开启）"), Choice("否（关闭）")],
+            allow_filter=False,
+            annotation="使用键盘的 ↑ 和 ↓ 来选择, 按回车确认",
+        ).prompt()
+        self.config["update_check"] = update_check.name == "是（开启）"
 
 
 def click_config(ignore_exist=False):

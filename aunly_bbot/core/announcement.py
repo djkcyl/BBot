@@ -1,4 +1,6 @@
+import re
 import contextlib
+
 from pathlib import Path
 from loguru import logger
 from importlib import metadata
@@ -14,13 +16,13 @@ TOML_PATH = Path(__file__).parent.parent.parent.joinpath("pyproject.toml")
 RAW_TOML = TOML_PATH.read_text(encoding="utf-8") if TOML_PATH.exists() else ""
 
 PROJECT_VERSION = (
-    RAW_TOML.split("version = ")[1].split("\n")[0].strip('"')
+    re.search(r'version = "([^"]+)"', RAW_TOML)[1]  # type: ignore
     if RAW_TOML
     else metadata.version("aunly_bbot")
 )
-
 ARIADNE_VERSION = (
-    (RAW_TOML.split("version = ")[2].split(", extras")[0].split("\n")[0].strip('"}{^'))
+    # (RAW_TOML.split("graia-ariadne[standard]")[1].split("=")[1].split('"')[0])
+    re.search(r'graia-ariadne.+=(.+)"', RAW_TOML)[1]  # type: ignore
     if RAW_TOML
     else metadata.version("graia-ariadne")
 )
@@ -43,19 +45,11 @@ BBOT_ASCII_LOGO = rf"""
 
 
 def get_monitored_libs():
-    monitored_libs = {}
-    libs = list(
-        filter(
-            None,
-            RAW_TOML.split("[tool.poetry.dependencies]")[1]
-            .split("[tool.poetry.group.dev.dependencies]")[0]
-            .split("\n"),
-        )
+    libs = re.findall(
+        r'"([\w\d-]+)(\[.*\])?<.+=(.+)"',
+        re.findall(r"dependencies = \[\n(.*)\n\]", RAW_TOML, re.S)[0],
     )
-    for lib in libs:
-        lib_name, lib_version = lib.split("=", maxsplit=1)
-        monitored_libs[lib_name.strip()] = lib_version.strip()
-    return monitored_libs
+    return {lib[0].lower(): lib[2] for lib in libs}
 
 
 def get_dist_map() -> dict[str, str]:
