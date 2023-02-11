@@ -43,7 +43,7 @@ elif p.replace_playwright_path:
     playwright_package_path = pkg_resources.resource_filename("playwright", "driver")
     path = list(
         pathlib.Path(playwright_package_path, "package", ".local-browsers").glob(
-            "chromium-*/chrome-*"
+            "firefox-*/firefox*"
         )
     )[0]
     chrome_relative_path = path.relative_to(pathlib.Path(playwright_package_path).parent)
