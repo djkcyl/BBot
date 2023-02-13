@@ -1,3 +1,4 @@
+import time
 from typing import Optional, Union
 from loguru import logger
 from datetime import datetime, timedelta
@@ -12,7 +13,7 @@ from peewee import (
 )
 
 
-data_version = 3
+data_version = 4
 db = SqliteDatabase("data/data.db")
 
 
@@ -73,6 +74,7 @@ class SubList(BaseModel):
     live = BooleanField(default=True)
     live_tips = CharField(null=True)
     dynamic = BooleanField(default=True)
+    cover_img = CharField(null=True)
 
     class Meta:
         table_name = "sub_list"
@@ -116,8 +118,13 @@ elif DataVersion.get().version != data_version:
             # 在 SubList 表中添加 live_tips 字段，允许为空
             db.execute_sql("ALTER TABLE sub_list ADD COLUMN live_tips VARCHAR(255) NULL")
             DataVersion.update(version=3).execute()
+        elif DataVersion.get().version == 3:
+            logger.info("当前数据版本为 3，正在更新至 4")
+            # 在 SubList 表中添加 cover_img 字段，允许为空
+            db.execute_sql("ALTER TABLE sub_list ADD COLUMN cover_img VARCHAR(255) NULL")
 
     logger.success("数据库更新完成")
+    time.sleep(2)
 
 
 def insert_dynamic_push(
@@ -269,3 +276,9 @@ def is_dyn_pushed_in_group(dyn_id: Union[str, int], group: Union[str, int]) -> b
         .where(GroupPush.dyn_id == str(dyn_id), GroupPush.group == str(group))
         .exists()
     )
+
+
+# 根据 uid 修改封面
+def update_cover_by_id(uid: Union[str, int], cover: Optional[str]):
+    SubList.update(cover=cover).where(SubList.uid == str(uid)).execute()
+    return cover or SubList.get(SubList.uid == str(uid)).cover
