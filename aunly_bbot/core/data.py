@@ -122,6 +122,7 @@ elif DataVersion.get().version != data_version:
             logger.info("当前数据版本为 3，正在更新至 4")
             # 在 SubList 表中添加 cover_img 字段，允许为空
             db.execute_sql("ALTER TABLE sub_list ADD COLUMN cover_img VARCHAR(255) NULL")
+            DataVersion.update(version=4).execute()
 
     logger.success("数据库更新完成")
     time.sleep(2)
