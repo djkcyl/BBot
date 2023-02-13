@@ -113,8 +113,9 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install pdm
+          pip install pdm twine
       
       - name: Build and Publish
         run: |
-          pdm publish --username __token__ --password ${{ secrets.PYPI_TOKEN }}
+          pdm build
+          twine upload dist/* --username __token__ --password ${{ secrets.PYPI_TOKEN }}
