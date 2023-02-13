@@ -38,7 +38,7 @@ jobs:
       - name: Install Playwright Browsers
         env:
           PLAYWRIGHT_BROWSERS_PATH: "0"
-        run: playwright install chromium
+        run: playwright install firefox
 
       - name: Install Pyinstaller
         run: pip install --upgrade pyinstaller
