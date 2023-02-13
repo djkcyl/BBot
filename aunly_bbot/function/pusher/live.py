@@ -22,7 +22,7 @@ from ...core.bot_config import BotConfig
 from ...utils.time_tools import calc_time_total
 from ...utils.bilibili_request import get_b23_url
 from ...utils.up_operation import delete_group, delete_uid, set_name
-from ...core.data import insert_live_push, get_all_uid, get_sub_by_uid
+from ...core.data import insert_live_push, get_all_uid, get_sub_by_uid, update_cover_by_id
 
 channel = Channel.current()
 
@@ -82,7 +82,9 @@ async def main(app: Ariadne):
                     area_parent = live_data["area_v2_parent_name"]
                     area = live_data["area_v2_name"]
                     room_area = f"{area_parent} / {area}"
-                    cover_img_url = live_data.get("cover_from_user", live_data.get("keyframe"))
+                    cover_img_url = update_cover_by_id(
+                        up_id, live_data.get("cover_from_user", live_data.get("keyframe"))
+                    )
                     cover_img = (
                         await app.upload_image(
                             await Image(url=cover_img_url).get_bytes(),
