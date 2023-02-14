@@ -281,5 +281,5 @@ def is_dyn_pushed_in_group(dyn_id: Union[str, int], group: Union[str, int]) -> b
 
 # 根据 uid 修改封面
 def update_cover_by_id(uid: Union[str, int], cover: Optional[str]):
-    SubList.update(cover=cover).where(SubList.uid == str(uid)).execute()
-    return cover or SubList.get(SubList.uid == str(uid)).cover
+    SubList.update(cover_img=cover).where(SubList.uid == str(uid)).execute()
+    return cover or SubList.get(SubList.uid == str(uid)).cover_img
