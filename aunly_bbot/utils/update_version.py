@@ -31,5 +31,5 @@ async def update_version():
     local_version = get_local_version()
     remote_version = await get_remote_version()
 
-    if local_version and remote_version and local_version < remote_version[-1]:
+    if local_version and remote_version and parse(local_version) < parse(remote_version[-1]):
         return parse(local_version), parse(remote_version[-1])
