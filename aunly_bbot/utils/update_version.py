@@ -23,12 +23,13 @@ async def get_remote_version():
         async with httpx.AsyncClient() as client:
             resp = await client.get("https://pypi.org/pypi/aunly-bbot/json")
             resp = resp.json()
-            return list(resp["releases"].keys())[-1]
+            # 按照时间排序，取最新的版本
+            return sorted(resp["releases"].keys(), key=parse)
 
 
 async def update_version():
     local_version = get_local_version()
     remote_version = await get_remote_version()
 
-    if local_version and remote_version and local_version < remote_version:
-        return parse(local_version), parse(remote_version)
+    if local_version and remote_version and local_version < remote_version[-1]:
+        return parse(local_version), parse(remote_version[-1])

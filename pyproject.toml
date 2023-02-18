@@ -1,6 +1,6 @@
 [project]
 name = "aunly-bbot"
-version = "1.2.3-post2"
+version = "1.2.3-post3"
 description = "一个用于 QQ 群内高效推送哔哩哔哩 UP 动态及直播的机器人"
 readme = "readme.md"
 keywords = ["graia", "graiax", "bilibili", "qqbot", "grpc", "playwright", "fastapi", "bot"]
