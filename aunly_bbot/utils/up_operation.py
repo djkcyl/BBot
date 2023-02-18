@@ -32,7 +32,7 @@ async def subscribe_uid(uid: Union[str, int], groupid: Union[str, int]):
     while BOT_Status["dynamic_updating"] and BotConfig.Bilibili.use_login:
         await asyncio.sleep(0.1)
 
-    if not uid:
+    if not int(uid):
         BOT_Status["init"] = True
         return "Bot 状态异常，订阅失败，请稍后再试"
     r = await grpc_get_user_dynamics(int(uid))
