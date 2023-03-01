@@ -17,10 +17,10 @@ def main():
     pass
 
 
-@click.command(help="运行 BBot")
+@click.command(name="run", help="运行 BBot")
 @click.option("-t", "--test", is_flag=True, help="测试模式")
 @click.help_option("-h", "--help", help="显示帮助信息")
-def run(test: bool):
+def run_bot(test: bool):
     if test:
         from ..core import cache
 
@@ -31,6 +31,15 @@ def run(test: bool):
     run_bot()
 
 
+@click.command(name="api", help="运行 BBot Playwright 截图 API 服务")
+@click.help_option("-h", "--help", help="显示帮助信息")
+def run_api():
+    import uvicorn
+    from .api import app
+
+    uvicorn.run(app, host="0.0.0.0", port=9000)
+
+
 @click.command(help="BBot 配置向导")
 def config():
     from .config import click_config
@@ -38,5 +47,6 @@ def config():
     click_config()
 
 
-main.add_command(run)
+main.add_command(run_bot)
+main.add_command(run_api)
 main.add_command(config)
