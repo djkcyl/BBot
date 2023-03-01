@@ -8,8 +8,8 @@ from loguru import logger
 from graia.ariadne import Ariadne
 from sentry_sdk import capture_exception
 from playwright._impl._api_types import TimeoutError
-from playwright.async_api._generated import Request, Page
 from graiax.playwright.interface import PlaywrightContext
+from playwright.async_api._generated import Request, Page, BrowserContext
 from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2 import DynamicItem
 
 from ..core.bot_config import BotConfig
@@ -24,14 +24,20 @@ mobile_style_js = Path(__file__).parent.parent.joinpath("static", "mobile_style.
 
 async def get_dynamic_screenshot(dyn: DynamicItem):
     dynid = dyn.extend.dyn_id_str
-    st = int(time.time())
     app = Ariadne.current()
     browser_context = app.launch_manager.get_interface(PlaywrightContext).context
+    return await screenshot(dynid, browser_context)
+
+
+async def screenshot(dynid: str, browser_context: BrowserContext, log=True):
+    logger.info(f"正在截图动态：{dynid}")
+    st = int(time.time())
     for i in range(3):
         page = await browser_context.new_page()
         await page.route(re.compile("^https://fonts.bbot/(.+)$"), fill_font)
         try:
-            page.on("requestfinished", network_request)
+            if log:
+                page.on("requestfinished", network_request)
             page.on("requestfailed", network_requestfailed)
             if BotConfig.Bilibili.mobile_style:
                 page, clip = await get_mobile_screenshot(page, dynid)
