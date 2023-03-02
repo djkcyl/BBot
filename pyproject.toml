@@ -1,6 +1,6 @@
 [project]
 name = "aunly-bbot"
-version = "1.2.4-beta1"
+version = "1.2.4-beta2"
 description = "一个用于 QQ 群内高效推送哔哩哔哩 UP 动态及直播的机器人"
 readme = "readme.md"
 keywords = ["graia", "graiax", "bilibili", "qqbot", "grpc", "playwright", "fastapi", "bot"]
@@ -10,7 +10,7 @@ authors = [
 ]
 requires-python = ">=3.9,<4.0"
 dependencies = [
-    "graia-ariadne[standard]<1.0.0,>=0.11.0",
+    "graia-ariadne[standard]<1.0.0,>=0.11.1",
     "peewee<4.0.0,>=1.31.1",
     "pyyaml<7.0,>=6.0",
     "bilireq<1.0.0,>=0.2.3",
@@ -27,6 +27,7 @@ dependencies = [
     "qrcode<8.0.0,>=7.3.1",
     "pillow<10.0.0,>=9.4.0",
     "noneprompt<1.0.0,>=0.1.7",
+    "playwright==1.29",
 ]
 
 [tool.pdm.build]
