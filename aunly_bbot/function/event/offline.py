@@ -10,7 +10,7 @@ channel = Channel.current()
 offline = False
 
 
-@channel.use(SchedulerSchema(every_custom_seconds(0)))
+@channel.use(SchedulerSchema(every_custom_seconds(0.01)))
 async def mirai_disconnect(app: Ariadne):
     global offline
     if BOT_Status["started"]:
