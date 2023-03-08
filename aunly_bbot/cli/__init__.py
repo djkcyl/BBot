@@ -40,6 +40,16 @@ def run_api():
     uvicorn.run(app, host="0.0.0.0", port=9000)
 
 
+@click.command(name="install-deps", help="安装 Playwright 所需依赖")
+@click.help_option("-h", "--help", help="显示帮助信息")
+def install_deps():
+    import sys
+    from playwright.__main__ import main as pw_main
+
+    sys.argv.append("firefox")
+    pw_main()
+
+
 @click.command(help="BBot 配置向导")
 def config():
     from .config import click_config
@@ -50,3 +60,4 @@ def config():
 main.add_command(run_bot)
 main.add_command(run_api)
 main.add_command(config)
+main.add_command(install_deps)

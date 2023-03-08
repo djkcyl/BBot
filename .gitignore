@@ -12,3 +12,4 @@ venv
 nuitka/
 dist/
 .pdm.toml
+aunly_bbot/static/test.js
