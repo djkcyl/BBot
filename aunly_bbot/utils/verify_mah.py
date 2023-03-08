@@ -12,12 +12,12 @@ def verify_mirai(host: str, account: int, verify_key: str):
     except Exception:
         return click.secho("Mirai HTTP API 地址不合法", fg="bright_red", bold=True)
 
-    if httpx.get(f"{host}/about").json()["data"]["version"] < "2.6.1":
-        return click.secho(
-            "Mirai HTTP API 版本低于 2.6.1，可能会导致部分功能无法使用！请升级至最新版", fg="bright_red", bold=True
-        )
-
     try:
+        if httpx.get(f"{host}/about").json()["data"]["version"] < "2.6.1":
+            return click.secho(
+                "Mirai HTTP API 版本低于 2.6.1，可能会导致部分功能无法使用！请升级至最新版", fg="bright_red", bold=True
+            )
+
         verify = httpx.post(f"{host}/verify", json={"verifyKey": verify_key}).json()
         if verify["code"] != 0:
             return click.secho("Mirai HTTP API 的 verifyKey 错误！", fg="bright_red", bold=True)
@@ -29,8 +29,8 @@ def verify_mirai(host: str, account: int, verify_key: str):
             return click.secho(
                 f"Mirai HTTP API 验证错误：{bind['msg']}！", fg="bright_red", bold=True
             )
-    except httpx.HTTPError:
-        return click.secho("无法连接到 Mirai HTTP API，请检查地址是否正确！", fg="bright_red", bold=True)
+    except httpx.HTTPError as e:
+        return click.secho(f"无法连接到 Mirai HTTP API，请检查地址是否正确！\n{e}", fg="bright_red", bold=True)
     except JSONDecodeError:
         return click.secho("输入的地址不为 Mirai HTTP API 的地址！", fg="bright_red", bold=True)
 

@@ -768,7 +768,7 @@ summary = "Backport of pathlib-compatible object wrapper for zip files"
 
 [metadata]
 lock_version = "4.1"
-content_hash = "sha256:96cf2c59aecc5a59210ea7da070792446cae7d420aa2380252769224daecea6c"
+content_hash = "sha256:e9b9626cce78ae0d8c625bf538edce00d09fdb65ce3dd4487786775b38216a2a"
 
 [metadata.files]
 "aiohttp 3.8.4" = [
