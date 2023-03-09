@@ -34,7 +34,7 @@ async def init_playwright():
     pw = await async_playwright().start()
     ff = await pw.firefox.launch_persistent_context(
         Path("data").joinpath("browser"),
-        device_scale_factor=2,
+        device_scale_factor=1.5,
         user_agent=(
             "Mozilla/5.0 (Linux; Android 10; RMX1911) AppleWebKit/537.36 "
             "(KHTML, like Gecko) Chrome/100.0.4896.127 Mobile Safari/537.36"
