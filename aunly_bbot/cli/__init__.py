@@ -19,12 +19,12 @@ def main():
 
 @click.command(name="run", help="运行 BBot")
 @click.option("-t", "--test", is_flag=True, help="测试模式")
+@click.option("-s", "--skip-verfiy", is_flag=True, help="跳过 MAH 可用性检查")
 @click.help_option("-h", "--help", help="显示帮助信息")
-def run_bot(test: bool):
-    if test:
-        from ..core import cache
-
-        cache["test"] = True
+def run_bot(test: bool, skip_verfiy: bool):
+    from ..core import cache
+    cache["test"] = test
+    cache["skip_verfiy"] = skip_verfiy
 
     from .run import run_bot
 

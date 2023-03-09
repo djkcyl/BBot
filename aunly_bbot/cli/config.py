@@ -14,6 +14,7 @@ from noneprompt import (
     CheckboxPrompt,
 )
 
+from ..core import cache
 from ..model.config import _BotConfig
 from ..core.announcement import BBOT_ASCII_LOGO
 
@@ -31,6 +32,7 @@ class CliConfig:
     __session: str = ""
 
     def __init__(self) -> None:
+        self.skip_verify = cache.get("skip_verify", False)
         self.mirai_mirai_host()
         self.mirai_verify_key()
         self.debug()
@@ -83,6 +85,9 @@ class CliConfig:
             mirai_host = InputPrompt(
                 "请输入 Mirai HTTP API 的地址: ", "http://localhost:8080"
             ).prompt()
+            if self.skip_verify:
+                self.config["Mirai"]["mirai_host"] = mirai_host
+                return
             try:
                 if not URL(mirai_host).is_absolute():
                     raise ValueError("输入的地址不合法！")
@@ -93,7 +98,7 @@ class CliConfig:
             try:
                 if httpx.get(f"{mirai_host}/about").json()["data"]["version"] < "2.6.1":
                     click.secho(
-                        "Mirai HTTP API 版本低于 2.6.1，可能会导致部分功能无法使用！请升级至最新版",
+                        "Mirai HTTP API 版本低于 2.6.1，可能会导致部分功能无法使用！请注意及时升级至最新版",
                         fg="bright_red",
                         bold=True,
                     )
@@ -108,6 +113,9 @@ class CliConfig:
             mirai_key: str = InputPrompt(
                 "请输入 Mirai HTTP API 的 verifyKey: ", is_password=True
             ).prompt()
+            if self.skip_verify:
+                self.config["Mirai"]["verify_key"] = mirai_key
+                return
             try:
                 # check verifyKey
                 verify = httpx.post(
@@ -185,6 +193,9 @@ class CliConfig:
                 click.secho("该群已在调试群列表中，请重新输入！", fg="bright_red", bold=True)
                 continue
             debug_group = int(debug_group)
+            if self.skip_verify:
+                self.config["Debug"]["groups"].append(debug_group)
+                return
             group_list = httpx.get(
                 f"{self.config['Mirai']['mirai_host']}/groupList",
                 params={"sessionKey": self.__session},
@@ -267,7 +278,7 @@ class CliConfig:
                 click.secho("输入的 QQ 号不合法！", fg="bright_red", bold=True)
                 continue
 
-            if self.verify_friend(master):
+            if self.skip_verify or self.verify_friend(master):
                 self.config["master"] = int(master)
                 return
             else:
@@ -285,7 +296,7 @@ class CliConfig:
             if int(admin) in self.config["admins"]:
                 click.secho("该 QQ 号已经在管理员列表中了！", fg="bright_red", bold=True)
                 continue
-            if not self.verify_friend(admin):
+            if not self.skip_verify and not self.verify_friend(admin):
                 click.secho("该 QQ 号不是 Bot 的好友！", fg="bright_red", bold=True)
                 continue
 
