@@ -12,7 +12,7 @@ RUN --mount=type=tmpfs,target=/var/cache/apt/archives \
     --mount=type=tmpfs,target=/var/lib/apt/lists \
     --mount=type=tmpfs,target=/tmp \
     sed -i 's/main/main non-free/g' /etc/apt/sources.list && \
-    playwright install --with-deps chromium
+    playwright install --with-deps firefox
 COPY . .
 VOLUME /bbot/data
 EXPOSE 6080
