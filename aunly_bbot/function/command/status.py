@@ -29,7 +29,7 @@ async def main(app: Ariadne, group: Group):
         MessageChain(
             Image(
                 data_bytes=await text2image(
-                    json.dumps(BOT_Status, indent=2, ensure_ascii=False)
+                    json.dumps(BOT_Status.to_dict(), indent=2, ensure_ascii=False)
                 )
             )
         ),

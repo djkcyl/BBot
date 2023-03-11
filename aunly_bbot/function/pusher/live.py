@@ -17,7 +17,7 @@ from graia.scheduler.saya.schema import SchedulerSchema
 from graia.scheduler.timers import every_custom_seconds
 from graia.ariadne.exception import UnknownTarget, AccountMuted, RemoteException
 
-from ...core import BOT_Status
+from ...core import BOT_Status, Status
 from ...core.bot_config import BotConfig
 from ...utils.time_tools import calc_time_total
 from ...utils.bilibili_request import get_b23_url
@@ -29,53 +29,59 @@ channel = Channel.current()
 
 @channel.use(SchedulerSchema(every_custom_seconds(3)))
 async def main(app: Ariadne):
-    if not BOT_Status["init"] or BOT_Status["init"] and len(get_all_uid()) == 0:
+    if (
+        not BOT_Status.is_all_statuses_true(
+            Status.INITIALIZED, Status.ACCOUNT_CONNECTED, Status.STARTED, Status.SUBSCRIBE_IDLE
+        )
+        or BOT_Status.is_all_statuses_true(
+            Status.INITIALIZED, Status.ACCOUNT_CONNECTED, Status.STARTED, Status.SUBSCRIBE_IDLE
+        )
+        and len(get_all_uid()) == 0
+    ):
         await asyncio.sleep(5)
         return
     sub_list = get_all_uid()
 
-    BOT_Status["live_updating"] = True
+    BOT_Status.set_status(Status.LIVE_IDLE, False)
 
-    for up in BOT_Status["living"].copy():
+    for up in BOT_Status.living.copy():
         if up not in sub_list:
-            del BOT_Status["living"][up]
+            del BOT_Status.living[up]
     try:
         try:
             status_infos = await get_rooms_info_by_uids(sub_list)
         except (TransportError, JSONDecodeError) as error:
             logger.warning(f"获取直播间状态失败: {type(error)} {error}")
             await asyncio.sleep(5)
-            BOT_Status["live_updating"] = False
+            BOT_Status.set_status(Status.LIVE_IDLE, True)
             return
         except RuntimeError as error:
             if "The connection pool was closed while" not in str(error):
                 raise error
-            BOT_Status["live_updating"] = False
+            BOT_Status.set_status(Status.LIVE_IDLE, True)
             return
     except Exception:  # noqa
         capture_exception()
         logger.exception("获取直播间状态失败:")
         await asyncio.sleep(30)
-        BOT_Status["live_updating"] = False
+        BOT_Status.set_status(Status.LIVE_IDLE, True)
         return
     if status_infos:
         for up, live_data in status_infos.items():
-            up_id = up
             up_name = live_data["uname"]
+            up_id = up
             # 检测订阅配置里是否有该 up
             if up_id in sub_list:
-                # if up_id in BOT_Status["skip_uid"]:
-                #     continue
                 # 如果存在直播信息则为已开播
                 logger.debug(
                     f"[Live] {up_name}({up_id}) live_status: {live_data['live_status']}"
                 )
                 if live_data["live_status"] == 1:
                     # 判断是否在正在直播列表中
-                    if up_id in BOT_Status["living"]:
+                    if up_id in BOT_Status.living:
                         continue
                     logger.debug(f"[Live] {up} live_data: {live_data}")
-                    BOT_Status["living"][up_id] = live_data["live_time"]  # 设定开播时间
+                    BOT_Status.living[up_id] = live_data["live_time"]  # 设定开播时间
                     # 获取直播信息
                     room_id = live_data["room_id"]
                     title = live_data["title"]
@@ -144,16 +150,14 @@ async def main(app: Ariadne):
                     insert_live_push(
                         up_id, True, len(get_sub_by_uid(up_id)), title, area_parent, area
                     )
-                elif up_id in BOT_Status["living"]:
+                elif up_id in BOT_Status.living:
                     logger.debug(f"[Live] {up} live_data: {live_data}")
                     live_time = (
-                        "，本次直播时长 "
-                        + calc_time_total(time.time() - BOT_Status["living"][up_id])
-                        + "。"
-                        if BOT_Status["living"][up_id]
+                        f"，本次直播时长 {calc_time_total(time.time() - BOT_Status.living[up_id])}。"
+                        if BOT_Status.living[up_id]
                         else "。"
                     )
-                    del BOT_Status["living"][up_id]
+                    del BOT_Status.living[up_id]
                     set_name(up_id, up_name)
                     logger.info(f"[BiliBili推送] {up_name} 已下播{live_time}")
                     for data in get_sub_by_uid(up_id):
@@ -191,8 +195,8 @@ async def main(app: Ariadne):
                                             "Bot 被限制发送群聊消息（46 代码），请尽快处理后发送 /init 重新开启推送进程"
                                         ),
                                     )
-                                    BOT_Status["dynamic_updating"] = True
-                                    BOT_Status["init"] = False
+                                    BOT_Status.set_status(Status.LIVE_IDLE, True)
+                                    BOT_Status.set_status(Status.INITIALIZED, True)
                                     raise ExecutionStop() from e
                                 else:
                                     capture_exception()
@@ -206,4 +210,4 @@ async def main(app: Ariadne):
                 logger.warning(f"[BiliBili推送] 未找到订阅 UP {up_name}（{up_id}）的群，正在退订！")
                 await delete_uid(up_id)
 
-    BOT_Status["live_updating"] = False
+    BOT_Status.set_status(Status.LIVE_IDLE, True)

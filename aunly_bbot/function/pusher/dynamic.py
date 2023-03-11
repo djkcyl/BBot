@@ -24,8 +24,8 @@ from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2 import (
     DynModuleType,
 )
 
-from ...core import BOT_Status
 from ...core.context import Context
+from ...core import BOT_Status, Status
 from ...core.bot_config import BotConfig
 from ...utils.dynamic_shot import get_dynamic_screenshot
 from ...utils.up_operation import delete_group, delete_uid, set_name
@@ -50,12 +50,13 @@ channel = Channel.current()
 
 @channel.use(SchedulerSchema(every_custom_seconds(3)))
 async def main(app: Ariadne):
-
     logger.debug("[Dynamic Pusher] Dynamic Pusher running now...")
     subid_list = get_all_uid()
     sub_sum = len(subid_list)
 
-    if not BOT_Status["init"]:
+    if not BOT_Status.is_all_statuses_true(
+        Status.INITIALIZED, Status.ACCOUNT_CONNECTED, Status.STARTED, Status.SUBSCRIBE_IDLE
+    ):
         logger.debug("[Dynamic Pusher] Dynamic Pusher is not init")
         await asyncio.sleep(3)
         return
@@ -64,8 +65,8 @@ async def main(app: Ariadne):
         await asyncio.sleep(5)
         return
 
-    BOT_Status["dynamic_updating"] = True
-    BOT_Status["last_update"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    BOT_Status.set_status(Status.DYNAMIC_IDLE, False)
+    BOT_Status.last_update = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # 动态更新检测
     # 获取当前登录账号的动态列表
@@ -75,11 +76,11 @@ async def main(app: Ariadne):
             dynall = await asyncio.wait_for(grpc_get_followed_dynamics_noads(), timeout=10)
         except AioRpcError as e:
             logger.error(f"[Dynamic] Get dynamic list failed: {e.details()}")
-            BOT_Status["dynamic_updating"] = False
+            BOT_Status.set_status(Status.DYNAMIC_IDLE, True)
             return
         except asyncio.TimeoutError:
             logger.debug("[Dynamic] Get dynamic list failed")
-            BOT_Status["dynamic_updating"] = False
+            BOT_Status.set_status(Status.DYNAMIC_IDLE, True)
             return
 
         # 判断请求是否拿到数据
@@ -89,7 +90,8 @@ async def main(app: Ariadne):
             new_dyn = [
                 x
                 for x in dynall
-                if int(x.extend.dyn_id_str) > BOT_Status.get("offset", int(x.extend.dyn_id_str))
+                if int(x.extend.dyn_id_str)
+                > BOT_Status.to_dict().get("offset", int(x.extend.dyn_id_str))
                 and not is_dyn_pushed(int(x.extend.dyn_id_str))
             ]
             logger.debug(f"[Dynamic] {len(new_dyn)} new dynamics")
@@ -101,20 +103,23 @@ async def main(app: Ariadne):
                     dynid = int(dyn.extend.dyn_id_str)
                     logger.debug(f"[Dynamic] Check dynamic {dynid}, {up_name}({up_id})")
                     try:
-                        if dynid <= BOT_Status.get("offset", dynid) or is_dyn_pushed(dynid):
+                        if dynid <= BOT_Status.offset["$login"] or is_dyn_pushed(dynid):
                             continue
                     except ValueError:
                         continue
+                    BOT_Status.set_status(Status.PUSH_IDLE, False)
                     if await push(app, dyn):
                         continue
                 except ScreenshotError:
                     return
+                finally:
+                    BOT_Status.set_status(Status.PUSH_IDLE, True)
 
             # 将当前检测到的第一条动态 id 设置为最新的动态 id
-            if BOT_Status["offset"] > int(dynall[-1].extend.dyn_id_str):
+            if BOT_Status.offset["$login"] > int(dynall[-1].extend.dyn_id_str):
                 logger.info("[BiliBili推送] 有 UP 删除了动态")
 
-            BOT_Status["offset"] = int(dynall[-1].extend.dyn_id_str)
+            BOT_Status.offset["$login"] = int(dynall[-1].extend.dyn_id_str)
         else:
             logger.error("[Dynamic] Gotten dynamic is empty")
             logger.error(dynall)
@@ -132,8 +137,8 @@ async def main(app: Ariadne):
                 *[check_uid(app, uid) for uid in subid_group], return_exceptions=True
             )
 
-    BOT_Status["last_finish"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    BOT_Status["dynamic_updating"] = False
+    BOT_Status.last_finish = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    BOT_Status.set_status(Status.DYNAMIC_IDLE, True)
     logger.debug("[Dynamic] Updating finished")
     await asyncio.sleep(0.5)
 
@@ -188,7 +193,7 @@ async def push(app: Ariadne, dyn: DynamicItem):
             err_msg = f"[BiliBili推送] {dynid} | {up_name}({up_id}) 更新了动态，截图失败"
             logger.error(err_msg)
             await app.send_friend_message(BotConfig.master, MessageChain(err_msg))
-            BOT_Status["dynamic_updating"] = False
+            BOT_Status.set_status(Status.DYNAMIC_IDLE, True)
             logger.debug("[Dynamic] Stop updating")
             raise ScreenshotError()
 
@@ -283,8 +288,8 @@ async def push(app: Ariadne, dyn: DynamicItem):
                             BotConfig.master,
                             MessageChain("Bot 被限制发送群聊消息（46 代码），请尽快处理后发送 /init 重新开启推送进程"),
                         )
-                        BOT_Status["dynamic_updating"] = True
-                        BOT_Status["init"] = False
+                        BOT_Status.set_status(Status.DYNAMIC_IDLE, True)
+                        BOT_Status.set_status(Status.INITIALIZED, False)
                         raise ExecutionStop() from e
                     elif "resultType=110" in str(e):  # 110: 可能为群被封
                         logger.warning(
@@ -343,8 +348,7 @@ async def check_uid(app: Ariadne, uid):
         resp = [
             x
             for x in resp.list
-            if int(x.extend.dyn_id_str)
-            > BOT_Status["offset"].get(uid, int(x.extend.dyn_id_str))
+            if int(x.extend.dyn_id_str) > BOT_Status.offset.get(uid, int(x.extend.dyn_id_str))  # type: ignore
         ]
         resp.reverse()
         for dyn in resp:
@@ -356,18 +360,14 @@ async def check_uid(app: Ariadne, uid):
                 dynid = int(dyn.extend.dyn_id_str)
                 logger.debug(f"[Dynamic] Check dynamic {dynid} | {up_name}({up_id})")
                 try:
-                    if (
-                        dynid <= BOT_Status["offset"][up_id]
-                        # or up_id in BOT_Status["skip_uid"]
-                        or is_dyn_pushed(dynid)
-                    ):
+                    if dynid <= BOT_Status.offset[up_id] or is_dyn_pushed(dynid):
                         return
                 except ValueError:
-                    BOT_Status["offset"][up_id] = dynid
+                    BOT_Status.offset[up_id] = dynid
                     return
                 await push(app, dyn)
 
-                BOT_Status["offset"][up_id] = dynid
+                BOT_Status.offset[up_id] = dynid
 
             except ScreenshotError:
                 return
@@ -379,4 +379,4 @@ class ScreenshotError(Exception):
 
 @channel.use(SchedulerSchema(every_custom_seconds(2)))
 async def debug():
-    logger.debug(BOT_Status)
+    logger.debug(BOT_Status.to_dict())

@@ -1,25 +1,19 @@
 from loguru import logger
 from graia.saya import Channel
-from graia.ariadne.app import Ariadne
-from graia.scheduler.saya.schema import SchedulerSchema
-from graia.scheduler.timers import every_custom_seconds
+from graia.saya.builtins.broadcast.schema import ListenerSchema
+from graia.ariadne.event.lifecycle import AccountLaunch, AccountShutdown, AccountConnectionFail
 
-from ...core import BOT_Status
+from ...core import BOT_Status, Status
 
 channel = Channel.current()
-offline = False
 
 
-@channel.use(SchedulerSchema(every_custom_seconds(0.01)))
-async def mirai_disconnect(app: Ariadne):
-    global offline
-    if BOT_Status["started"]:
-        if app.connection.status.connected:
-            if not BOT_Status["init"] and offline:
-                BOT_Status["init"] = True
-                offline = False
-                logger.info("Bot 连接成功")
-        elif BOT_Status["init"] and not offline:
-            BOT_Status["init"] = False
-            offline = True
-            logger.info("Bot 断开连接")
+@channel.use(ListenerSchema(listening_events=[AccountLaunch, AccountShutdown, AccountConnectionFail]))
+async def mirai_disconnect(event: AccountLaunch | AccountShutdown | AccountConnectionFail):
+    if isinstance(event, AccountLaunch):
+        if not BOT_Status.check_status(Status.ACCOUNT_CONNECTED):
+            logger.info("[Mirai] 账号已连接成功")
+            BOT_Status.set_status(Status.ACCOUNT_CONNECTED, True)
+    elif BOT_Status.check_status(Status.ACCOUNT_CONNECTED):
+        logger.warning("[Mirai] 账号断开")
+        BOT_Status.set_status(Status.ACCOUNT_CONNECTED, False)
