@@ -41,4 +41,9 @@
       - .creart.broadcast
       - .ariadne.message.commander.creart
 
+- module-name: grpc
+  data-files:
+    patterns:
+      - '_cython\_credentials\roots.pem'
+
 # nuitka --standalone --show-progress --output-dir=build .\test.py
