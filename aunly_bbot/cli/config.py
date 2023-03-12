@@ -37,6 +37,7 @@ class CliConfig:
         self.mirai_mirai_host()
         self.mirai_verify_key()
         self.debug()
+        self.use_browser()
         self.bilibili_mobile_style()
         self.bilibili_concurrent()
         self.event()

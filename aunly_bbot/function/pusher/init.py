@@ -288,6 +288,7 @@ async def init(app: Ariadne):
             await asyncio.sleep(1)
             logger.success("[BiliBili推送] 未订阅任何 UP ，初始化结束")
             BOT_Status.set_status(Status.INITIALIZED, True)
+            BOT_Status.set_status(Status.STARTED, True)
             return
         # 把所有账号分组，每组发送一次请求
         group_list = [
