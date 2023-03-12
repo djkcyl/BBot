@@ -8,6 +8,7 @@ data/
 docker_build
 nuitka/
 .pdm.toml
+aunly_bbot/static/test.js
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
