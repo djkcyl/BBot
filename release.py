@@ -29,10 +29,10 @@ group = p.group
 
 if platform.system() == "Windows":
     file_name = f"bbot-{group}-{project_version}{beta_hash}-windows-{package_tools}.exe"
-    build_name = f"main-{group}.exe"
+    build_name = "main.exe"
 else:
     file_name = f"bbot-{group}-{project_version}{beta_hash}-ubuntu-{package_tools}"
-    build_name = f"main-{group}{build_suffix}"
+    build_name = f"main{build_suffix}"
 
 
 if p.version:
