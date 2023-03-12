@@ -6,7 +6,12 @@ from bilireq.utils import post, get
 from bilireq.grpc.utils import grpc_request
 from bilireq.grpc.dynamic import grpc_get_followed_dynamics
 from bilireq.grpc.protos.bilibili.app.view.v1.view_pb2_grpc import ViewStub
-from bilireq.grpc.protos.bilibili.app.view.v1.view_pb2 import ViewReq, ViewReply
+from bilireq.grpc.protos.bilibili.app.view.v1.view_pb2 import (
+    ViewReq,
+    ViewReply,
+    ViewProgressReq,
+    ViewProgressReply,
+)
 from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2_grpc import DynamicStub
 from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2 import (
     DynamicType,
@@ -131,3 +136,10 @@ async def grpc_get_view_info(aid: int = 0, bvid: str = "", **kwargs) -> ViewRepl
     else:
         raise ValueError("aid or bvid must be provided")
     return await stub.View(req, **kwargs)
+
+
+@grpc_request
+async def grpc_get_view_progress(aid: int, cid: int, **kwargs) -> ViewProgressReply:
+    stub = ViewStub(kwargs.pop("_channel"))
+    req = ViewProgressReq(aid=aid, cid=cid)
+    return await stub.ViewProgress(req, **kwargs)

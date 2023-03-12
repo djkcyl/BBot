@@ -1,17 +1,13 @@
 import asyncio
 
 from io import BytesIO
-from pathlib import Path
 from PIL import Image, ImageFont, ImageDraw
 
 from .strings import get_cut_str
+from .fonts_provider import get_font_sync
 
-font_file = (
-    Path(__file__)
-    .parent.parent.joinpath("static", "font")
-    .joinpath("sarasa-mono-sc-semibold.ttf")
-)
-font = ImageFont.truetype(str(font_file), size=20)
+
+font = ImageFont.truetype(str(get_font_sync("sarasa-mono-sc-semibold.ttf")), size=20)
 
 
 async def text2image(text: str, cut=64) -> bytes:

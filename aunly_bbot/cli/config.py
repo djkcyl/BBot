@@ -16,6 +16,7 @@ from noneprompt import (
 
 from ..core import cache
 from ..model.config import _BotConfig
+from ..utils.detect_package import is_full
 from ..core.announcement import BBOT_ASCII_LOGO
 
 
@@ -208,14 +209,30 @@ class CliConfig:
             else:
                 click.secho("Bot 未加入该群，请重新输入！", fg="bright_red", bold=True)
 
+    def use_browser(self):
+        if is_full:
+            browser = ListPrompt(
+                "是否使用浏览器进行动态页面截图？",
+                [Choice("是（开启）"), Choice("否（关闭）")],
+                allow_filter=False,
+                default_select=1,
+                annotation="使用键盘的 ↑ 和 ↓ 来选择, 按回车确认",
+            ).prompt()
+            self.config["Bilibili"]["use_browser"] = browser.name == "是（开启）"
+        else:
+            self.config["Bilibili"]["use_browser"] = False
+
     def bilibili_mobile_style(self):
-        mobile_style = ListPrompt(
-            "是否使用手机端样式？",
-            [Choice("是（开启）"), Choice("否（关闭）")],
-            allow_filter=False,
-            annotation="使用键盘的 ↑ 和 ↓ 来选择, 按回车确认",
-        ).prompt()
-        self.config["Bilibili"]["mobile_style"] = mobile_style.name == "是（开启）"
+        if is_full:
+            mobile_style = ListPrompt(
+                "是否在浏览器中使用手机端样式？",
+                [Choice("是（开启）"), Choice("否（关闭）")],
+                allow_filter=False,
+                annotation="使用键盘的 ↑ 和 ↓ 来选择, 按回车确认",
+            ).prompt()
+            self.config["Bilibili"]["mobile_style"] = mobile_style.name == "是（开启）"
+        else:
+            self.config["Bilibili"]["mobile_style"] = False
 
     def bilibili_concurrent(self):
         while True:

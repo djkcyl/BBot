@@ -1,3 +1,4 @@
+import sys
 import json
 import yaml
 import click
@@ -48,10 +49,11 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
     username: Optional[int]
     password: Optional[str]
     use_login: bool = False
+    use_browser: bool = True
     mobile_style: bool = True
     concurrency: int = 5
     dynamic_font: Optional[str] = "HarmonyOS_Sans_SC_Medium.woff2"
-    dynamic_font_source: Optional[Literal["local", "remote", "system"]] = "local"
+    dynamic_font_source: Optional[Literal["local", "remote"]] = "local"
 
     # 验证是否可以登录
     @validator("use_login", always=True)
@@ -64,6 +66,19 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
                 return use_login
         except KeyError as key_err:
             raise ValueError("已启用登录但未填入合法的用户名与密码") from key_err
+
+    # 验证是否可以使用浏览器
+    @validator("use_browser")
+    def can_use_browser(cls, use_browser):
+        if not use_browser:
+            return use_browser
+        click.secho("已检测到开启 BiliBili 浏览器模式", fg="bright_yellow")
+        try:
+            import playwright  # noqa  # type: ignore
+            return use_browser
+        except ImportError:
+            click.secho("未安装 playwright，如需使用浏览器截图，请安装 graiax-playwright", fg="bright_red")
+            sys.exit()
 
     # 验证 Bilibili gRPC 并发数
     @validator("concurrency")
