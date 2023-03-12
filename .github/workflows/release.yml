@@ -43,13 +43,13 @@ jobs:
         if: ${{ matrix.group }} == full
         env:
           PLAYWRIGHT_BROWSERS_PATH: "0"
-        run: playwright install firefox
+        run: pdm run playwright install firefox
 
       - name: Install Pyinstaller
-        run: pip install --upgrade pyinstaller
+        run: pdm run pip install --upgrade pyinstaller
 
       - name: Build Pyinstaller Binary
-        run: pyinstaller main-${{ matrix.group }}.spec
+        run: pdm run pyinstaller main-${{ matrix.group }}.spec
 
       - name: Get commit hash
         id: commit
@@ -58,11 +58,11 @@ jobs:
       - name: Get Release Version
         id: version
         run: |
-          echo "::set-output name=version::v$(python release.py --version)"
+          echo "::set-output name=version::v$(pdm run python release.py --version)"
 
       - name: Rename Binary
         run: |
-          mv ./dist/$(python release.py --buildname --package-tools pyinstaller --group ${{ matrix.group }}) ./build/$(python release.py --name --package-tools pyinstaller --group ${{ matrix.group }})
+          mv ./dist/$(pdm run python release.py --buildname --package-tools pyinstaller --group ${{ matrix.group }}) ./build/$(pdm run python release.py --name --package-tools pyinstaller --group ${{ matrix.group }})
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -103,16 +103,16 @@ jobs:
         if: ${{ matrix.group }} == full
         env:
           PLAYWRIGHT_BROWSERS_PATH: "0"
-        run: playwright install firefox
+        run: pdm run playwright install firefox
 
       - name: Replease Playwright Path
         if: ${{ matrix.group }} == full
-        run: python release.py --replace-playwright-path
+        run: pdm run python release.py --replace-playwright-path
 
       - name: Build Nuitka Binary
         run: |
-          pip install nuitka zstandard ordered-set
-          python -m nuitka --onefile --standalone --show-progress --assume-yes-for-downloads --output-dir=nuitka --windows-icon-from-ico=tv.ico --user-package-configuration-file=nuitka-${{ matrix.group }}.yml main.py
+          pdm run pip install nuitka zstandard ordered-set
+          pdm run python -m nuitka --onefile --standalone --show-progress --assume-yes-for-downloads --output-dir=nuitka --windows-icon-from-ico=tv.ico --user-package-configuration-file=nuitka-${{ matrix.group }}.yml main.py
 
       - name: Get commit hash
         id: commit
@@ -125,7 +125,7 @@ jobs:
 
       - name: Rename Binary
         run: |
-          mv ./nuitka/$(python release.py --buildname --package-tools nuitka --group ${{ matrix.group }}) ./build/$(python release.py --name --package-tools nuitka --group ${{ matrix.group }})
+          mv ./nuitka/$(pdm run python release.py --buildname --package-tools nuitka --group ${{ matrix.group }}) ./build/$(pdm run python release.py --name --package-tools nuitka --group ${{ matrix.group }})
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
