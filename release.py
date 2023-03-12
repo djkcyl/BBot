@@ -49,5 +49,5 @@ elif p.replace_playwright_path:
         )
     )[0]
     chrome_relative_path = path.relative_to(pathlib.Path(playwright_package_path).parent)
-    yml_path = pathlib.Path("nuitka.yml")
+    yml_path = pathlib.Path("nuitka-full.yml")
     yml_path.write_text(yml_path.read_text().replace("$PLAYWRIGHT", str(chrome_relative_path)))
