@@ -40,7 +40,7 @@ jobs:
           pdm install -G ${{ matrix.group }}
 
       - name: Install Playwright Browsers
-        if: ${{ matrix.group }} == full
+        if: ${{ matrix.group }} == "full"
         env:
           PLAYWRIGHT_BROWSERS_PATH: "0"
         run: pdm run playwright install firefox
@@ -100,13 +100,13 @@ jobs:
           pdm install -G ${{ matrix.group }}
 
       - name: Install Playwright Browsers
-        if: ${{ matrix.group }} == full
+        if: ${{ matrix.group }} == "full"
         env:
           PLAYWRIGHT_BROWSERS_PATH: "0"
         run: pdm run playwright install firefox
 
       - name: Replease Playwright Path
-        if: ${{ matrix.group }} == full
+        if: ${{ matrix.group }} == "full"
         run: pdm run python release.py --replace-playwright-path
 
       - name: Build Nuitka Binary
