@@ -62,7 +62,7 @@ jobs:
 
       - name: Rename Binary
         run: |
-          mv ./dist/$(python release.py --buildname --package-tools pyinstaller) ./build/$(python release.py --name --package-tools pyinstaller)
+          mv ./dist/$(python release.py --buildname --package-tools pyinstaller --group ${{ matrix.group }}) ./build/$(python release.py --name --package-tools pyinstaller --group ${{ matrix.group }})
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -125,7 +125,7 @@ jobs:
 
       - name: Rename Binary
         run: |
-          mv ./nuitka/$(python release.py --buildname --package-tools nuitka) ./build/$(python release.py --name --package-tools nuitka)
+          mv ./nuitka/$(python release.py --buildname --package-tools nuitka --group ${{ matrix.group }}) ./build/$(python release.py --name --package-tools nuitka --group ${{ matrix.group }})
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
