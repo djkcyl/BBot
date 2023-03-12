@@ -40,6 +40,7 @@ jobs:
           pdm install -G ${{ matrix.group }}
 
       - name: Install Playwright Browsers
+        if: ${{ matrix.group }} == full
         env:
           PLAYWRIGHT_BROWSERS_PATH: "0"
         run: playwright install firefox
@@ -48,7 +49,7 @@ jobs:
         run: pip install --upgrade pyinstaller
 
       - name: Build Pyinstaller Binary
-        run: pyinstaller main.spec
+        run: pyinstaller main-${{ matrix.group }}.spec
 
       - name: Get commit hash
         id: commit
@@ -99,17 +100,19 @@ jobs:
           pdm install -G ${{ matrix.group }}
 
       - name: Install Playwright Browsers
+        if: ${{ matrix.group }} == full
         env:
           PLAYWRIGHT_BROWSERS_PATH: "0"
         run: playwright install firefox
 
       - name: Replease Playwright Path
+        if: ${{ matrix.group }} == full
         run: python release.py --replace-playwright-path
 
       - name: Build Nuitka Binary
         run: |
           pip install nuitka zstandard ordered-set
-          python -m nuitka --onefile --standalone --show-progress --assume-yes-for-downloads --output-dir=nuitka --windows-icon-from-ico=tv.ico --user-package-configuration-file=nuitka.yml main.py
+          python -m nuitka --onefile --standalone --show-progress --assume-yes-for-downloads --output-dir=nuitka --windows-icon-from-ico=tv.ico --user-package-configuration-file=nuitka-${{ matrix.group }}.yml main.py
 
       - name: Get commit hash
         id: commit
