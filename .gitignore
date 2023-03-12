@@ -9,6 +9,7 @@ data/
 docker_build
 build
 venv
+.venv
 nuitka/
 dist/
 .pdm.toml
