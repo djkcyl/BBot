@@ -14,6 +14,8 @@ def detect_package():
     return False
 
 
+import contextlib
+
 is_package = detect_package()
 
 if is_package == "nuitka":
@@ -59,9 +61,19 @@ if is_package == "nuitka":
         },
     ]
     for entry in _entrys:
-        try:
+        with contextlib.suppress(Exception):
             creator = EntryPoint(**entry).load()
             if creator.available():
                 add_creator(creator)
-        except Exception:
-            pass
+
+
+def detect_playwright():
+    try:
+        import playwright  # type: ignore # noqa
+
+        return True
+    except ImportError:
+        return False
+
+
+is_full = detect_playwright()

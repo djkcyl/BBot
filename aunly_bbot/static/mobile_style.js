@@ -143,12 +143,11 @@ async function getMobileStyle() {
 
 
 function setFont(font = "", fontSource = "local") {
-    // TODO: 未来考虑添加本地离线字体
     // 自行添加在线字体(字体的优先度将按照顺序执行)
     const needLoadFontList = [
         {
-            fontUrl: "https://fonts.bbot?name=https://cdn.jsdelivr.net/gh/irozhi/HarmonyOS-Sans/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Medium.woff2",
-            fontFamily: "HarmonyOS_Medium_woff2",
+            fontUrl: "https://fonts.bbot?name=HarmonyOS_Sans_SC_Medium.ttf",
+            fontFamily: "HarmonyOS_Sans_SC_Medium.ttf",
         }
     ];
     const emojiFontList = ["Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"];

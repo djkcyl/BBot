@@ -1,3 +1,4 @@
+from typing import Union
 from loguru import logger
 from graia.saya import Channel
 from graia.saya.builtins.broadcast.schema import ListenerSchema
@@ -8,8 +9,10 @@ from ...core import BOT_Status, Status
 channel = Channel.current()
 
 
-@channel.use(ListenerSchema(listening_events=[AccountLaunch, AccountShutdown, AccountConnectionFail]))
-async def mirai_disconnect(event: AccountLaunch | AccountShutdown | AccountConnectionFail):
+@channel.use(
+    ListenerSchema(listening_events=[AccountLaunch, AccountShutdown, AccountConnectionFail])
+)
+async def mirai_disconnect(event: Union[AccountLaunch, AccountShutdown, AccountConnectionFail]):
     if isinstance(event, AccountLaunch):
         if not BOT_Status.check_status(Status.ACCOUNT_CONNECTED):
             logger.info("[Mirai] 账号已连接成功")

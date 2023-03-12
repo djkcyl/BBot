@@ -1,13 +1,18 @@
+import sys
 import httpx
+import asyncio
 
 from yarl import URL
+from io import BytesIO
 from pathlib import Path
 from loguru import logger
-from playwright.async_api import Request, Route
+from zipfile import ZipFile
+
+from ..core.bot_config import BotConfig
+
 
 DEFUALT_DYNAMIC_FONT = (
-    "https://cdn.jsdelivr.net"
-    "/gh/irozhi/HarmonyOS-Sans/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Medium.woff2"
+    "https://cdn.jsdelivr.net/gh/" "djkcyl/BBot-Fonts/HarmonyOS_Sans_SC_Medium.woff2"
 )
 
 
@@ -45,17 +50,37 @@ async def get_font(font: str = DEFUALT_DYNAMIC_FONT):
         return font_path.joinpath(font)
 
 
-async def fill_font(route: Route, request: Request):
-    url = URL(request.url)
-    if not url.is_absolute():
-        raise ValueError("字体地址不合法")
-    try:
-        logger.debug(f"Font {url.name} requested")
-        await route.fulfill(
-            path=await get_font(url.query["name"]),
-            content_type=font_mime_map.get(url.suffix, None),
-        )
-        return
-    except Exception:
-        logger.debug(f"can't get font {url.name}")
-        await route.fallback()
+def get_font_sync(font: str = DEFUALT_DYNAMIC_FONT):
+    return asyncio.run(get_font(font))
+
+
+def font_init():
+    f = httpx.get(
+        "https://mirrors.bfsu.edu.cn/pypi/web/packages/ad/97/"
+        "03cd0a15291c6c193260d97586c4adf37a7277d8ae4507d68566c5757a6a/"
+        "bbot_fonts-0.1.1-py3-none-any.whl"
+    )
+    with ZipFile(BytesIO(f.content)) as z:
+        font_path = Path("data", "font")
+        font_path.mkdir(parents=True, exist_ok=True)
+        fonts = [i for i in z.filelist if str(i.filename).startswith("bbot_fonts/font/")]
+        for font in fonts:
+            file_name = Path(font.filename).name
+            local_file = font_path.joinpath(file_name)
+            if not local_file.exists():
+                logger.info(local_file)
+                local_file.write_bytes(z.read(font))
+    if BotConfig.Bilibili.dynamic_font:
+        if BotConfig.Bilibili.dynamic_font_source == "remote":
+            custom_font = URL(BotConfig.Bilibili.dynamic_font)
+            if custom_font.is_absolute():
+                if custom_font.name != URL(DEFUALT_DYNAMIC_FONT).name:
+                    logger.info(get_font_sync(BotConfig.Bilibili.dynamic_font))
+            else:
+                logger.error("你输入的自定义字体不是一个有效的 URL，请检查！")
+                sys.exit()
+        else:
+            custom_font = font_path.joinpath(BotConfig.Bilibili.dynamic_font)
+            if not custom_font.exists():
+                logger.error("你输入的自定义字体不存在（data/font），请检查！")
+                sys.exit()
