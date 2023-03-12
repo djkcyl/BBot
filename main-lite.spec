@@ -2,7 +2,6 @@
 from PyInstaller.utils.hooks import copy_metadata
 
 datas = [
-    ('aunly_bbot/static/font', 'aunly_bbot/static/font'), 
     ('aunly_bbot/static/bot_config.exp.yaml', 'aunly_bbot/static'), 
     ('aunly_bbot/website/static', 'aunly_bbot/website/static'), 
     ('aunly_bbot/static/mobile_style.js', 'aunly_bbot/static'), 
@@ -14,7 +13,6 @@ datas += copy_metadata('graia-saya')
 datas += copy_metadata('graia-scheduler')
 datas += copy_metadata('graia-broadcast')
 datas += copy_metadata('creart-graia')
-datas += copy_metadata('graiax-playwright')
 
 
 block_cipher = None
