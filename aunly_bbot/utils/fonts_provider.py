@@ -12,7 +12,7 @@ from ..core.bot_config import BotConfig
 
 
 DEFUALT_DYNAMIC_FONT = (
-    "https://cdn.jsdelivr.net/gh/" "djkcyl/BBot-Fonts/HarmonyOS_Sans_SC_Medium.woff2"
+    "HarmonyOS_Sans_SC_Medium.ttf"
 )
 
 
