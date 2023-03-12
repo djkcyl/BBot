@@ -63,7 +63,7 @@ jobs:
       - name: Rename Binary
         run: |
           tree
-          mv ./dist/$(pdm run python release.py --buildname --package-tools pyinstaller --group ${{ matrix.group }}) ./build/$(pdm run python release.py --name --package-tools pyinstaller --group ${{ matrix.group }})
+          mv ./dist/$(pdm run python release.py --buildname --package-tools pyinstaller) ./build/$(pdm run python release.py --name --package-tools pyinstaller --group ${{ matrix.group }})
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -127,7 +127,7 @@ jobs:
       - name: Rename Binary
         run: |
           tree
-          mv ./nuitka/$(pdm run python release.py --buildname --package-tools nuitka --group ${{ matrix.group }}) ./build/$(pdm run python release.py --name --package-tools nuitka --group ${{ matrix.group }})
+          mv ./nuitka/$(pdm run python release.py --buildname --package-tools nuitka) ./build/$(pdm run python release.py --name --package-tools nuitka --group ${{ matrix.group }})
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
