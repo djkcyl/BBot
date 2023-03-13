@@ -7,13 +7,18 @@ from io import BytesIO
 from pathlib import Path
 from loguru import logger
 from zipfile import ZipFile
+from rich.progress import (
+    Progress,
+    BarColumn,
+    DownloadColumn,
+    TimeElapsedColumn,
+    TransferSpeedColumn,
+)
 
 from ..core.bot_config import BotConfig
 
 
-DEFUALT_DYNAMIC_FONT = (
-    "HarmonyOS_Sans_SC_Medium.ttf"
-)
+DEFUALT_DYNAMIC_FONT = "HarmonyOS_Sans_SC_Medium.ttf"
 
 
 font_path = Path("data", "font")
@@ -55,21 +60,52 @@ def get_font_sync(font: str = DEFUALT_DYNAMIC_FONT):
 
 
 def font_init():
-    f = httpx.get(
+    # sourcery skip: extract-method
+    font_url = (
         "https://mirrors.bfsu.edu.cn/pypi/web/packages/ad/97/"
         "03cd0a15291c6c193260d97586c4adf37a7277d8ae4507d68566c5757a6a/"
         "bbot_fonts-0.1.1-py3-none-any.whl"
     )
-    with ZipFile(BytesIO(f.content)) as z:
-        font_path = Path("data", "font")
-        font_path.mkdir(parents=True, exist_ok=True)
-        fonts = [i for i in z.filelist if str(i.filename).startswith("bbot_fonts/font/")]
-        for font in fonts:
-            file_name = Path(font.filename).name
-            local_file = font_path.joinpath(file_name)
-            if not local_file.exists():
-                logger.info(local_file)
-                local_file.write_bytes(z.read(font))
+    lock_file = Path("data", "font", ".lock")
+    lock_file.touch(exist_ok=True)
+    if lock_file.read_text() != font_url:
+        font_file = BytesIO()
+        with Progress(
+            "{task.description}",
+            BarColumn(),
+            "[progress.percentage]{task.percentage:>3.0f}%",
+            "•",
+            DownloadColumn(),
+            "•",
+            TransferSpeedColumn(),
+            "•",
+            TimeElapsedColumn(),
+        ) as progress_bar:
+            task = progress_bar.add_task("下载字体文件中", start=False)
+            with httpx.stream("GET", font_url) as r:
+                content_length = int(r.headers["Content-Length"])
+                progress = 0
+                progress_bar.update(task, total=content_length)
+                progress_bar.update(task, completed=0)
+                for chunk in r.iter_bytes():
+                    font_file.write(chunk)
+                    progress += len(chunk)
+                    percent = progress / content_length * 100
+                    progress_bar.advance(task, advance=percent)
+                progress_bar.update(task, completed=content_length)
+        with ZipFile(font_file) as z:
+            fonts = [i for i in z.filelist if str(i.filename).startswith("bbot_fonts/font/")]
+            for font in fonts:
+                file_name = Path(font.filename).name
+                local_file = font_path.joinpath(file_name)
+                if not local_file.exists():
+                    logger.info(local_file)
+                    local_file.write_bytes(z.read(font))
+
+        lock_file.write_text(font_url)
+    else:
+        logger.info("字体文件已存在，跳过下载")
+
     if BotConfig.Bilibili.dynamic_font:
         if BotConfig.Bilibili.dynamic_font_source == "remote":
             custom_font = URL(BotConfig.Bilibili.dynamic_font)

@@ -3,7 +3,7 @@ import aunly_bbot.function.command.announcement
 import aunly_bbot.function.command.init
 import aunly_bbot.function.command.quit_group
 import aunly_bbot.function.command.status
-import aunly_bbot.function.command.video_resolve
+import aunly_bbot.function.command.content_resolve
 import aunly_bbot.function.command.vive_dynamic
 import aunly_bbot.function.command.admin.add
 import aunly_bbot.function.command.admin.remove

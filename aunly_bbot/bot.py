@@ -1,7 +1,6 @@
 import os
 import sys
 import httpx
-import asyncio
 
 from creart import it
 from pathlib import Path
