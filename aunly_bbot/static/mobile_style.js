@@ -147,7 +147,7 @@ function setFont(font = "", fontSource = "local") {
     const needLoadFontList = [
         {
             fontUrl: "https://fonts.bbot?name=HarmonyOS_Sans_SC_Medium.ttf",
-            fontFamily: "HarmonyOS_Sans_SC_Medium.ttf",
+            fontFamily: "HarmonyOS_Sans_SC_Medium",
         }
     ];
     const emojiFontList = ["Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"];

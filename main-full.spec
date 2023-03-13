@@ -1,5 +1,8 @@
 # -*- mode: python ; coding: utf-8 -*-
-from PyInstaller.utils.hooks import copy_metadata
+from PyInstaller.utils.hooks import copy_metadata, collect_dynamic_libs
+
+binaries = []
+binaries += collect_dynamic_libs('minidynamicrender')
 
 datas = [
     ('aunly_bbot/static/bot_config.exp.yaml', 'aunly_bbot/static'), 
@@ -22,7 +25,7 @@ block_cipher = None
 a = Analysis(
     ['main.py'],
     pathex=[],
-    binaries=[],
+    binaries=binaries,
     datas=datas,
     hiddenimports=['graia.creart', 'graia.creart.broadcast', 'graia.creart.saya', 'graia.ariadne.message.commander.creart'],
     hookspath=[],
