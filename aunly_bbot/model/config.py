@@ -52,7 +52,7 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
     use_browser: bool = True
     mobile_style: bool = True
     concurrency: int = 5
-    dynamic_font: Optional[str] = "HarmonyOS_Sans_SC_Medium.woff2"
+    dynamic_font: Optional[str] = "HarmonyOS_Sans_SC_Medium.ttf"
     dynamic_font_source: Optional[Literal["local", "remote"]] = "local"
 
     # 验证是否可以登录
