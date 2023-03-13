@@ -46,4 +46,9 @@
     patterns:
       - '_cython\_credentials\roots.pem'
 
+- module-name: minidynamicrender
+  data-files:
+    patterns:
+      - 'Static.zip'
+
 # nuitka --standalone --show-progress --output-dir=build .\test.py

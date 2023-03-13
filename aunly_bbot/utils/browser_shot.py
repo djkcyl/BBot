@@ -42,7 +42,7 @@ async def fill_font(route: Route, request: Request):
         )
         return
     except Exception:
-        logger.debug(f"can't get font {url.name}")
+        logger.error(f"找不到字体 {url.name}")
         await route.fallback()
 
 
