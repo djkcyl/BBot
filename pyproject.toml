@@ -26,6 +26,7 @@ dependencies = [
     "pillow>=9.4.0",
     "noneprompt>=0.1.9",
     "minidynamicrender>=1.1.9",
+    "lxml>=4.9.2",
 ]
 
 [tool.pdm.build]
