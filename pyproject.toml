@@ -43,7 +43,6 @@ dev = [
     "yamllint>=1.29.0",
     "black>=23.1.0",
     "flake8>=6.0.0",
-    "pyinstaller>=4.5.1",
 ]
 [build-system]
 requires = ["pdm-pep517>=1.0.0"]
