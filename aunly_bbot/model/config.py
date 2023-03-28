@@ -52,8 +52,13 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
     use_browser: bool = True
     mobile_style: bool = True
     concurrency: int = 5
-    dynamic_font: Optional[str] = "HarmonyOS_Sans_SC_Medium.ttf"
-    dynamic_font_source: Optional[Literal["local", "remote"]] = "local"
+    dynamic_font: str = "HarmonyOS_Sans_SC_Medium.ttf"
+    dynamic_font_source: Literal["local", "remote"] = "local"
+    openai_summarization: bool = False
+    openai_api_token: Optional[str] = None
+    openai_model: str = "gpt-3.5-turbo"
+    openai_proxy: Optional[AnyHttpUrl] = None
+    use_wordcloud: bool = False
 
     # 验证是否可以登录
     @validator("use_login", always=True)
@@ -75,9 +80,24 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
         click.secho("已检测到开启 BiliBili 浏览器模式", fg="bright_yellow")
         try:
             import playwright  # noqa  # type: ignore
+
             return use_browser
         except ImportError:
             click.secho("未安装 playwright，如需使用浏览器截图，请安装 graiax-playwright", fg="bright_red")
+            sys.exit()
+
+    # 验证是否可以使用 wordcloud
+    @validator("use_wordcloud")
+    def can_use_wordcloud(cls, use_wordcloud):
+        if not use_wordcloud:
+            return use_wordcloud
+        click.secho("已检测到开启词云", fg="bright_yellow")
+        try:
+            import wordcloud  # noqa  # type: ignore
+
+            return use_wordcloud
+        except ImportError:
+            click.secho("未安装 wordcloud，如需使用词云，请安装 wordcloud", fg="bright_red")
             sys.exit()
 
     # 验证 Bilibili gRPC 并发数

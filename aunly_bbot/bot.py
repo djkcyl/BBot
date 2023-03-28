@@ -19,8 +19,8 @@ from .core.bot_config import BotConfig
 from .utils.fastapi import FastAPIService
 from .utils.verify_mah import verify_mirai
 from .utils.fonts_provider import font_init
+from .utils.detect_package import is_package
 from .core.announcement import base_telemetry
-from .utils.detect_package import is_package, is_full
 
 
 os.environ["PLAYWRIGHT_BROWSERS_PATH"] = (
@@ -54,7 +54,7 @@ app_config = config(
 app = Ariadne(app_config)
 app.config(install_log=True)
 
-if is_full and BotConfig.Bilibili.use_browser:
+if BotConfig.Bilibili.use_browser:
     from graiax.playwright.service import PlaywrightService  # type: ignore # noqa
 
     app.launch_manager.add_service(

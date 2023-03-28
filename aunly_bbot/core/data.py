@@ -1,6 +1,7 @@
 import time
-from typing import Optional, Union
+
 from loguru import logger
+from typing import Optional, Union
 from datetime import datetime, timedelta
 from peewee import (
     Cast,
@@ -80,6 +81,20 @@ class SubList(BaseModel):
         table_name = "sub_list"
 
 
+class ContentResolveArchive(BaseModel):
+    """内容解析存档"""
+
+    avid = CharField(null=True)
+    cvid = CharField(null=True)
+    title = CharField()
+    content = CharField()
+    jieba = CharField(null=True)
+    openai = CharField(null=True)
+
+    class Meta:
+        table_name = "content_resolve_archive"
+
+
 class TalkCount(BaseModel):
     """消息统计"""
 
@@ -99,7 +114,7 @@ class DataVersion(BaseModel):
         table_name = "data_version"
 
 
-db.create_tables([DynamicPush, GroupPush, LivePush, SubList, TalkCount, DataVersion], safe=True)
+db.create_tables([DynamicPush, GroupPush, LivePush, SubList, TalkCount, DataVersion, ContentResolveArchive], safe=True)
 
 
 if not DataVersion.select().exists():
@@ -283,3 +298,63 @@ def is_dyn_pushed_in_group(dyn_id: Union[str, int], group: Union[str, int]) -> b
 def update_cover_by_id(uid: Union[str, int], cover: Optional[str]):
     SubList.update(cover_img=cover).where(SubList.uid == str(uid)).execute()
     return cover or SubList.get(SubList.uid == str(uid)).cover_img
+
+
+class ContentResolveData:
+    """内容解析存档数据操作"""
+
+    def __init__(
+        self, aid: Optional[Union[str, int]] = None, cid: Optional[Union[str, int]] = None
+    ):
+        self.aid = aid
+        self.cid = cid
+        self.sid = str(aid or cid)
+        self.title: Optional[str] = None
+        self.content: Optional[str] = None
+        self.jieba: Optional[str] = None
+        self.openai: Optional[str] = None
+
+        if self.check_exists():
+            data = self.get_data()
+            self.title = data.title
+            self.content = data.content
+            self.jieba = data.jieba
+            self.openai = data.openai
+
+    def check_exists(self) -> bool:
+        """检查是否存在"""
+        return bool(
+            ContentResolveArchive.select()
+            .where(
+                ContentResolveArchive.avid == self.sid or ContentResolveArchive.cvid == self.sid
+            )
+            .exists()
+        )
+
+    def get_data(self) -> Optional[ContentResolveArchive]:
+        """获取数据"""
+        if self.check_exists():
+            return ContentResolveArchive.get(
+                ContentResolveArchive.avid == self.sid or ContentResolveArchive.cvid == self.sid
+            )
+
+    def save(self):
+        """保存数据"""
+        if self.check_exists():
+            ContentResolveArchive.update(
+                title=self.title,
+                content=self.content,
+                jieba=self.jieba,
+                openai=self.openai,
+            ).where(
+                ContentResolveArchive.avid == self.sid or ContentResolveArchive.cvid == self.sid
+            ).execute()
+        else:
+            ContentResolveArchive(
+                avid=self.sid if self.aid else None,
+                cvid=self.sid if self.cid else None,
+                title=self.title,
+                content=self.content,
+                jieba=self.jieba,
+                openai=self.openai,
+            ).save()

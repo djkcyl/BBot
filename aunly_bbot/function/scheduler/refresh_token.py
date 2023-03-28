@@ -22,7 +22,7 @@ login_cache_file = Path("data/login_cache.json")
 @channel.use(SchedulerSchema(crontabify("0 0 * * *")))
 async def main(app: Ariadne):
     logger.info("[BiliBili推送] 开始刷新 token")
-    if BotConfig.Bilibili.use_login:
+    if BotConfig.Bilibili.username and BotConfig.Bilibili.password and Bili_Auth.tokens:
         BOT_Status.set_status(Status.INITIALIZED, False)
 
         while BOT_Status.check_status(Status.LIVE_IDLE) or BOT_Status.check_status(

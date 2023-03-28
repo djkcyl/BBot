@@ -22,8 +22,8 @@ from bilireq.grpc.dynamic import grpc_get_followed_dynamic_users, grpc_get_user_
 
 from ...core.bot_config import BotConfig
 from ...utils.up_operation import delete_uid
-from ...core import BOT_Status, Bili_Auth, Status
 from ...core.data import get_all_uid, delete_sub_by_uid
+from ...core import BOT_Status, Bili_Auth, Status, cache
 from ...utils.bilibili_request import relation_modify, grpc_get_followed_dynamics_noads
 
 
@@ -58,7 +58,7 @@ async def init_dyn_id(up_uid):
             BOT_Status.offset[str(up_uid)] = dyn_id
             if dyn.modules[0].module_author.author.live.is_living == 1:
                 logger.info(f"[BiliBili推送] {up_name}（{up_uid}） 已开播")
-                BOT_Status.living[str(up_uid)] = None
+                BOT_Status.living[str(up_uid)] = 0
             logger.info(f"[BiliBili推送] UP {up_name}（{up_uid}） | {dyn_id}")
         else:
             delete_sub_by_uid(up_uid)
@@ -71,9 +71,9 @@ async def init_dyn_id(up_uid):
 async def init(app: Ariadne):
     await asyncio.sleep(1)
 
-    # 如果使用登录模式，则进行登录流程
-    if BotConfig.Bilibili.use_login:
-        logger.info("[BiliBili推送] 当前为登录模式，正在进行登录流程")
+    # 如果填写了用户名密码，则进行登录
+    if BotConfig.Bilibili.username and BotConfig.Bilibili.password:
+        logger.info("[BiliBili推送] 已填写 Bilibili 用户名密码，正在尝试登录")
         auth_data = None
         while True:
             await asyncio.sleep(1)
@@ -81,6 +81,7 @@ async def init(app: Ariadne):
                 Bili_Auth.update(json.loads(login_cache_file.read_text()))
                 try:
                     auth_data = await Bili_Auth.refresh()
+                    logger.debug(auth_data)
                     logger.success("[Bilibili推送] 缓存登录完成")
                     await app.send_friend_message(
                         BotConfig.master,
@@ -164,14 +165,21 @@ async def init(app: Ariadne):
                         )
                         sys.exit(1)
 
-        logger.info("[Bilibili推送] 登录完成")
-        Bili_Auth.update(auth_data)
-        logger.debug(await Bili_Auth.get_info())
-        login_cache_file.write_text(json.dumps(dict(Bili_Auth), indent=2, ensure_ascii=False))
+        if auth_data:
+            Bili_Auth.update(auth_data)
+            logger.debug(await Bili_Auth.get_info())
+            login_cache_file.write_text(
+                json.dumps(dict(Bili_Auth), indent=2, ensure_ascii=False)
+            )
+            logger.info("[Bilibili推送] 登录完成")
+        else:
+            logger.critical("[Bilibili推送] 登录状态异常，正在退出")
+            sys.exit(1)
 
+    if BotConfig.Bilibili.use_login:
         # 初始化
         subid_list = get_all_uid()
-        for retry in range(3):
+        for _ in range(3):
             try:
                 resp = await grpc_get_followed_dynamic_users(auth=Bili_Auth)
                 break
@@ -196,14 +204,14 @@ async def init(app: Ariadne):
                 sys.exit(1)
 
         elif (f := len(followed_list)) != 0:
-            if sys.argv.pop() != "--ignore-sub":
+            if cache["ignore_sub"]:
+                logger.warning(f"[Bilibili推送] 该账号已关注 {f} 个用户，正在尝试自动处理")
+                Path("data").joinpath(".lock").write_text(str(BotConfig.Bilibili.username))
+            else:
                 logger.critical(
                     f"[Bilibili推送] 该账号已关注 {f} 个用户，为避免产生问题，已停止运行，请先手动取消关注或添加启动参数 --ignore-sub，这将取关所有已关注的用户"
                 )
                 sys.exit(1)
-            else:
-                logger.warning(f"[Bilibili推送] 该账号已关注 {f} 个用户，正在尝试自动处理")
-                Path("data").joinpath(".lock").write_text(str(BotConfig.Bilibili.username))
         else:
             Path("data").joinpath(".lock").write_text(str(BotConfig.Bilibili.username))
 
@@ -233,7 +241,7 @@ async def init(app: Ariadne):
                 # 顺便检测直播状态
                 if uid.live_info.status:
                     logger.info(f"[BiliBili推送] {uid.name} 已开播")
-                    BOT_Status.living[str(uid.uid)] = None
+                    BOT_Status.living[str(uid.uid)] = 0
 
         # 检测在数据库但不在B站关注列表的uid
         for up in subid_list:

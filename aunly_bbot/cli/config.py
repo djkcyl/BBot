@@ -40,6 +40,10 @@ class CliConfig:
         self.use_browser()
         self.bilibili_mobile_style()
         self.bilibili_concurrent()
+        self.openai_summary()
+        self.bilibili_username()
+        self.use_bilibili_login()
+        self.wordcloud()
         self.event()
         self.webui()
         self.log_level()
@@ -234,6 +238,89 @@ class CliConfig:
             self.config["Bilibili"]["mobile_style"] = mobile_style.name == "是（开启）"
         else:
             self.config["Bilibili"]["mobile_style"] = False
+
+    def openai_summary(self):
+        openai_summary = ListPrompt(
+            "是否使用 OpenAI 进行视频和专栏内容摘要提取？",
+            [Choice("是（开启）"), Choice("否（关闭）")],
+            allow_filter=False,
+            annotation="使用键盘的 ↑ 和 ↓ 来选择, 按回车确认",
+        ).prompt()
+        if openai_summary.name == "是（开启）":
+            self.config["Bilibili"]["openai_summarization"] = True
+            self.openai_api_token()
+            self.openai_model()
+
+    def openai_api_token(self):
+        openai_token = InputPrompt("请输入 OpenAI Token: ").prompt()
+        if len(openai_token) != 51:
+            click.secho("输入的 OpenAI Token 不合法（长度应为 51 位）", fg="bright_red", bold=True)
+            self.openai_api_token()
+        if openai_token.startswith("sk-"):
+            self.config["Bilibili"]["openai_api_token"] = openai_token
+        else:
+            click.secho("输入的 OpenAI Token 不合法（应以 sk- 开头）", fg="bright_red", bold=True)
+            self.openai_api_token()
+
+    def openai_model(self):
+        openai_model = ListPrompt(
+            "请选择 OpenAI 模型",
+            [Choice("gpt-3.5-turbo-0301"), Choice("gpt-4-0314"), Choice("gpt-4-32k-0314")],
+            allow_filter=False,
+            annotation="使用键盘的 ↑ 和 ↓ 来选择, 按回车确认",
+        ).prompt()
+        self.config["Bilibili"]["openai_model"] = openai_model.name
+
+    def openai_proxy(self):
+        if openai_proxy_url := InputPrompt("请输入 OpenAI 代理地址（留空则不使用代理）: ").prompt():
+            if not URL(openai_proxy_url).is_absolute():
+                click.secho("输入的 OpenAI 代理地址不合法！", fg="bright_red", bold=True)
+                self.openai_proxy()
+            elif not openai_proxy_url.startswith("http"):
+                click.secho("输入的 OpenAI 代理地址不合法！仅可使用 http 代理", fg="bright_red", bold=True)
+                self.openai_proxy()
+            self.config["Bilibili"]["openai_proxy"] = openai_proxy_url
+
+    def bilibili_username(self):
+        username = InputPrompt("请输入 Bilibili 用户名: （可用于 AI 总结时获取 Bilibili 的 AI 字幕）").prompt()
+        if not username:
+            click.secho("用户名不能为空！", fg="bright_red", bold=True)
+            self.bilibili_username()
+        elif not username.isdigit():
+            click.secho("用户名不合法！", fg="bright_red", bold=True)
+            self.bilibili_username()
+        self.config["Bilibili"]["username"] = username
+
+    def bilibili_password(self):
+        password = InputPrompt("请输入 Bilibili 密码: ", is_password=True).prompt()
+        if not password:
+            click.secho("密码不能为空！", fg="bright_red", bold=True)
+            self.bilibili_password()
+        self.config["Bilibili"]["password"] = password
+
+    def use_bilibili_login(self):
+        if self.config["Bilibili"]["username"]:
+            use_bilibili_login = ListPrompt(
+                "是否使用已登录的 Bilibili 账号进行动态监听？（警告：不推荐使用该功能，暂不可用）",
+                [Choice("否（关闭）"), Choice("是（开启）")],
+                allow_filter=False,
+                annotation="使用键盘的 ↑ 和 ↓ 来选择, 按回车确认",
+            ).prompt()
+            self.config["Bilibili"]["use_login"] = use_bilibili_login.name == "是（开启）"
+        else:
+            self.config["Bilibili"]["use_login"] = False
+
+    def wordcloud(self):
+        if is_full:
+            wordcloud = ListPrompt(
+                "是否为视频和专栏内容制作词云？",
+                [Choice("是（开启）"), Choice("否（关闭）")],
+                allow_filter=False,
+                annotation="使用键盘的 ↑ 和 ↓ 来选择, 按回车确认",
+            ).prompt()
+            self.config["Bilibili"]["use_wordcloud"] = wordcloud.name == "是（开启）"
+        else:
+            self.config["Bilibili"]["use_wordcloud"] = False
 
     def bilibili_concurrent(self):
         while True:
