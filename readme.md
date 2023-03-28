@@ -6,7 +6,7 @@
 ![GitHub Repo stars](https://img.shields.io/github/stars/djkcyl/BBot-Graia?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/djkcyl/BBot-Graia?style=social)
 
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/djkcyl/BBot-Graia/prerelease.yml?branch=web)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/djkcyl/BBot-Graia/release.yml?branch=master)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/djkcyl/BBot-Graia?color=brightgreen)
 ![GitHub all releases](https://img.shields.io/github/downloads/djkcyl/BBot-Graia/total)
 ![Platform](https://img.shields.io/badge/platform-linux_%7C_windows-lightgrey)
