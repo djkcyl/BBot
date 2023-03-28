@@ -12,8 +12,8 @@ from graia.ariadne.model import Friend, Group, Member
 from graia.ariadne.typing import SendMessageAction, SendMessageException
 from graia.ariadne.exception import UnknownTarget, AccountMuted, RemoteException
 
-from core import BOT_Status
 from core.context import Context
+from core import BOT_Status, Status
 from core.bot_config import BotConfig
 
 from .up_operation import delete_group
@@ -69,7 +69,7 @@ class Safe(SendMessageAction):
                     msg = f"{push_type} {push_id} | 推送失败，Bot 被限制发送群聊消息（46 代码），请尽快处理后发送 /init 重新开启推送进程"
                     logger.error(f"[BiliBili推送] {msg}")
                     await ariadne.send_friend_message(BotConfig.master, MessageChain(msg))
-                    BOT_Status["init"] = False
+                    BOT_Status.set_status(Status.INITIALIZED, True)
                     raise ExecutionStop()
                 elif "resultType=110" in str(item):  # 110: 可能为群被封
                     logger.warning(f"[BiliBili推送] {push_type} {push_id} | 推送失败，Bot 因未知原因被移出群聊")

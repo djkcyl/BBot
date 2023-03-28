@@ -41,14 +41,14 @@
       - .creart.broadcast
       - .ariadne.message.commander.creart
 
-- module-name: playwright
+- module-name: grpc
   data-files:
-    dirs:
-      - 'driver'
-  dlls:
-    - from_filenames:
-        relative_path: '$PLAYWRIGHT'
-        prefixes:
-          - '*'
+    patterns:
+      - '_cython\_credentials\roots.pem'
+
+- module-name: minidynamicrender
+  data-files:
+    patterns:
+      - 'Static.zip'
 
 # nuitka --standalone --show-progress --output-dir=build .\test.py

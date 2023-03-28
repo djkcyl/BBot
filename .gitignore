@@ -1,6 +1,6 @@
 __pycache__/
 logs/
-test.py
+/test.py
 .vscode/
 package
 .idea/
@@ -9,6 +9,8 @@ data/
 docker_build
 build
 venv
+.venv
 nuitka/
 dist/
 .pdm.toml
+aunly_bbot/static/test.js

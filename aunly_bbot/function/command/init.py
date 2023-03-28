@@ -9,7 +9,7 @@ from graia.ariadne.event.message import FriendMessage
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import Twilight, FullMatch
 
-from ...core import BOT_Status
+from ...core import BOT_Status, Status
 from ...core.control import Permission
 
 channel = Channel.current()
@@ -27,13 +27,13 @@ channel = Channel.current()
 )
 async def main(app: Ariadne, friend: Friend):
     Permission.manual(friend, Permission.MASTER)
-    if BOT_Status["init"]:
+    if BOT_Status.check_status(Status.INITIALIZED):
         await app.send_friend_message(friend, MessageChain("已初始化，无需重复操作"))
     else:
         group = random.choice(await app.get_group_list())
         try:
             await app.recall_message(await app.send_group_message(group, MessageChain("test")))
-            BOT_Status["init"] = True
+            BOT_Status.set_status(Status.INITIALIZED, True)
             await app.send_friend_message(friend, MessageChain("初始化成功"))
         except RemoteException as e:
             await app.send_friend_message(friend, MessageChain(f"初始化失败，{e}"))

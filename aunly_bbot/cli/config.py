@@ -14,7 +14,9 @@ from noneprompt import (
     CheckboxPrompt,
 )
 
+from ..core import cache
 from ..model.config import _BotConfig
+from ..utils.detect_package import is_full
 from ..core.announcement import BBOT_ASCII_LOGO
 
 
@@ -31,11 +33,17 @@ class CliConfig:
     __session: str = ""
 
     def __init__(self) -> None:
+        self.skip_verify = cache.get("skip_verify", False)
         self.mirai_mirai_host()
         self.mirai_verify_key()
         self.debug()
+        self.use_browser()
         self.bilibili_mobile_style()
         self.bilibili_concurrent()
+        self.openai_summary()
+        self.bilibili_username()
+        self.use_bilibili_login()
+        self.wordcloud()
         self.event()
         self.webui()
         self.log_level()
@@ -83,6 +91,9 @@ class CliConfig:
             mirai_host = InputPrompt(
                 "请输入 Mirai HTTP API 的地址: ", "http://localhost:8080"
             ).prompt()
+            if self.skip_verify:
+                self.config["Mirai"]["mirai_host"] = mirai_host
+                return
             try:
                 if not URL(mirai_host).is_absolute():
                     raise ValueError("输入的地址不合法！")
@@ -93,7 +104,7 @@ class CliConfig:
             try:
                 if httpx.get(f"{mirai_host}/about").json()["data"]["version"] < "2.6.1":
                     click.secho(
-                        "Mirai HTTP API 版本低于 2.6.1，可能会导致部分功能无法使用！请升级至最新版",
+                        "Mirai HTTP API 版本低于 2.6.1，可能会导致部分功能无法使用！请注意及时升级至最新版",
                         fg="bright_red",
                         bold=True,
                     )
@@ -108,6 +119,9 @@ class CliConfig:
             mirai_key: str = InputPrompt(
                 "请输入 Mirai HTTP API 的 verifyKey: ", is_password=True
             ).prompt()
+            if self.skip_verify:
+                self.config["Mirai"]["verify_key"] = mirai_key
+                return
             try:
                 # check verifyKey
                 verify = httpx.post(
@@ -185,6 +199,9 @@ class CliConfig:
                 click.secho("该群已在调试群列表中，请重新输入！", fg="bright_red", bold=True)
                 continue
             debug_group = int(debug_group)
+            if self.skip_verify:
+                self.config["Debug"]["groups"].append(debug_group)
+                return
             group_list = httpx.get(
                 f"{self.config['Mirai']['mirai_host']}/groupList",
                 params={"sessionKey": self.__session},
@@ -197,14 +214,113 @@ class CliConfig:
             else:
                 click.secho("Bot 未加入该群，请重新输入！", fg="bright_red", bold=True)
 
+    def use_browser(self):
+        if is_full:
+            browser = ListPrompt(
+                "是否使用浏览器进行动态页面截图？",
+                [Choice("是（开启）"), Choice("否（关闭）")],
+                allow_filter=False,
+                default_select=1,
+                annotation="使用键盘的 ↑ 和 ↓ 来选择, 按回车确认",
+            ).prompt()
+            self.config["Bilibili"]["use_browser"] = browser.name == "是（开启）"
+        else:
+            self.config["Bilibili"]["use_browser"] = False
+
     def bilibili_mobile_style(self):
-        mobile_style = ListPrompt(
-            "是否使用手机端样式？",
+        if is_full:
+            mobile_style = ListPrompt(
+                "是否在浏览器中使用手机端样式？",
+                [Choice("是（开启）"), Choice("否（关闭）")],
+                allow_filter=False,
+                annotation="使用键盘的 ↑ 和 ↓ 来选择, 按回车确认",
+            ).prompt()
+            self.config["Bilibili"]["mobile_style"] = mobile_style.name == "是（开启）"
+        else:
+            self.config["Bilibili"]["mobile_style"] = False
+
+    def openai_summary(self):
+        openai_summary = ListPrompt(
+            "是否使用 OpenAI 进行视频和专栏内容摘要提取？",
             [Choice("是（开启）"), Choice("否（关闭）")],
             allow_filter=False,
             annotation="使用键盘的 ↑ 和 ↓ 来选择, 按回车确认",
         ).prompt()
-        self.config["Bilibili"]["mobile_style"] = mobile_style.name == "是（开启）"
+        if openai_summary.name == "是（开启）":
+            self.config["Bilibili"]["openai_summarization"] = True
+            self.openai_api_token()
+            self.openai_model()
+
+    def openai_api_token(self):
+        openai_token = InputPrompt("请输入 OpenAI Token: ").prompt()
+        if len(openai_token) != 51:
+            click.secho("输入的 OpenAI Token 不合法（长度应为 51 位）", fg="bright_red", bold=True)
+            self.openai_api_token()
+        if openai_token.startswith("sk-"):
+            self.config["Bilibili"]["openai_api_token"] = openai_token
+        else:
+            click.secho("输入的 OpenAI Token 不合法（应以 sk- 开头）", fg="bright_red", bold=True)
+            self.openai_api_token()
+
+    def openai_model(self):
+        openai_model = ListPrompt(
+            "请选择 OpenAI 模型",
+            [Choice("gpt-3.5-turbo-0301"), Choice("gpt-4-0314"), Choice("gpt-4-32k-0314")],
+            allow_filter=False,
+            annotation="使用键盘的 ↑ 和 ↓ 来选择, 按回车确认",
+        ).prompt()
+        self.config["Bilibili"]["openai_model"] = openai_model.name
+
+    def openai_proxy(self):
+        if openai_proxy_url := InputPrompt("请输入 OpenAI 代理地址（留空则不使用代理）: ").prompt():
+            if not URL(openai_proxy_url).is_absolute():
+                click.secho("输入的 OpenAI 代理地址不合法！", fg="bright_red", bold=True)
+                self.openai_proxy()
+            elif not openai_proxy_url.startswith("http"):
+                click.secho("输入的 OpenAI 代理地址不合法！仅可使用 http 代理", fg="bright_red", bold=True)
+                self.openai_proxy()
+            self.config["Bilibili"]["openai_proxy"] = openai_proxy_url
+
+    def bilibili_username(self):
+        username = InputPrompt("请输入 Bilibili 用户名: （可用于 AI 总结时获取 Bilibili 的 AI 字幕）").prompt()
+        if not username:
+            click.secho("用户名不能为空！", fg="bright_red", bold=True)
+            self.bilibili_username()
+        elif not username.isdigit():
+            click.secho("用户名不合法！", fg="bright_red", bold=True)
+            self.bilibili_username()
+        self.config["Bilibili"]["username"] = username
+
+    def bilibili_password(self):
+        password = InputPrompt("请输入 Bilibili 密码: ", is_password=True).prompt()
+        if not password:
+            click.secho("密码不能为空！", fg="bright_red", bold=True)
+            self.bilibili_password()
+        self.config["Bilibili"]["password"] = password
+
+    def use_bilibili_login(self):
+        if self.config["Bilibili"]["username"]:
+            use_bilibili_login = ListPrompt(
+                "是否使用已登录的 Bilibili 账号进行动态监听？（警告：不推荐使用该功能，暂不可用）",
+                [Choice("否（关闭）"), Choice("是（开启）")],
+                allow_filter=False,
+                annotation="使用键盘的 ↑ 和 ↓ 来选择, 按回车确认",
+            ).prompt()
+            self.config["Bilibili"]["use_login"] = use_bilibili_login.name == "是（开启）"
+        else:
+            self.config["Bilibili"]["use_login"] = False
+
+    def wordcloud(self):
+        if is_full:
+            wordcloud = ListPrompt(
+                "是否为视频和专栏内容制作词云？",
+                [Choice("是（开启）"), Choice("否（关闭）")],
+                allow_filter=False,
+                annotation="使用键盘的 ↑ 和 ↓ 来选择, 按回车确认",
+            ).prompt()
+            self.config["Bilibili"]["use_wordcloud"] = wordcloud.name == "是（开启）"
+        else:
+            self.config["Bilibili"]["use_wordcloud"] = False
 
     def bilibili_concurrent(self):
         while True:
@@ -267,7 +383,7 @@ class CliConfig:
                 click.secho("输入的 QQ 号不合法！", fg="bright_red", bold=True)
                 continue
 
-            if self.verify_friend(master):
+            if self.skip_verify or self.verify_friend(master):
                 self.config["master"] = int(master)
                 return
             else:
@@ -285,7 +401,7 @@ class CliConfig:
             if int(admin) in self.config["admins"]:
                 click.secho("该 QQ 号已经在管理员列表中了！", fg="bright_red", bold=True)
                 continue
-            if not self.verify_friend(admin):
+            if not self.skip_verify and not self.verify_friend(admin):
                 click.secho("该 QQ 号不是 Bot 的好友！", fg="bright_red", bold=True)
                 continue
 

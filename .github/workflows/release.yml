@@ -10,8 +10,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Build Binary
+  build-pyinstaller:
+    name: Build Pyinstaller Binary
     outputs:
       version: ${{ steps.version.outputs.version }}
     strategy:
@@ -19,6 +19,10 @@ jobs:
         os:
           - ubuntu-20.04
           - windows-latest
+
+        group:
+          - lite
+          - full
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -32,28 +36,84 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install --upgrade wheel pip
-          pip install -r requirements.txt
+          pip install --upgrade wheel pip pdm
+          pdm install -G ${{ matrix.group }}
 
       - name: Install Playwright Browsers
+        if: ${{ matrix.group == 'full' }}
         env:
           PLAYWRIGHT_BROWSERS_PATH: "0"
-        run: playwright install firefox
+        run: pdm run playwright install firefox
 
       - name: Install Pyinstaller
-        run: pip install --upgrade pyinstaller
+        run: pdm add pyinstaller
 
       - name: Build Pyinstaller Binary
-        run: pyinstaller main.spec
+        run: pdm run pyinstaller main-${{ matrix.group }}.spec
+
+      - name: Get commit hash
+        id: commit
+        uses: pr-mpt/actions-commit-hash@v2
+
+      - name: Get Release Version
+        id: version
+        run: |
+          echo "::set-output name=version::v$(pdm run python release.py --version)"
+
+      - name: Rename Binary
+        run: |
+          tree
+          mv ./dist/$(pdm run python release.py --buildname --package-tools pyinstaller) ./build/$(pdm run python release.py --name --package-tools pyinstaller --group ${{ matrix.group }})
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          files: build/*
+
+  build-nuitka:
+    name: Build Nuitka Binary
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-20.04
+          - windows-latest
+
+        group:
+          - lite
+          - full
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Prepare environment
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9.x"
+
+      - name: Install Dependencies
+        run: |
+          pip install --upgrade wheel pip pdm
+          pdm install -G ${{ matrix.group }}
+
+      - name: Install Playwright Browsers
+        if: ${{ matrix.group == 'full' }}
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: "0"
+        run: pdm run playwright install firefox
 
       - name: Replease Playwright Path
-        run: python release.py --replace-playwright-path
+        if: ${{ matrix.group == 'full' }}
+        run: pdm run python release.py --replace-playwright-path
 
       - name: Build Nuitka Binary
         run: |
-          pip uninstall -y pyinstaller
-          pip install nuitka zstandard ordered-set
-          python -m nuitka --onefile --standalone --show-progress --assume-yes-for-downloads --output-dir=nuitka --windows-icon-from-ico=tv.ico --user-package-configuration-file=nuitka.yml main.py
+          pdm add nuitka zstandard ordered-set
+          pdm run python -m nuitka --onefile --standalone --show-progress --assume-yes-for-downloads --output-dir=nuitka --windows-icon-from-ico=tv.ico --user-package-configuration-file=nuitka-${{ matrix.group }}.yml main.py
 
       - name: Get commit hash
         id: commit
@@ -66,8 +126,9 @@ jobs:
 
       - name: Rename Binary
         run: |
-          mv ./dist/$(python release.py --buildname --package-tools pyinstaller) ./build/$(python release.py --name --package-tools pyinstaller)
-          mv ./nuitka/$(python release.py --buildname --package-tools nuitka) ./build/$(python release.py --name --package-tools nuitka)
+          tree
+          mkdir build
+          mv ./nuitka/$(pdm run python release.py --buildname --package-tools nuitka) ./build/$(pdm run python release.py --name --package-tools nuitka --group ${{ matrix.group }})
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -75,48 +136,48 @@ jobs:
           tag_name: ${{ steps.version.outputs.version }}
           files: build/*
 
-  docker:
-    name: Build Docker Image
-    runs-on: ubuntu-latest
-    steps:
-      - name: Prepare environment
-        uses: actions/checkout@v2
+  # docker:
+  #   name: Build Docker Image
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Prepare environment
+  #       uses: actions/checkout@v2
 
-      - name: Setup QEMU
-        uses: docker/setup-qemu-action@v2
+  #     - name: Setup QEMU
+  #       uses: docker/setup-qemu-action@v2
 
-      - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v2
+  #     - name: Setup Docker Buildx
+  #       uses: docker/setup-buildx-action@v2
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+  #     - name: Login to Docker Hub
+  #       uses: docker/login-action@v2
+  #       with:
+  #         username: ${{ secrets.DOCKER_USERNAME }}
+  #         password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build Image
-        uses: docker/build-push-action@v3
-        with:
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/bbot:latest
+  #     - name: Build Image
+  #       uses: docker/build-push-action@v3
+  #       with:
+  #         platforms: linux/amd64,linux/arm64
+  #         push: true
+  #         tags: ${{ secrets.DOCKER_USERNAME }}/bbot:latest
 
-  pypi:
-    name: Upload to PyPI
-    runs-on: ubuntu-latest
-    steps:
-      - name: Prepare environment
-        uses: actions/checkout@v2
+  # pypi:
+  #   name: Upload to PyPI
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Prepare environment
+  #       uses: actions/checkout@v2
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.9.x"
+  #     - name: Setup Python
+  #       uses: actions/setup-python@v4
+  #       with:
+  #         python-version: "3.9.x"
 
-      - name: Install Dependencies
-        run: |
-          pip install pdm
+  #     - name: Install Dependencies
+  #       run: |
+  #         pip install pdm
 
-      - name: Build and Publish
-        run: |
-          pdm publish --username __token__ --password ${{ secrets.PYPI_TOKEN }}
+  #     - name: Build and Publish
+  #       run: |
+  #         pdm publish --username __token__ --password ${{ secrets.PYPI_TOKEN }}

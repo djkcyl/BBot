@@ -12,7 +12,7 @@ from graia.ariadne.message.chain import MessageChain
 from graia.scheduler.saya.schema import SchedulerSchema
 
 from ...core.bot_config import BotConfig
-from ...core import BOT_Status, Bili_Auth
+from ...core import BOT_Status, Bili_Auth, Status
 
 
 channel = Channel.current()
@@ -22,10 +22,12 @@ login_cache_file = Path("data/login_cache.json")
 @channel.use(SchedulerSchema(crontabify("0 0 * * *")))
 async def main(app: Ariadne):
     logger.info("[BiliBili推送] 开始刷新 token")
-    if BotConfig.Bilibili.use_login:
-        BOT_Status["init"] = False
+    if BotConfig.Bilibili.username and BotConfig.Bilibili.password and Bili_Auth.tokens:
+        BOT_Status.set_status(Status.INITIALIZED, False)
 
-        while BOT_Status["live_updating"] or BOT_Status["dynamic_updating"]:
+        while BOT_Status.check_status(Status.LIVE_IDLE) or BOT_Status.check_status(
+            Status.DYNAMIC_IDLE
+        ):
             await asyncio.sleep(0.1)
 
         try:
@@ -49,6 +51,6 @@ async def main(app: Ariadne):
                 MessageChain(f"[BiliBili推送] 刷新 token 失败，Bot 已关机，{e}"),
             )
             app.stop()
-        BOT_Status["init"] = True
+        BOT_Status.set_status(Status.INITIALIZED, True)
     else:
         logger.info("[BiliBili推送] 未启用登录，跳过 token 刷新")

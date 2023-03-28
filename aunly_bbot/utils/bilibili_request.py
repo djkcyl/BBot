@@ -7,7 +7,9 @@ from bilireq.grpc.utils import grpc_request
 from bilireq.grpc.dynamic import grpc_get_followed_dynamics
 from bilireq.grpc.protos.bilibili.app.view.v1.view_pb2_grpc import ViewStub
 from bilireq.grpc.protos.bilibili.app.view.v1.view_pb2 import ViewReq, ViewReply
+from bilireq.grpc.protos.bilibili.community.service.dm.v1.dm_pb2_grpc import DMStub
 from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2_grpc import DynamicStub
+from bilireq.grpc.protos.bilibili.community.service.dm.v1.dm_pb2 import DmViewReq, DmViewReply
 from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2 import (
     DynamicType,
     DynDetailsReq,
@@ -101,6 +103,18 @@ async def get_user_space_info(uid: int):
     return await get(url, params=params)
 
 
+async def get_player(aid: int, cid: int):
+    """
+    获取视频播放器信息
+    """
+    url = "https://api.bilibili.com/x/player/v2"
+    params = {
+        "aid": aid,
+        "cid": cid,
+    }
+    return await get(url, params=params, auth=Bili_Auth)
+
+
 async def grpc_get_followed_dynamics_noads():
     resp = await grpc_get_followed_dynamics(auth=Bili_Auth)
     exclude_list = [
@@ -131,3 +145,10 @@ async def grpc_get_view_info(aid: int = 0, bvid: str = "", **kwargs) -> ViewRepl
     else:
         raise ValueError("aid or bvid must be provided")
     return await stub.View(req, **kwargs)
+
+
+@grpc_request
+async def grpc_get_dmview(pid: int, oid: int, type: int = 1, **kwargs) -> DmViewReply:
+    stub = DMStub(kwargs.pop("_channel"))
+    req = DmViewReq(pid=pid, oid=oid, type=type)
+    return await stub.DmView(req, **kwargs)

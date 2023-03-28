@@ -90,6 +90,9 @@ Docker 部署请查看 [这里](https://github.com/djkcyl/BBot-Graia/wiki/Docker
 - [x] 自定义动态页字体
 - [x] 上传至 PyPI 并支持 CLI 方式启动
 - [x] 迁移至 PDM
+- [x] 增加针对视频和专栏解析的内容总结，支持 ChatGPT 和 WordCloud 两种模式
+- [x] 字体修改为网络获取，缩小程序体积
+- [x] 增加 Lite 版本，不包含浏览器等依赖
 - [ ] **增加 Web 端管理界面**
 - [ ] 增加简单的推送数据分析及报告
 - [ ] 丰富管理员指令

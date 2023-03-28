@@ -18,18 +18,20 @@ parser.add_argument("--buildname", action="store_true")
 parser.add_argument("--package-tools", default="")
 parser.add_argument("--beta", default="")
 parser.add_argument("--replace-playwright-path", action="store_true")
+parser.add_argument("--group", default="")
 
 p = parser.parse_args()
 
 package_tools = p.package_tools
 beta_hash = f".beta.{p.beta}" if p.beta else ""
 build_suffix = ".bin" if package_tools == "nuitka" else ""
+group = p.group
 
 if platform.system() == "Windows":
-    file_name = f"bbot-{project_version}{beta_hash}-windows-{package_tools}.exe"
+    file_name = f"bbot-{group}-{project_version}{beta_hash}-windows-{package_tools}.exe"
     build_name = "main.exe"
 else:
-    file_name = f"bbot-{project_version}{beta_hash}-ubuntu-{package_tools}"
+    file_name = f"bbot-{group}-{project_version}{beta_hash}-ubuntu-{package_tools}"
     build_name = f"main{build_suffix}"
 
 
@@ -47,5 +49,5 @@ elif p.replace_playwright_path:
         )
     )[0]
     chrome_relative_path = path.relative_to(pathlib.Path(playwright_package_path).parent)
-    yml_path = pathlib.Path("nuitka.yml")
+    yml_path = pathlib.Path("nuitka-full.yml")
     yml_path.write_text(yml_path.read_text().replace("$PLAYWRIGHT", str(chrome_relative_path)))

@@ -14,7 +14,7 @@ from graia.ariadne.message.parser.twilight import (
     WildcardMatch,
 )
 
-from ....core import BOT_Status
+from ....core import BOT_Status, Status
 from ....core.bot_config import BotConfig
 from ....utils.uid_extract import uid_extract
 from ....utils.up_operation import subscribe_uid
@@ -41,10 +41,15 @@ channel = Channel.current()
 async def main(app: Ariadne, group: Group, at: ElementResult, anything: RegexResult):
     at_result: At = at.result  # type: ignore
     if at_result.target == app.account:
+        if not BOT_Status.check_status(Status.INITIALIZED):
+            return await app.send_group_message(
+                group,
+                MessageChain("正在初始化，请稍后..."),
+            )
         message = anything.result.display  # type: ignore
         uid = await uid_extract(message)
         if uid:
-            if BOT_Status["dynamic_updating"]:
+            if not BOT_Status.check_status(Status.DYNAMIC_IDLE):
                 await app.send_group_message(
                     group,
                     MessageChain("正在订阅，请稍后..."),

@@ -1,0 +1,64 @@
+- module-name: __main__
+  data-files:
+    dirs:
+      - 'aunly_bbot/static'
+      - 'aunly_bbot/website/static'
+    patterns:
+      - "pyproject.toml"
+
+- module-name: sentry_sdk.integrations
+  implicit-imports:
+    - depends:
+      - .logging
+      - .stdlib
+      - .excepthook
+      - .dedupe
+      - .atexit
+      - .modules
+      - .argv
+      - .threading
+      - .django
+      - .flask
+      - .starlette
+      - .fastapi
+      - .bottle
+      - .falcon
+      - .sanic
+      - .celery
+      - .rq
+      - .aiohttp
+      - .tornado
+      - .sqlalchemy
+      - .redis
+      - .pyramid
+      - .boto3
+
+- module-name: graia
+  implicit-imports:
+    - depends:
+      - .creart
+      - .creart.saya
+      - .creart.broadcast
+      - .ariadne.message.commander.creart
+
+- module-name: grpc
+  data-files:
+    patterns:
+      - '_cython\_credentials\roots.pem'
+
+- module-name: minidynamicrender
+  data-files:
+    patterns:
+      - 'Static.zip'
+
+- module-name: playwright
+  data-files:
+    dirs:
+      - 'driver'
+  dlls:
+    - from_filenames:
+        relative_path: '$PLAYWRIGHT'
+        prefixes:
+          - '*'
+
+# nuitka --standalone --show-progress --output-dir=build .\test.py

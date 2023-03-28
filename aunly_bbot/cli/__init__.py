@@ -17,18 +17,39 @@ def main():
     pass
 
 
-@click.command(help="运行 BBot")
+@click.command(name="run", help="运行 BBot")
 @click.option("-t", "--test", is_flag=True, help="测试模式")
+@click.option("-s", "--skip-verfiy", is_flag=True, help="跳过 MAH 可用性检查")
+@click.option("-i", "--ignore-sub", is_flag=True, help="忽略登录模式下的账户订阅列表")
 @click.help_option("-h", "--help", help="显示帮助信息")
-def run(test: bool):
-    if test:
-        from ..core import cache
-
-        cache["test"] = True
+def run_bot(test: bool, skip_verfiy: bool, ignore_sub: bool):
+    from ..core import cache
+    cache["test"] = test
+    cache["skip_verfiy"] = skip_verfiy
+    cache["ignore_sub"] = ignore_sub
 
     from .run import run_bot
 
     run_bot()
+
+
+@click.command(name="api", help="运行 BBot Playwright 截图 API 服务")
+@click.help_option("-h", "--help", help="显示帮助信息")
+def run_api():
+    import uvicorn
+    from .api import app
+
+    uvicorn.run(app, host="0.0.0.0", port=9000)
+
+
+@click.command(name="install-deps", help="安装 Playwright 所需依赖")
+@click.help_option("-h", "--help", help="显示帮助信息")
+def install_deps():
+    import sys
+    from playwright.__main__ import main as pw_main
+
+    sys.argv.append("firefox")
+    pw_main()
 
 
 @click.command(help="BBot 配置向导")
@@ -38,5 +59,7 @@ def config():
     click_config()
 
 
-main.add_command(run)
+main.add_command(run_bot)
+main.add_command(run_api)
 main.add_command(config)
+main.add_command(install_deps)
