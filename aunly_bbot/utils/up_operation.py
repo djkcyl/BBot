@@ -72,8 +72,6 @@ async def subscribe_uid(uid: Union[str, int], groupid: Union[str, int]):
         ):
             BOT_Status.offset["$login"] = int(dyn.extend.dyn_id_str)
     elif not BotConfig.Bilibili.use_login:
-        if BOT_Status.offset["$login"] is None:
-            BOT_Status.offset = {}
         BOT_Status.offset[uid] = int(dyn.extend.dyn_id_str)
 
     if dyn.modules[0].module_author.author.live.live_state == 1:
@@ -88,7 +86,11 @@ async def unsubscribe_uid(uid, groupid, force=False):
     groupid = str(groupid)
     logger.info(f"正在群 {groupid} 取消订阅 {uid}")
     BOT_Status.set_status(Status.SUBSCRIBE_IDLE, False)
-    while not BOT_Status.check_status(Status.DYNAMIC_IDLE) and not force and BotConfig.Bilibili.use_login:
+    while (
+        not BOT_Status.check_status(Status.DYNAMIC_IDLE)
+        and not force
+        and BotConfig.Bilibili.use_login
+    ):
         await asyncio.sleep(0.1)
 
     if not uid_in_group(uid, groupid):

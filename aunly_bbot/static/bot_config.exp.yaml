@@ -12,19 +12,24 @@ Debug:
     - 123456789
 Bilibili:
   mobile_style: true # 是否采用手机的 Web 样式进行截图
-  use_login: false   # 是否登录 BiliBili 账号
-  username:          # 若登录 BiliBili 账号, 则 **需要** 填入账号
-  password:          # 若登录 BiliBili 账号, 则 **需要** 填入密码
+  use_login: false   # 是否使用登录的 BiliBili 账号进行动态监听（不要开）
+  username:          # BiliBili 账号，若填写则会在启动后自动登录，并且用于部分功能，如 AI 字幕
+  password:          # BiliBili 密码
   concurrency: 5     # 未登录时发送 gRPC 请求的并发数量(1 ~ 50)
   dynamic_font: "HarmonyOS_Sans_SC_Medium.ttf" # 自定义动态字体
-  dynamic_font_source: "remote" # 自定义动态字体来源, 可选值: "local", "remote", "system", 为 "local" 时请将字体文件放在 data/font 目录下
+  dynamic_font_source: "local"            # 自定义动态字体来源, 可选值: "local", "remote", "system", 为 "local" 时请将字体文件放在 data/font 目录下
+  openai_summarization: false             # 是否使用 OpenAI 进行视频和专栏的 AI 总结
+  openai_api_token: "sk-xxxxxxxxxxxxxx"   # OpenAI API Token
+  openai_model: "gpt-3.5-turbo-0301"      # OpenAI 模型
+  openai_proxy: "http://localhost:7890"   # 请求 OpenAI 所用的代理
+  use_wordcloud: true                     # 是否使用词云
 Event:
   mute: true         # 是否向管理员发送被禁言的事件提醒。
   permchange: true   # 是否向管理员发送权限变更的事件提醒。
   push: true         # 是否向管理员发送推送的事件提醒。
   subscribe: true    # 是否向管理员发送订阅的事件提醒。
 Webui:
-  webui_host: "127.0.0.1"
+  webui_host: "0.0.0.0"
   webui_port: 6080
   webui_enable: true
 log_level: INFO      # 控制台输出的日志等级

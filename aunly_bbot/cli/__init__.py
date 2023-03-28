@@ -20,11 +20,13 @@ def main():
 @click.command(name="run", help="运行 BBot")
 @click.option("-t", "--test", is_flag=True, help="测试模式")
 @click.option("-s", "--skip-verfiy", is_flag=True, help="跳过 MAH 可用性检查")
+@click.option("-i", "--ignore-sub", is_flag=True, help="忽略登录模式下的账户订阅列表")
 @click.help_option("-h", "--help", help="显示帮助信息")
-def run_bot(test: bool, skip_verfiy: bool):
+def run_bot(test: bool, skip_verfiy: bool, ignore_sub: bool):
     from ..core import cache
     cache["test"] = test
     cache["skip_verfiy"] = skip_verfiy
+    cache["ignore_sub"] = ignore_sub
 
     from .run import run_bot
 

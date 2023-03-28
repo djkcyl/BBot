@@ -1,3 +1,6 @@
+import json
+import asyncio
+
 from loguru import logger
 from graia.saya import Channel
 from grpc.aio import AioRpcError
@@ -11,11 +14,17 @@ from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.message.element import Image, Source
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 
-from ...utils.column_shot import get_cv
+from ...core.bot_config import BotConfig
+from ...model.exception import AbortError
+from ...utils.column_resolve import get_cv
+from ...core.data import ContentResolveData
+from ...utils.text2image import rich_text2image
 from ...core.control import Interval, Permission
+from ...utils.video_subtitle import get_subtitle
 from ...utils.message_resolve import message_resolve
 from ...utils.draw_bili_image import binfo_image_create
 from ...utils.bilibili_request import get_b23_url, grpc_get_view_info
+from ...utils.content_summarise import column_summarise, get_browser_image, subtitle_summarise
 
 channel = Channel.current()
 
@@ -26,7 +35,7 @@ async def main(app: Ariadne, group: Group, message: MessageChain, source: Source
     if not bili_number:
         return
 
-    if bili_number[:2] in ["BV", "bv"]:
+    if bili_number[:2] in ["BV", "bv", "av"]:
         try:
             if (video_info := await video_info_get(bili_number)) is None:
                 await Interval.manual(group.id, 5)
@@ -50,7 +59,15 @@ async def main(app: Ariadne, group: Group, message: MessageChain, source: Source
                 group, MessageChain(f"{bili_number} 视频信息解析失败，错误信息：{type(e)} {e}"), quote=source
             )
         aid = video_info.activity_season.arc.aid or video_info.arc.aid
+        cid = (
+            video_info.activity_season.pages[0].page.cid
+            if video_info.activity_season.pages
+            else video_info.pages[0].page.cid
+        )
         bvid = video_info.activity_season.bvid or video_info.bvid
+        title = video_info.activity_season.arc.title or video_info.arc.title
+        archive_data = ContentResolveData(aid=aid)
+        archive_data.title = title
         await Interval.manual(aid + group.id)
         try:
             logger.info(f"开始生成视频信息图片：{aid}")
@@ -64,11 +81,89 @@ async def main(app: Ariadne, group: Group, message: MessageChain, source: Source
                 ),
                 quote=source,
             )
+
+            if BotConfig.Bilibili.openai_summarization or BotConfig.Bilibili.use_wordcloud:
+                try:
+                    if archive_data.content:
+                        subtitle = [str(x) for x in json.loads(archive_data.content)]
+                    else:
+                        subtitle = await get_subtitle(aid, cid)
+                        archive_data.content = json.dumps(subtitle, ensure_ascii=False)
+
+                    async def openai_summarization():
+                        logger.info(f"开始进行 AI 总结：{aid}")
+                        try:
+                            if archive_data.openai:
+                                logger.info(f"{aid} 已存在总结缓存，跳过总结请求")
+                                summarise = archive_data.openai
+                            else:
+                                logger.info(f"{aid} 总结不存在，正在尝试请求......")
+                                ai_summary = await subtitle_summarise(subtitle, title)
+                                if ai_summary.summary:
+                                    summarise = ai_summary.summary
+                                    archive_data.openai = summarise
+                                else:
+                                    logger.warning(f"视频 {aid} 总结失败：{ai_summary.raw}")
+                                    return
+
+                            logger.debug(summarise)
+                            if BotConfig.Bilibili.use_browser:
+                                image = await get_browser_image(summarise)
+                            else:
+                                image = await rich_text2image(summarise)
+                            if image:
+                                await app.send_group_message(
+                                    group, MessageChain(Image(data_bytes=image))
+                                )
+                        except AbortError as e:
+                            logger.info(f"视频 {aid} 总结被终止：{e}")
+                        except Exception:
+                            capture_exception()
+                            logger.exception(f"视频 {aid} 总结出错")
+
+                    async def wordcloud():
+                        logger.info(f"开始生成词云：{aid}")
+                        try:
+                            from ...utils.wordcloud import get_worldcloud_image, get_frequencies
+
+                            if archive_data.jieba:
+                                logger.info(f"{aid} 已存在分词缓存，跳过分词")
+                                word_frequencies = dict(json.loads(archive_data.jieba))
+                            else:
+                                logger.info(f"{aid} 分词不存在，正在尝试分词......")
+                                word_frequencies = await asyncio.to_thread(
+                                    get_frequencies, subtitle
+                                )
+                                archive_data.jieba = json.dumps(
+                                    word_frequencies, ensure_ascii=False
+                                )
+
+                            wordcloud = await get_worldcloud_image(word_frequencies)
+                            if wordcloud:
+                                await app.send_group_message(
+                                    group, MessageChain(Image(data_bytes=wordcloud))
+                                )
+                        except Exception:
+                            capture_exception()
+                            logger.exception(f"视频 {aid} 词云出错")
+
+                    gather = []
+                    if BotConfig.Bilibili.openai_summarization:
+                        gather.append(openai_summarization())
+                    if BotConfig.Bilibili.use_wordcloud:
+                        gather.append(wordcloud())
+                    await asyncio.gather(*gather, return_exceptions=True)
+
+                except AbortError as e:
+                    logger.warning(f"视频 {aid} 总结失败：{e.message}")
+                    return
+                archive_data.save()
+
         except TimeoutException:
             await app.send_group_message(
                 group, MessageChain(f"{bili_number} 视频信息生成超时，请稍后再试。"), quote=source
             )
-        except Exception as e:  # noqa
+        except Exception as e:
             capture_exception()
             logger.exception("视频解析 API 调用出错")
             await app.send_group_message(
@@ -76,19 +171,76 @@ async def main(app: Ariadne, group: Group, message: MessageChain, source: Source
             )
 
     elif bili_number[:2] == "cv":
-        column_id = bili_number[2:]
-        column = await get_cv(column_id)
-        if column:
-            if isinstance(column, str):
-                await app.send_group_message(group, MessageChain(column), quote=source)
-            else:
-                await app.send_group_message(
-                    group, MessageChain(Image(data_bytes=column)), quote=source
-                )
-        else:
-            await app.send_group_message(
-                group, MessageChain(f"未找到专栏 {bili_number}，可能已被 UP 主删除。"), quote=source
-            )
+        if BotConfig.Bilibili.openai_summarization or BotConfig.Bilibili.use_wordcloud:
+            column_id = bili_number[2:]
+            archive_data = ContentResolveData(cid=column_id)
+            try:
+                if archive_data.content and archive_data.title:
+                    cv_text = archive_data.content
+                    cv_title = archive_data.title
+                else:
+                    cv_title, cv_text = await get_cv(column_id)
+                    archive_data.title = cv_title
+                    archive_data.content = cv_text
+
+                async def openai_summarization():
+                    try:
+                        if archive_data.openai:
+                            summarise = archive_data.openai
+                        else:
+                            ai_summary = await column_summarise(cv_title, cv_text)
+                            if ai_summary.summary:
+                                summarise = ai_summary.summary
+                                archive_data.openai = summarise
+                            else:
+                                return
+
+                        if BotConfig.Bilibili.use_browser:
+                            image = await get_browser_image(summarise)
+                        else:
+                            image = await rich_text2image(summarise)
+                        if image:
+                            await app.send_group_message(
+                                group, MessageChain(Image(data_bytes=image)), quote=source
+                            )
+                    except AbortError as e:
+                        logger.info(f"专栏 {column_id} 总结被终止：{e}")
+                    except Exception:
+                        capture_exception()
+                        logger.exception(f"专栏 {column_id} 总结出错")
+
+                async def wordcloud():
+                    try:
+                        from ...utils.wordcloud import get_worldcloud_image, get_frequencies
+
+                        if archive_data.jieba:
+                            word_frequencies = dict(json.loads(archive_data.jieba))
+                        else:
+                            word_frequencies = await asyncio.to_thread(
+                                get_frequencies, [cv_title, cv_text]
+                            )
+                            archive_data.jieba = json.dumps(
+                                word_frequencies, ensure_ascii=False
+                            )
+
+                        wordcloud = await get_worldcloud_image(word_frequencies)
+                        if wordcloud:
+                            await app.send_group_message(
+                                group, MessageChain(Image(data_bytes=wordcloud)), quote=source
+                            )
+                    except Exception:
+                        capture_exception()
+                        logger.exception(f"专栏 {column_id} 词云出错")
+
+                gather = []
+                if BotConfig.Bilibili.openai_summarization:
+                    gather.append(openai_summarization())
+                if BotConfig.Bilibili.use_wordcloud:
+                    gather.append(wordcloud())
+                await asyncio.gather(*gather, return_exceptions=True)
+            except AbortError as e:
+                logger.warning(f"专栏 {column_id} 加载失败：{e.message}")
+            archive_data.save()
 
 
 def bv2av(bv):
