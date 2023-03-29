@@ -48,6 +48,7 @@ B，也代表 BiliBili，这个 Bot 将专注于哔哩哔哩的推送等服务
 - 可针对不同群聊对订阅的 UP 主进行昵称替换
 - 可限制每个群可订阅的最大 UP 主数量
 - 视频解析可使用 OpenAI ChatGPT 进行内容总结
+- 内存少的话可以使用 Lite 版来减少部分依赖的占用
 
 ## 🛠️ 使用
 
@@ -111,6 +112,6 @@ More...
 - [Well404](https://space.bilibili.com/33138220/) 为本项目编写文档以及部署教程[视频](https://www.bilibili.com/video/BV16B4y137sx)
 - [八萬](https://space.bilibili.com/8027000) 项目 Logo 画师
 
-## ⏳ Stargazers over time
+## ⏳ Star 趋势
 
 [![Stargazers over time](https://starchart.cc/djkcyl/BBot-Graia.svg)](https://starchart.cc/djkcyl/BBot-Graia)
