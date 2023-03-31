@@ -96,3 +96,10 @@ with saya.module_context():
     else:
         saya.require("aunly_bbot.function")
         from . import function  # noqa
+
+        custom_path = Path("data", "custom")
+        custom_path.mkdir(parents=True, exist_ok=True)
+        for module in custom_path.glob("*"):
+            if module.name != "__pycache__":
+                logger.info(f"正在加载自定义模块：{module.stem}")
+                saya.require(f"data.custom.{module.stem}")

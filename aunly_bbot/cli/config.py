@@ -44,6 +44,7 @@ class CliConfig:
         self.bilibili_username()
         self.use_bilibili_login()
         self.wordcloud()
+        self.bcut_asr()
         self.event()
         self.webui()
         self.log_level()
@@ -321,6 +322,21 @@ class CliConfig:
             self.config["Bilibili"]["use_wordcloud"] = wordcloud.name == "是（开启）"
         else:
             self.config["Bilibili"]["use_wordcloud"] = False
+
+    def bcut_asr(self):
+        if (
+            self.config["Bilibili"]["openai_summarization"]
+            or self.config["Bilibili"]["use_wordcloud"]
+        ):
+            bcut_asr = ListPrompt(
+                "是否使用 Bilibili ASR 进行视频内容语音识别？（用于 AI 总结和词云制作）",
+                [Choice("是（开启）"), Choice("否（关闭）")],
+                allow_filter=False,
+                annotation="使用键盘的 ↑ 和 ↓ 来选择, 按回车确认",
+            ).prompt()
+            self.config["Bilibili"]["use_bcut_asr"] = bcut_asr.name == "是（开启）"
+        else:
+            self.config["Bilibili"]["use_bcut_asr"] = False
 
     def bilibili_concurrent(self):
         while True:

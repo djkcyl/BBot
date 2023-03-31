@@ -9,7 +9,9 @@ from bilireq.grpc.protos.bilibili.app.view.v1.view_pb2_grpc import ViewStub
 from bilireq.grpc.protos.bilibili.app.view.v1.view_pb2 import ViewReq, ViewReply
 from bilireq.grpc.protos.bilibili.community.service.dm.v1.dm_pb2_grpc import DMStub
 from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2_grpc import DynamicStub
+from bilireq.grpc.protos.bilibili.app.playurl.v1.playurl_pb2_grpc import PlayURLStub
 from bilireq.grpc.protos.bilibili.community.service.dm.v1.dm_pb2 import DmViewReq, DmViewReply
+from bilireq.grpc.protos.bilibili.app.playurl.v1.playurl_pb2 import PlayViewReq, PlayViewReply
 from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2 import (
     DynamicType,
     DynDetailsReq,
@@ -152,3 +154,10 @@ async def grpc_get_dmview(pid: int, oid: int, type: int = 1, **kwargs) -> DmView
     stub = DMStub(kwargs.pop("_channel"))
     req = DmViewReq(pid=pid, oid=oid, type=type)
     return await stub.DmView(req, **kwargs)
+
+
+@grpc_request
+async def grpc_get_playview(aid: int, cid: int, **kwargs) -> PlayViewReply:
+    stub = PlayURLStub(kwargs.pop("_channel"))
+    req = PlayViewReq(aid=aid, cid=cid, qn=128, fnval=464)
+    return await stub.PlayView(req, **kwargs)

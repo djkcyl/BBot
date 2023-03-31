@@ -16,7 +16,9 @@ LIMIT_COUNT = {"gpt-3.5-turbo-0301": 3500, "gpt-4-0314": 7600, "gpt-4-32k-0314":
 
 if BotConfig.Bilibili.openai_summarization:
     logger.info("正在加载 OpenAI Token 计算模型")
-    tiktoken_enc = asyncio.run(tiktoken_async.encoding_for_model(BotConfig.Bilibili.openai_model))
+    tiktoken_enc = asyncio.run(
+        tiktoken_async.encoding_for_model(BotConfig.Bilibili.openai_model)
+    )
     logger.info(f"{tiktoken_enc.name} 加载成功")
 
 
@@ -27,10 +29,12 @@ def get_user_prompt(title: str, transcript: str) -> str:
     prompt = (
         "Your output should use the following template:\n## Summary\n## Highlights\n"
         "- [Emoji] Bulletpoint\n\n"
-        "Your task is to summarise the video I have given you in up to 6 concise bullet points, "
+        "Your task is to summarise the video I have given you in up to 2 to 6 concise bullet points, "
         "starting with a short highlight, each bullet point is at least 15 words. "
         "Choose an appropriate emoji for each bullet point. "
         f"Use the video above: {{Title}} {{Transcript}}."
+        "If you think the content in the transcript is meaningless or nonsensical, "
+        "you can choose to skip summarization and simply output 'none'."
         f"\n\nReply in {language} Language."
     )
     return f'Title: "{title}"\nTranscript: "{transcript}"\n\nInstructions: {prompt}'
@@ -73,14 +77,16 @@ def get_simple_prompt(prompt: str):
 
 
 async def openai_req(
-    prompt_message: list[dict[str, str]], token: Optional[str] = None
+    prompt_message: list[dict[str, str]],
+    token: Optional[str] = BotConfig.Bilibili.openai_api_token,
+    model: str = BotConfig.Bilibili.openai_model,
 ) -> AISummary:
-    if not (token or BotConfig.Bilibili.openai_api_token):
+    if not token:
         return AISummary(error=True, message="未配置 OpenAI API Token")
     async with httpx.AsyncClient(
         proxies=BotConfig.Bilibili.openai_proxy,
         headers={
-            "Authorization": f"Bearer {token or BotConfig.Bilibili.openai_api_token}",
+            "Authorization": f"Bearer {token}",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)"
             " Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.69",
         },
@@ -89,11 +95,11 @@ async def openai_req(
         req = await client.post(
             "https://api.openai.com/v1/chat/completions",
             json={
-                "model": "gpt-3.5-turbo",
+                "model": model,
                 "messages": prompt_message,
             },
         )
         if req.status_code != 200:
             return AISummary(error=True, message=req.text, raw=req.json())
-        logger.info(f"OpenAI Response token 实际: {req.json()['usage']}")
+        logger.info(f"[OpenAI] Response token 实际: {req.json()['usage']}")
         return AISummary(summary=req.json()["choices"][0]["message"]["content"], raw=req.json())

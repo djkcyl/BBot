@@ -59,6 +59,8 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
     openai_model: str = "gpt-3.5-turbo"
     openai_proxy: Optional[AnyHttpUrl] = None
     use_wordcloud: bool = False
+    use_bcut_asr: bool = False
+    asr_length_threshold: int = 60
 
     # 验证是否可以登录
     @validator("use_login", always=True)

@@ -2,6 +2,7 @@ import asyncio
 
 from io import BytesIO
 from pathlib import Path
+from graia.ariadne.app import Ariadne
 from PIL import Image, ImageFont, ImageDraw
 
 from .strings import get_cut_str
@@ -69,3 +70,21 @@ async def rich_text2image(data: str):
             bio = BytesIO()
             image.convert("RGB").save(bio, "jpeg", optimize=True)
             return bio.getvalue()
+
+
+async def browser_text2image(data: str):
+    from graiax.text2img.playwright import convert_md
+    from graiax.playwright.interface import PlaywrightContext
+    from graiax.text2img.playwright.renderer import BuiltinCSS
+
+    app = Ariadne.current()
+    browser_context = app.launch_manager.get_interface(PlaywrightContext).context
+    page = await browser_context.new_page()
+    await page.set_viewport_size({"width": 400, "height": 100})
+    md = convert_md(data)
+    css = "\n".join(BuiltinCSS.github.value)
+    await page.set_content(
+        '<html><head><meta name="viewport" content="width=device-width,initial-scale=1.0">'
+        f"<style>{css}</style></head><body>{md}<body></html>"
+    )
+    return await page.screenshot(full_page=True, type="jpeg", quality=95)

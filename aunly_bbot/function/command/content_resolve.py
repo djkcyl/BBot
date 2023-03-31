@@ -5,10 +5,11 @@ from loguru import logger
 from graia.saya import Channel
 from grpc.aio import AioRpcError
 from graia.ariadne.app import Ariadne
-from graia.ariadne.model import Group
 from sentry_sdk import capture_exception
 from bilireq.exceptions import GrpcError
+from graia.ariadne.model import Group, Member
 from httpx._exceptions import TimeoutException
+from graia.broadcast.exceptions import ExecutionStop
 from graia.ariadne.event.message import GroupMessage
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.message.element import Image, Source
@@ -18,19 +19,21 @@ from ...core.bot_config import BotConfig
 from ...model.exception import AbortError
 from ...utils.column_resolve import get_cv
 from ...core.data import ContentResolveData
-from ...utils.text2image import rich_text2image
 from ...core.control import Interval, Permission
 from ...utils.video_subtitle import get_subtitle
 from ...utils.message_resolve import message_resolve
 from ...utils.draw_bili_image import binfo_image_create
+from ...utils.text2image import rich_text2image, browser_text2image
 from ...utils.bilibili_request import get_b23_url, grpc_get_view_info
-from ...utils.content_summarise import column_summarise, get_browser_image, subtitle_summarise
+from ...utils.content_summarise import column_summarise, subtitle_summarise
 
 channel = Channel.current()
 
 
 @channel.use(ListenerSchema(listening_events=[GroupMessage], decorators=[Permission.require()]))
-async def main(app: Ariadne, group: Group, message: MessageChain, source: Source):
+async def main(
+    app: Ariadne, group: Group, member: Member, message: MessageChain, source: Source
+):
     bili_number = await message_resolve(message)
     if not bili_number:
         return
@@ -68,12 +71,12 @@ async def main(app: Ariadne, group: Group, message: MessageChain, source: Source
         title = video_info.activity_season.arc.title or video_info.arc.title
         archive_data = ContentResolveData(aid=aid)
         archive_data.title = title
-        await Interval.manual(aid + group.id)
+        await Interval.manual(aid + group.id, 30)
         try:
             logger.info(f"开始生成视频信息图片：{aid}")
             b23_url = await get_b23_url(f"https://www.bilibili.com/video/{bvid}")
             image = await binfo_image_create(video_info, b23_url)
-            await app.send_group_message(
+            info_message = await app.send_group_message(
                 group,
                 MessageChain(
                     Image(data_bytes=image),
@@ -90,6 +93,14 @@ async def main(app: Ariadne, group: Group, message: MessageChain, source: Source
                         subtitle = await get_subtitle(aid, cid)
                         archive_data.content = json.dumps(subtitle, ensure_ascii=False)
 
+                    if (
+                        len(subtitle) < 10
+                        or video_info.arc.duration < BotConfig.Bilibili.asr_length_threshold
+                    ):
+                        raise AbortError("字幕内容过少且视频时长过短，跳过总结请求")
+
+                    chatgpt_thinks = True
+
                     async def openai_summarization():
                         logger.info(f"开始进行 AI 总结：{aid}")
                         try:
@@ -98,6 +109,12 @@ async def main(app: Ariadne, group: Group, message: MessageChain, source: Source
                                 summarise = archive_data.openai
                             else:
                                 logger.info(f"{aid} 总结不存在，正在尝试请求......")
+                                try:
+                                    await Interval.manual(member, 600)
+                                except ExecutionStop:
+                                    msg = f"{member.id} 在 10 分钟内已经请求过总结，跳过本次请求"
+                                    logger.info(msg)
+                                    raise AbortError(msg)
                                 ai_summary = await subtitle_summarise(subtitle, title)
                                 if ai_summary.summary:
                                     summarise = ai_summary.summary
@@ -106,14 +123,21 @@ async def main(app: Ariadne, group: Group, message: MessageChain, source: Source
                                     logger.warning(f"视频 {aid} 总结失败：{ai_summary.raw}")
                                     return
 
+                            if summarise.lower().startswith("none"):
+                                nonlocal chatgpt_thinks
+                                chatgpt_thinks = False
+                                raise AbortError("ChatGPT 认为这些字幕没有意义")
+
                             logger.debug(summarise)
                             if BotConfig.Bilibili.use_browser:
-                                image = await get_browser_image(summarise)
+                                image = await browser_text2image(summarise)
                             else:
                                 image = await rich_text2image(summarise)
                             if image:
                                 await app.send_group_message(
-                                    group, MessageChain(Image(data_bytes=image))
+                                    group,
+                                    MessageChain(Image(data_bytes=image)),
+                                    quote=info_message.source,
                                 )
                         except AbortError as e:
                             logger.info(f"视频 {aid} 总结被终止：{e}")
@@ -141,18 +165,18 @@ async def main(app: Ariadne, group: Group, message: MessageChain, source: Source
                             wordcloud = await get_worldcloud_image(word_frequencies)
                             if wordcloud:
                                 await app.send_group_message(
-                                    group, MessageChain(Image(data_bytes=wordcloud))
+                                    group,
+                                    MessageChain(Image(data_bytes=wordcloud)),
+                                    quote=info_message.source,
                                 )
                         except Exception:
                             capture_exception()
                             logger.exception(f"视频 {aid} 词云出错")
 
-                    gather = []
                     if BotConfig.Bilibili.openai_summarization:
-                        gather.append(openai_summarization())
-                    if BotConfig.Bilibili.use_wordcloud:
-                        gather.append(wordcloud())
-                    await asyncio.gather(*gather, return_exceptions=True)
+                        await openai_summarization()
+                    if BotConfig.Bilibili.use_wordcloud and chatgpt_thinks:
+                        await wordcloud()
 
                 except AbortError as e:
                     logger.warning(f"视频 {aid} 总结失败：{e.message}")
@@ -196,7 +220,7 @@ async def main(app: Ariadne, group: Group, message: MessageChain, source: Source
                                 return
 
                         if BotConfig.Bilibili.use_browser:
-                            image = await get_browser_image(summarise)
+                            image = await browser_text2image(summarise)
                         else:
                             image = await rich_text2image(summarise)
                         if image:
