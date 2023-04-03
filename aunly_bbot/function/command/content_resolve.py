@@ -123,7 +123,7 @@ async def main(
                                     logger.warning(f"视频 {aid} 总结失败：{ai_summary.raw}")
                                     return
 
-                            if summarise.lower().startswith("none"):
+                            if "no meaning" in summarise.lower():
                                 nonlocal chatgpt_thinks
                                 chatgpt_thinks = False
                                 raise AbortError("ChatGPT 认为这些字幕没有意义")
@@ -140,7 +140,7 @@ async def main(
                                     quote=info_message.source,
                                 )
                         except AbortError as e:
-                            logger.info(f"视频 {aid} 总结被终止：{e}")
+                            logger.warning(f"视频 {aid} 总结被终止：{e}")
                         except Exception:
                             capture_exception()
                             logger.exception(f"视频 {aid} 总结出错")
@@ -228,7 +228,7 @@ async def main(
                                 group, MessageChain(Image(data_bytes=image)), quote=source
                             )
                     except AbortError as e:
-                        logger.info(f"专栏 {column_id} 总结被终止：{e}")
+                        logger.warning(f"专栏 {column_id} 总结被终止：{e}")
                     except Exception:
                         capture_exception()
                         logger.exception(f"专栏 {column_id} 总结出错")

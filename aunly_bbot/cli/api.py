@@ -9,7 +9,7 @@ from playwright.async_api import async_playwright
 from playwright.async_api._generated import BrowserContext
 from graiax.playwright.installer import install_playwright
 
-from ..utils.dynamic_shot import screenshot
+from ..utils.browser_shot import screenshot
 from ..utils.fonts_provider import get_font
 from ..utils.detect_package import is_package
 

@@ -264,7 +264,7 @@ async def push(app: Ariadne, dyn: DynamicItem):
                         MessageChain(msg),
                     )
                     insert_dyn_push_to_group(dynid, data.group)
-                    await asyncio.sleep(2)
+                    await asyncio.sleep(5)
                 except UnknownTarget:
                     logger.warning(
                         f"[BiliBili推送] {dynid} | {up_name}({up_id}) 推送失败，找不到该群 {data.group}，正在取消订阅"

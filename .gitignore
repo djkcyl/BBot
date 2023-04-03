@@ -12,5 +12,5 @@ venv
 .venv
 nuitka/
 dist/
-.pdm.toml
+.pdm-python
 aunly_bbot/static/test.js

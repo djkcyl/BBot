@@ -137,7 +137,6 @@ async def main(app: Ariadne):
                                     int(data.group),
                                     MessageChain(msg),
                                 )
-                                await asyncio.sleep(1)
                             except UnknownTarget:
                                 delete = await delete_group(data.group)
                                 logger.info(
@@ -146,6 +145,7 @@ async def main(app: Ariadne):
                             except AccountMuted:
                                 group = f"{group.name}（{group.id}）" if group else data.group
                                 logger.warning(f"[BiliBili推送] 推送失败，账号在 {group} 被禁言")
+                            await asyncio.sleep(5)
 
                     insert_live_push(
                         up_id, True, len(get_sub_by_uid(up_id)), title, area_parent, area
@@ -204,7 +204,7 @@ async def main(app: Ariadne):
                             except Exception:  # noqa
                                 capture_exception()
                                 logger.exception("[BiliBili推送] 推送失败，未知错误")
-                            await asyncio.sleep(1)
+                            await asyncio.sleep(5)
                     insert_live_push(up_id, False, len(get_sub_by_uid(up_id)))
             else:
                 logger.warning(f"[BiliBili推送] 未找到订阅 UP {up_name}（{up_id}）的群，正在退订！")
