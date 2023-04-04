@@ -123,7 +123,7 @@ async def main(
                                     logger.warning(f"视频 {aid} 总结失败：{ai_summary.raw}")
                                     return
 
-                            if "no meaning" in summarise.lower():
+                            if "no meaning" in summarise.lower() or len(summarise) < 20:
                                 nonlocal chatgpt_thinks
                                 chatgpt_thinks = False
                                 raise AbortError("ChatGPT 认为这些字幕没有意义")
