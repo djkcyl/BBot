@@ -21,7 +21,7 @@ from ...utils.column_resolve import get_cv
 from ...core.data import ContentResolveData
 from ...core.control import Interval, Permission
 from ...utils.video_subtitle import get_subtitle
-from ...utils.message_resolve import message_resolve
+from ...utils.bilibili_parse import extract_bilibili_info
 from ...utils.draw_bili_image import binfo_image_create
 from ...utils.text2image import rich_text2image, browser_text2image
 from ...utils.bilibili_request import get_b23_url, grpc_get_view_info
@@ -34,7 +34,7 @@ channel = Channel.current()
 async def main(
     app: Ariadne, group: Group, member: Member, message: MessageChain, source: Source
 ):
-    bili_number = await message_resolve(message)
+    bili_number = await extract_bilibili_info(message)
     if not bili_number:
         return
 
@@ -134,11 +134,7 @@ async def main(
                             else:
                                 image = await rich_text2image(summarise)
                             if image:
-                                await app.send_group_message(
-                                    group,
-                                    MessageChain(Image(data_bytes=image)),
-                                    quote=info_message.source,
-                                )
+                                images.append(image)
                         except AbortError as e:
                             logger.warning(f"视频 {aid} 总结被终止：{e}")
                         except Exception:
@@ -164,19 +160,23 @@ async def main(
 
                             wordcloud = await get_worldcloud_image(word_frequencies)
                             if wordcloud:
-                                await app.send_group_message(
-                                    group,
-                                    MessageChain(Image(data_bytes=wordcloud)),
-                                    quote=info_message.source,
-                                )
+                                images.append(wordcloud)
                         except Exception:
                             capture_exception()
                             logger.exception(f"视频 {aid} 词云出错")
 
+                    images = []
                     if BotConfig.Bilibili.openai_summarization:
                         await openai_summarization()
                     if BotConfig.Bilibili.use_wordcloud and chatgpt_thinks:
                         await wordcloud()
+
+                    if images:
+                        await app.send_group_message(
+                            group,
+                            MessageChain([Image(data_bytes=x) for x in images]),
+                            quote=info_message.source,
+                        )
 
                 except AbortError as e:
                     logger.warning(f"视频 {aid} 总结失败：{e.message}")

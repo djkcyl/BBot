@@ -27,13 +27,13 @@ def get_user_prompt(title: str, transcript: str) -> list[dict[str, str]]:
     transcript = transcript.replace("\n", " ").strip() if transcript else ""
     language = "Chinese"
     sys_prompt = (
-        "Your output should use the following template:\n## 总结\n## 要点\n"
+        "Your output should use the following template:\n## Summary\n## Highlights\n"
         "- [Emoji] Bulletpoint\n\n"
-        "Your task is to summarise the video I have given you in up to 2 to 6 concise bullet points, "
-        "starting with a short highlight, each bullet point is at least 15 words. "
+        "Your task is to summarise the video I have given you in up to 2 to 6 concise bullet points. "
+        "First, use a simple sentence to summarize, each bullet point is at least 15 words. "
         "Choose an appropriate emoji for each bullet point. "
         "Use the video above: {{Title}} {{Transcript}}."
-        "If you think that the content in the transcript is meaningless, "
+        "\nIf you think that the content in the transcript is meaningless, "
         "Or if there is very little content that cannot be well summarized, "
         "then you can simply output the two words 'no meaning'. Remember, not to output anything else."
     )

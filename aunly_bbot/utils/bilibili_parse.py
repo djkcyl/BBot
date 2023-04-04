@@ -6,7 +6,7 @@ from graia.ariadne.message.element import Image, Voice, FlashImage
 from .b23_extract import b23_extract
 
 
-async def message_resolve(message: MessageChain):
+async def extract_bilibili_info(message: MessageChain):
     if message.only(Image) or message.has(Voice) or message.has(FlashImage):
         return
 
