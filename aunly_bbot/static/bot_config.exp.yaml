@@ -3,45 +3,47 @@
 # https://github.com/djkcyl/BBot-Graia/wiki/fill-config
 
 Mirai:
-  mirai_host: https://localhost:8080  # **需要** 填入 mirai-api-http 的监听地址
-  verify_key: xxxxxxxxx               # **需要** 填入 mirai 的密钥
-  account: 123456789                  # **需要** 填入 bot 的 qq 号
+  mirai_host: https://localhost:8080      # **需要** 填入 mirai-api-http 的监听地址
+  verify_key: xxxxxxxxx                   # **需要** 填入 mirai 的密钥
+  account: 123456789                      # **需要** 填入 bot 的 qq 号
 Debug:
-  enable: false      # 是否开启 debug
-  groups:            # 若开启 debug 则 **需要** 填入群号, list 里填 int
+  enable: false                           # 是否开启 debug
+  groups:                                 # 若开启 debug 则 **需要** 填入群号, list 里填 int
     - 123456789
 Bilibili:
-  mobile_style: true # 是否采用手机的 Web 样式进行截图
-  use_login: false   # 是否使用登录的 BiliBili 账号进行动态监听（不要开）
-  username:          # BiliBili 账号，若填写则会在启动后自动登录，并且用于部分功能，如 AI 字幕
-  password:          # BiliBili 密码
-  concurrency: 5     # 未登录时发送 gRPC 请求的并发数量(1 ~ 50)
+  mobile_style: true                      # 是否采用手机的 Web 样式进行截图
+  use_login: false                        # 是否使用登录的 BiliBili 账号进行动态监听（不要开）
+  username:                               # BiliBili 账号，若填写则会在启动后自动登录，并且用于部分功能，如 AI 字幕
+  password:                               # BiliBili 密码
+  concurrency: 5                          # 未登录时发送 gRPC 请求的并发数量(1 ~ 50)
   dynamic_font: "HarmonyOS_Sans_SC_Medium.ttf" # 自定义动态字体
-  dynamic_font_source: "local"            # 自定义动态字体来源, 可选值: "local", "remote", "system", 为 "local" 时请将字体文件放在 data/font 目录下
+  dynamic_font_source: "local"            # 自定义动态字体来源, 可选值: "local", "remote", 为 "local" 时请将字体文件放在 data/font 目录下
   openai_summarization: false             # 是否使用 OpenAI 进行视频和专栏的 AI 总结
   openai_api_token: "sk-xxxxxxxxxxxxxx"   # OpenAI API Token
   openai_model: "gpt-3.5-turbo-0301"      # OpenAI 模型
   openai_proxy: "http://localhost:7890"   # 请求 OpenAI 所用的代理
+  openai_cooldown: 60                     # OpenAI 调用冷却时间（秒）
+  openai_whitelist_users: []              # OpenAI 调用限制白名单用户
   use_wordcloud: true                     # 是否使用词云
   use_bcut_asr: true                      # 是否使用 BCut 进行 AI 语音识别
   asr_length_threshold: 60                # 调用语音识别的最小长度阈值（秒）
 Event:
-  mute: true         # 是否向管理员发送被禁言的事件提醒。
-  permchange: true   # 是否向管理员发送权限变更的事件提醒。
-  push: true         # 是否向管理员发送推送的事件提醒。
-  subscribe: true    # 是否向管理员发送订阅的事件提醒。
+  mute: true                              # 是否向管理员发送被禁言的事件提醒。
+  permchange: true                        # 是否向管理员发送权限变更的事件提醒。
+  push: true                              # 是否向管理员发送推送的事件提醒。
+  subscribe: true                         # 是否向管理员发送订阅的事件提醒。
 Webui:
-  webui_host: "0.0.0.0"
-  webui_port: 6080
-  webui_enable: true
-log_level: INFO      # 控制台输出的日志等级
-name: BBot           # bot 的自称
-access_control: true # 是否开启白名单模式
-master: 123456789    # **需要** 填入 bot 主人的 qq 号
-admins:              # 可以填入 bot 管理员的 qq 号, list 里填 int
+  webui_host: "0.0.0.0"                   # WebUI 监听地址
+  webui_port: 6080                        # WebUI 监听端口
+  webui_enable: true                      # 是否开启 WebUI
+log_level: INFO                           # 控制台输出的日志等级
+name: BBot                                # bot 的自称
+access_control: true                      # 是否开启白名单模式
+master: 123456789                         # **需要** 填入 bot 主人的 qq 号
+admins:                                   # 可以填入 bot 管理员的 qq 号, list 里填 int
   - 123456789
-max_subsubscribe: 4  # 非 vip 群聊最大可订阅数量
-update_check: true   # 是否检查更新
+max_subsubscribe: 4                       # 非 vip 群聊最大可订阅数量
+update_check: true                        # 是否检查更新
 
 # 警告: 在 bot 第一次成功运行后配置文件将会被规范化, 此文件中的注释均会被清除, 
 # 并且配置项顺序可能会出现变动, 若需要查看配置项的详细信息可参考配置文档

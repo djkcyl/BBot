@@ -110,7 +110,14 @@ async def main(
                             else:
                                 logger.info(f"{aid} 总结不存在，正在尝试请求......")
                                 try:
-                                    await Interval.manual(member, 600)
+                                    if (
+                                        BotConfig.Bilibili.openai_whitelist_users
+                                        and member.id
+                                        not in BotConfig.Bilibili.openai_whitelist_users
+                                    ):
+                                        await Interval.manual(
+                                            member, BotConfig.Bilibili.openai_cooldown
+                                        )
                                 except ExecutionStop:
                                     msg = f"{member.id} 在 10 分钟内已经请求过总结，跳过本次请求"
                                     logger.info(msg)
