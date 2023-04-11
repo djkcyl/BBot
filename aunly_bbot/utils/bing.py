@@ -49,7 +49,7 @@ async def newbing_req(prompt: str):
     bing_resp = ans["item"]["messages"][1]
     if bing_resp["contentOrigin"] == "Apology":
         raise AbortError("newbing 认为视频或专栏内容包含冒犯性内容")
-    elif bing_resp["text"] < 100:
+    elif len(bing_resp["text"]) < 100:
         raise AbortError("newbing 无法总结此内容")
     else:
         return bing_resp["text"]
