@@ -123,8 +123,8 @@ async def main(
                                     logger.info(msg)
                                     raise AbortError(msg)
                                 ai_summary = await subtitle_summarise(subtitle, title)
-                                if ai_summary.summary:
-                                    summarise = ai_summary.summary
+                                if ai_summary.response:
+                                    summarise = ai_summary.response
                                     archive_data.openai = summarise
                                 else:
                                     logger.warning(f"视频 {aid} 总结失败：{ai_summary.raw}")
@@ -191,6 +191,7 @@ async def main(
                 archive_data.save()
 
         except TimeoutException:
+            logger.exception(f"视频 {aid} 信息生成超时")
             await app.send_group_message(
                 group, MessageChain(f"{bili_number} 视频信息生成超时，请稍后再试。"), quote=source
             )
@@ -220,8 +221,8 @@ async def main(
                             summarise = archive_data.openai
                         else:
                             ai_summary = await column_summarise(cv_title, cv_text)
-                            if ai_summary.summary:
-                                summarise = ai_summary.summary
+                            if ai_summary.response:
+                                summarise = ai_summary.response
                                 archive_data.openai = summarise
                             else:
                                 return

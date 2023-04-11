@@ -1,8 +1,8 @@
 from pydantic import BaseModel
 
 
-class AISummary(BaseModel):
+class OpenAI(BaseModel):
     error: bool = False
     message: str = ""
-    summary: str = ""
+    response: str = ""
     raw: dict = {}

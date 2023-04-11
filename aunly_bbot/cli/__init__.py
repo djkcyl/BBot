@@ -2,7 +2,7 @@ import click
 from ..core.announcement import PROJECT_VERSION
 
 
-@click.group(help="BBot 命令行工具")
+@click.group("BBot Cli", help="BBot 命令行工具")
 @click.version_option(
     PROJECT_VERSION,
     "-v",
@@ -19,13 +19,14 @@ def main():
 
 @click.command(name="run", help="运行 BBot")
 @click.option("-t", "--test", is_flag=True, help="测试模式")
-@click.option("-s", "--skip-verfiy", is_flag=True, help="跳过 MAH 可用性检查")
+@click.option("-s", "--skip-verify", is_flag=True, help="跳过 MAH 可用性检查")
 @click.option("-i", "--ignore-sub", is_flag=True, help="忽略登录模式下的账户订阅列表")
 @click.help_option("-h", "--help", help="显示帮助信息")
-def run_bot(test: bool, skip_verfiy: bool, ignore_sub: bool):
+def run_bot(test: bool, skip_verify: bool, ignore_sub: bool):
     from ..core import cache
+
     cache["test"] = test
-    cache["skip_verfiy"] = skip_verfiy
+    cache["skip_verify"] = skip_verify
     cache["ignore_sub"] = ignore_sub
 
     from .run import run_bot

@@ -23,7 +23,7 @@ help_text = (
     "BBot 功能菜单：\n"
     "=================================================================\n"
     " 0. /quit\n"
-    " 1. BiliBili 视频解析\n"
+    " 1. BiliBili 视频、专栏内容解析，支持 OpenAI 总结\n"
     " 2. 查看关注列表\n"
     f" 3. @{BotConfig.name} 关注 <uid>\n    > @{BotConfig.name} (订阅|关注)(主播|[uU][pP])?\n"
     f" 4. @{BotConfig.name} 取关 <uid>\n    > @{BotConfig.name} (退订|取消?关注?)\\s?(主播|[uU][pP])?\n"

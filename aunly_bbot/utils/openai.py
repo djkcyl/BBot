@@ -7,7 +7,7 @@ from loguru import logger
 from typing import Optional
 from collections import OrderedDict
 
-from ..model.openai import AISummary
+from ..model.openai import OpenAI
 from ..core.bot_config import BotConfig
 
 LIMIT_COUNT = {"gpt-3.5-turbo-0301": 3500, "gpt-4-0314": 7600, "gpt-4-32k-0314": 32200}.get(
@@ -22,7 +22,7 @@ if BotConfig.Bilibili.openai_summarization:
     logger.info(f"{tiktoken_enc.name} 加载成功")
 
 
-def get_user_prompt(title: str, transcript: str) -> list[dict[str, str]]:
+def get_summarise_prompt(title: str, transcript: str) -> list[dict[str, str]]:
     title = title.replace("\n", " ").strip() if title else ""
     transcript = transcript.replace("\n", " ").strip() if transcript else ""
     language = "Chinese"
@@ -67,7 +67,7 @@ def count_tokens(prompts: list[dict[str, str]]):
 
 def get_small_size_transcripts(text_data: list[str], token_limit: int = LIMIT_COUNT):
     unique_texts = list(OrderedDict.fromkeys(text_data))
-    while count_tokens(get_user_prompt("", " ".join(unique_texts))) > token_limit:
+    while count_tokens(get_summarise_prompt("", " ".join(unique_texts))) > token_limit:
         unique_texts.pop(random.randint(0, len(unique_texts) - 1))
     return " ".join(unique_texts)
 
@@ -94,9 +94,9 @@ async def openai_req(
     prompt_message: list[dict[str, str]],
     token: Optional[str] = BotConfig.Bilibili.openai_api_token,
     model: str = BotConfig.Bilibili.openai_model,
-) -> AISummary:
+) -> OpenAI:
     if not token:
-        return AISummary(error=True, message="未配置 OpenAI API Token")
+        return OpenAI(error=True, message="未配置 OpenAI API Token")
     async with httpx.AsyncClient(
         proxies=BotConfig.Bilibili.openai_proxy,
         headers={
@@ -114,7 +114,7 @@ async def openai_req(
             },
         )
         if req.status_code != 200:
-            return AISummary(error=True, message=req.text, raw=req.json())
+            return OpenAI(error=True, message=req.text, raw=req.json())
         logger.info(f"[OpenAI] Response:\n{req.json()['choices'][0]['message']['content']}")
-        logger.info(f"[OpenAI] Response token 实际: {req.json()['usage']}")
-        return AISummary(summary=req.json()["choices"][0]["message"]["content"], raw=req.json())
+        logger.info(f"[OpenAI] Response 实际 token 消耗: {req.json()['usage']}")
+        return OpenAI(response=req.json()["choices"][0]["message"]["content"], raw=req.json())
