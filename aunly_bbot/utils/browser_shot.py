@@ -38,7 +38,7 @@ async def fill_font(route: Route, request: Request):
         logger.debug(f"Font {url.name} requested")
         await route.fulfill(
             path=await get_font(url.query["name"]),
-            content_type=font_mime_map.get(url.suffix, None),
+            content_type=font_mime_map.get(url.suffix),
         )
         return
     except Exception:

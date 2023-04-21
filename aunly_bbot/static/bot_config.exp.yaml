@@ -23,9 +23,10 @@ Bilibili:
   openai_model: "gpt-3.5-turbo-0301"      # OpenAI 模型
   openai_proxy: "http://localhost:7890"   # 请求 OpenAI 所用的代理
   openai_cooldown: 60                     # OpenAI 调用冷却时间（秒）
-  openai_whitelist_users: []              # OpenAI 调用限制白名单用户
+  openai_whitelist_users: []              # OpenAI 调用冷却白名单用户（即使在冷却时间内也可以调用）
+  openai_promot_version: 2                # OpenAI 提示词版本，当前可选值: 1, 2
   use_wordcloud: true                     # 是否使用词云
-  use_bcut_asr: true                      # 是否使用 BCut 进行 AI 语音识别
+  use_bcut_asr: true                      # 是否使用 BCut 接口进行 AI 语音识别
   asr_length_threshold: 60                # 调用语音识别的最小长度阈值（秒）
 Event:
   mute: true                              # 是否向管理员发送被禁言的事件提醒。

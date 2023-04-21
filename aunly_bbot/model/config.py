@@ -60,6 +60,7 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
     openai_proxy: Optional[AnyHttpUrl] = None
     openai_cooldown: int = 60
     openai_whitelist_users: Optional[list[int]] = None
+    openai_promot_version: int = 2
     use_wordcloud: bool = False
     use_bcut_asr: bool = False
     asr_length_threshold: int = 60

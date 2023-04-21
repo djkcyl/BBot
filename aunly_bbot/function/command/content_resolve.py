@@ -40,35 +40,11 @@ async def main(
 
     if bili_number[:2] in ["BV", "bv", "av"]:
         try:
-            if (video_info := await video_info_get(bili_number)) is None:
-                await Interval.manual(group.id, 5)
-                return
-            elif video_info.ecode == 1:
-                await app.send_group_message(
-                    group, MessageChain(f"未找到视频 {bili_number}，可能已被 UP 主删除。"), quote=source
-                )
-                return
-        except (AioRpcError, GrpcError) as e:
+            aid, cid, bvid, title, video_info = await extract_video_info(bili_number)
+        except AbortError as e:
             await Interval.manual(group.id, 5)
-            logger.exception(e)
-            return await app.send_group_message(
-                group, MessageChain(f"{bili_number} 视频信息获取失败，错误信息：{type(e)} {e}"), quote=source
-            )
-        except Exception as e:
-            capture_exception()
-            await Interval.manual(group.id, 5)
-            logger.exception(e)
-            return await app.send_group_message(
-                group, MessageChain(f"{bili_number} 视频信息解析失败，错误信息：{type(e)} {e}"), quote=source
-            )
-        aid = video_info.activity_season.arc.aid or video_info.arc.aid
-        cid = (
-            video_info.activity_season.pages[0].page.cid
-            if video_info.activity_season.pages
-            else video_info.pages[0].page.cid
-        )
-        bvid = video_info.activity_season.bvid or video_info.bvid
-        title = video_info.activity_season.arc.title or video_info.arc.title
+            return await app.send_group_message(group, MessageChain(e.message), quote=source)
+
         archive_data = ContentResolveData(aid=aid)
         archive_data.title = title
         await Interval.manual(aid + group.id, 30)
@@ -290,3 +266,29 @@ async def video_info_get(vid_id: str):
         aid = int(vid_id[2:])
         return await grpc_get_view_info(aid=aid) if aid > 1 else None
     return await grpc_get_view_info(bvid=vid_id)
+
+
+async def extract_video_info(bili_number: str):
+    try:
+        if (video_info := await video_info_get(bili_number)) is None:
+            raise ExecutionStop
+        elif video_info.ecode == 1:
+            raise AbortError(f"未找到视频 {bili_number}，可能已被 UP 主删除。")
+    except (AioRpcError, GrpcError) as e:
+        logger.exception(e)
+        raise AbortError(f"{bili_number} 视频信息获取失败，错误信息：{type(e)} {e}")
+    except Exception as e:
+        capture_exception()
+        logger.exception(e)
+        raise AbortError(f"{bili_number} 视频信息解析失败，错误信息：{type(e)} {e}")
+
+    aid = video_info.activity_season.arc.aid or video_info.arc.aid
+    cid = (
+        video_info.activity_season.pages[0].page.cid
+        if video_info.activity_season.pages
+        else video_info.pages[0].page.cid
+    )
+    bvid = video_info.activity_season.bvid or video_info.bvid
+    title = video_info.activity_season.arc.title or video_info.arc.title
+
+    return aid, cid, bvid, title, video_info
