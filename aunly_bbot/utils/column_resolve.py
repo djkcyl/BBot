@@ -9,9 +9,14 @@ XPATH = "//p//text() | //h1/text() | //h2/text() | //h3/text() | //h4/text() | /
 
 
 async def get_cv(cvid: str) -> tuple[str, str]:
-    cv = await hc.get(f"https://www.bilibili.com/read/cv{cvid}")
+    cv = await hc.get(f"https://www.bilibili.com/read/cv{cvid}", follow_redirects=True)
     if cv.status_code != 200:
         raise AbortError("专栏获取失败")
+    elif cv.url != f"https://www.bilibili.com/read/cv{cvid}":
+        if cv.url == "https://www.bilibili.com/read/error":
+            raise AbortError("专栏不存在")
+        else:
+            raise AbortError("专栏获取失败")
     cv.encoding = "utf-8"
     cv = cv.text
 

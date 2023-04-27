@@ -105,6 +105,14 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
             click.secho("未安装 wordcloud，如需使用词云，请安装 wordcloud", fg="bright_red")
             sys.exit()
 
+    # 验证 openai promt version
+    @validator("openai_promot_version")
+    def valid_openai_promot_version(cls, openai_promot_version):
+        if openai_promot_version in [1, 2]:
+            return openai_promot_version
+        click.secho("openai_promot_version 只能为 1 或 2", fg="bright_yellow")
+        sys.exit()
+
     # 验证 Bilibili gRPC 并发数
     @validator("concurrency")
     def limit_concurrency(cls, concurrency):

@@ -45,7 +45,7 @@ if BotConfig.Bilibili.use_login:
             Twilight(
                 [
                     "at" @ ElementMatch(At, optional=True),
-                    RegexMatch("([/.。?？!！])?(帮助|菜单|功能|help|menu)([/.。?？!！])?"),
+                    RegexMatch(r"([/.。?？!！])?(帮助|菜单|功能|help|menu)([/.。?？!！])?"),
                 ]
             )
         ],

@@ -29,7 +29,7 @@ channel = Channel.current()
             Twilight(
                 [
                     "at" @ ElementMatch(At, optional=True),
-                    "act" @ RegexMatch(r"设定|删除"),
+                    "act" @ RegexMatch(r"添加|修改|设定|删除"),
                     RegexMatch(r"昵称|别名"),
                     "uid" @ ParamMatch(optional=True),
                     "nick" @ ParamMatch(optional=True),
@@ -56,7 +56,7 @@ async def main(
         uid = await uid_extract(uid.result.display, group.id)
         if uid:
             acts = act.result.display
-            if acts == "设定":
+            if acts in ["设定", "修改", "添加"]:
                 nicks = nick.result.display
                 if len(nicks) > 24:
                     msg = "昵称过长，设定失败"

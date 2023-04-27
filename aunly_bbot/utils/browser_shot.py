@@ -35,14 +35,14 @@ async def fill_font(route: Route, request: Request):
     if not url.is_absolute():
         raise ValueError("字体地址不合法")
     try:
-        logger.debug(f"Font {url.name} requested")
+        logger.debug(f"Font {url.query['name']} requested")
         await route.fulfill(
             path=await get_font(url.query["name"]),
             content_type=font_mime_map.get(url.suffix),
         )
         return
     except Exception:
-        logger.error(f"找不到字体 {url.name}")
+        logger.error(f"找不到字体 {url.query['name']}")
         await route.fallback()
 
 
