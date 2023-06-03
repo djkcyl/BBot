@@ -50,6 +50,7 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
     password: Optional[str]
     use_login: bool = False
     use_browser: bool = True
+    allow_fallback: bool = True
     mobile_style: bool = True
     concurrency: int = 5
     dynamic_font: str = "HarmonyOS_Sans_SC_Medium.ttf"
@@ -58,6 +59,9 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
     openai_api_token: Optional[str] = None
     openai_model: str = "gpt-3.5-turbo"
     openai_proxy: Optional[AnyHttpUrl] = None
+    openai_cooldown: int = 60
+    openai_whitelist_users: Optional[list[int]] = None
+    openai_promot_version: int = 2
     use_wordcloud: bool = False
     use_bcut_asr: bool = False
     asr_length_threshold: int = 60
@@ -102,6 +106,14 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
             click.secho("未安装 wordcloud，如需使用词云，请安装 wordcloud", fg="bright_red")
             sys.exit()
 
+    # 验证 openai promt version
+    @validator("openai_promot_version")
+    def valid_openai_promot_version(cls, openai_promot_version):
+        if openai_promot_version in [1, 2]:
+            return openai_promot_version
+        click.secho("openai_promot_version 只能为 1 或 2", fg="bright_yellow")
+        sys.exit()
+
     # 验证 Bilibili gRPC 并发数
     @validator("concurrency")
     def limit_concurrency(cls, concurrency):
@@ -141,6 +153,7 @@ class _BotConfig(BaseModel, extra=Extra.ignore):
     max_subsubscribe: int = 4
     access_control: bool = True
     update_check: bool = True
+    use_richuru: bool = True
 
     # 验证 admins 列表
     @validator("admins")

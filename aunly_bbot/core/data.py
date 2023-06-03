@@ -14,7 +14,7 @@ from peewee import (
 )
 
 
-data_version = 4
+data_version = 5
 db = SqliteDatabase("data/data.db")
 
 
@@ -114,7 +114,10 @@ class DataVersion(BaseModel):
         table_name = "data_version"
 
 
-db.create_tables([DynamicPush, GroupPush, LivePush, SubList, TalkCount, DataVersion, ContentResolveArchive], safe=True)
+db.create_tables(
+    [DynamicPush, GroupPush, LivePush, SubList, TalkCount, DataVersion, ContentResolveArchive],
+    safe=True,
+)
 
 
 if not DataVersion.select().exists():
@@ -138,6 +141,9 @@ elif DataVersion.get().version != data_version:
             # 在 SubList 表中添加 cover_img 字段，允许为空
             db.execute_sql("ALTER TABLE sub_list ADD COLUMN cover_img VARCHAR(255) NULL")
             DataVersion.update(version=4).execute()
+        elif DataVersion.get().version == 4:
+            logger.info("当前数据版本为 4，正在更新至 5")
+            DataVersion.update(version=5).execute()
 
     logger.success("数据库更新完成")
     time.sleep(2)

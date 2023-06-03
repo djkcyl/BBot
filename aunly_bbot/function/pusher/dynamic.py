@@ -280,13 +280,18 @@ async def push(app: Ariadne, dyn: DynamicItem):
                         f"[BiliBili推送] {dynid} | {up_name}({up_id}) 推送失败，账号在 {group} 被禁言"
                     )
                 except RemoteException as e:
-                    if "resultType=46" in str(e):
+                    if "LIMITED_MESSAGING" in str(e):
                         logger.error(
                             f"[BiliBili推送] {dynid} | {up_name}({up_id}) 推送失败，Bot 被限制发送群聊消息"
                         )
                         await app.send_friend_message(
                             BotConfig.master,
-                            MessageChain("Bot 被限制发送群聊消息（46 代码），请尽快处理后发送 /init 重新开启推送进程"),
+                            MessageChain(
+                                "Bot 被限制发送群聊消息（46 代码），问题原因可能是账号被多次举报或被服务器认为不安全. "
+                                "若账号在官方客户端也无法发出消息, 可尝试用手机 QQ 登录后访问 "
+                                "https://accounts.qq.com/safe/message/unlock?lock_info=5_5 解冻。"
+                                "请尽快处理后发送 /init 重新开启推送进程"
+                            ),
                         )
                         BOT_Status.set_status(Status.DYNAMIC_IDLE, True)
                         BOT_Status.set_status(Status.INITIALIZED, False)
@@ -338,8 +343,10 @@ async def check_uid(app: Ariadne, uid):
     except asyncio.TimeoutError:
         logger.warning(f"[BiliBili推送] {uid} 获取动态超时！")
         return
-    except GrpcError as e:
-        logger.error(f"[BiliBili推送] {uid} 获取动态失败：[{e.code}] {e.msg}")
+    except (GrpcError, AioRpcError) as e:
+        logger.error(
+            f"[BiliBili推送] {uid} 获取动态失败：[{e.code}] {e.details() if isinstance(e, AioRpcError) else e.msg}"
+        )
         return
     except Exception as e:  # noqa
         capture_exception(e)

@@ -21,7 +21,7 @@ from ...utils.column_resolve import get_cv
 from ...core.data import ContentResolveData
 from ...core.control import Interval, Permission
 from ...utils.video_subtitle import get_subtitle
-from ...utils.message_resolve import message_resolve
+from ...utils.bilibili_parse import extract_bilibili_info
 from ...utils.draw_bili_image import binfo_image_create
 from ...utils.text2image import rich_text2image, browser_text2image
 from ...utils.bilibili_request import get_b23_url, grpc_get_view_info
@@ -34,41 +34,17 @@ channel = Channel.current()
 async def main(
     app: Ariadne, group: Group, member: Member, message: MessageChain, source: Source
 ):
-    bili_number = await message_resolve(message)
+    bili_number = await extract_bilibili_info(message)
     if not bili_number:
         return
 
     if bili_number[:2] in ["BV", "bv", "av"]:
         try:
-            if (video_info := await video_info_get(bili_number)) is None:
-                await Interval.manual(group.id, 5)
-                return
-            elif video_info.ecode == 1:
-                await app.send_group_message(
-                    group, MessageChain(f"未找到视频 {bili_number}，可能已被 UP 主删除。"), quote=source
-                )
-                return
-        except (AioRpcError, GrpcError) as e:
+            aid, cid, bvid, title, video_info = await extract_video_info(bili_number)
+        except AbortError as e:
             await Interval.manual(group.id, 5)
-            logger.exception(e)
-            return await app.send_group_message(
-                group, MessageChain(f"{bili_number} 视频信息获取失败，错误信息：{type(e)} {e}"), quote=source
-            )
-        except Exception as e:
-            capture_exception()
-            await Interval.manual(group.id, 5)
-            logger.exception(e)
-            return await app.send_group_message(
-                group, MessageChain(f"{bili_number} 视频信息解析失败，错误信息：{type(e)} {e}"), quote=source
-            )
-        aid = video_info.activity_season.arc.aid or video_info.arc.aid
-        cid = (
-            video_info.activity_season.pages[0].page.cid
-            if video_info.activity_season.pages
-            else video_info.pages[0].page.cid
-        )
-        bvid = video_info.activity_season.bvid or video_info.bvid
-        title = video_info.activity_season.arc.title or video_info.arc.title
+            return await app.send_group_message(group, MessageChain(e.message), quote=source)
+
         archive_data = ContentResolveData(aid=aid)
         archive_data.title = title
         await Interval.manual(aid + group.id, 30)
@@ -110,20 +86,27 @@ async def main(
                             else:
                                 logger.info(f"{aid} 总结不存在，正在尝试请求......")
                                 try:
-                                    await Interval.manual(member, 600)
+                                    if (
+                                        BotConfig.Bilibili.openai_whitelist_users
+                                        and member.id
+                                        not in BotConfig.Bilibili.openai_whitelist_users
+                                    ):
+                                        await Interval.manual(
+                                            member, BotConfig.Bilibili.openai_cooldown
+                                        )
                                 except ExecutionStop:
                                     msg = f"{member.id} 在 10 分钟内已经请求过总结，跳过本次请求"
                                     logger.info(msg)
                                     raise AbortError(msg)
                                 ai_summary = await subtitle_summarise(subtitle, title)
-                                if ai_summary.summary:
-                                    summarise = ai_summary.summary
+                                if ai_summary.response:
+                                    summarise = ai_summary.response
                                     archive_data.openai = summarise
                                 else:
                                     logger.warning(f"视频 {aid} 总结失败：{ai_summary.raw}")
                                     return
 
-                            if "no meaning" in summarise.lower():
+                            if "no meaning" in summarise.lower() or len(summarise) < 20:
                                 nonlocal chatgpt_thinks
                                 chatgpt_thinks = False
                                 raise AbortError("ChatGPT 认为这些字幕没有意义")
@@ -134,11 +117,7 @@ async def main(
                             else:
                                 image = await rich_text2image(summarise)
                             if image:
-                                await app.send_group_message(
-                                    group,
-                                    MessageChain(Image(data_bytes=image)),
-                                    quote=info_message.source,
-                                )
+                                images.append(image)
                         except AbortError as e:
                             logger.warning(f"视频 {aid} 总结被终止：{e}")
                         except Exception:
@@ -164,19 +143,23 @@ async def main(
 
                             wordcloud = await get_worldcloud_image(word_frequencies)
                             if wordcloud:
-                                await app.send_group_message(
-                                    group,
-                                    MessageChain(Image(data_bytes=wordcloud)),
-                                    quote=info_message.source,
-                                )
+                                images.append(wordcloud)
                         except Exception:
                             capture_exception()
                             logger.exception(f"视频 {aid} 词云出错")
 
+                    images = []
                     if BotConfig.Bilibili.openai_summarization:
                         await openai_summarization()
                     if BotConfig.Bilibili.use_wordcloud and chatgpt_thinks:
                         await wordcloud()
+
+                    if images:
+                        await app.send_group_message(
+                            group,
+                            MessageChain([Image(data_bytes=x) for x in images]),
+                            quote=info_message.source,
+                        )
 
                 except AbortError as e:
                     logger.warning(f"视频 {aid} 总结失败：{e.message}")
@@ -184,6 +167,7 @@ async def main(
                 archive_data.save()
 
         except TimeoutException:
+            logger.exception(f"视频 {aid} 信息生成超时")
             await app.send_group_message(
                 group, MessageChain(f"{bili_number} 视频信息生成超时，请稍后再试。"), quote=source
             )
@@ -213,8 +197,8 @@ async def main(
                             summarise = archive_data.openai
                         else:
                             ai_summary = await column_summarise(cv_title, cv_text)
-                            if ai_summary.summary:
-                                summarise = ai_summary.summary
+                            if ai_summary.response:
+                                summarise = ai_summary.response
                                 archive_data.openai = summarise
                             else:
                                 return
@@ -282,3 +266,29 @@ async def video_info_get(vid_id: str):
         aid = int(vid_id[2:])
         return await grpc_get_view_info(aid=aid) if aid > 1 else None
     return await grpc_get_view_info(bvid=vid_id)
+
+
+async def extract_video_info(bili_number: str):
+    try:
+        if (video_info := await video_info_get(bili_number)) is None:
+            raise AbortError(f"无法获取视频 {bili_number}。")
+        elif video_info.ecode == 1:
+            raise AbortError(f"未找到视频 {bili_number}，可能已被 UP 主删除。")
+    except (AioRpcError, GrpcError) as e:
+        logger.exception(e)
+        raise AbortError(f"{bili_number} 视频信息获取失败，错误信息：{type(e)} {e}")
+    except Exception as e:
+        capture_exception()
+        logger.exception(e)
+        raise AbortError(f"{bili_number} 视频信息解析失败，错误信息：{type(e)} {e}")
+
+    aid = video_info.activity_season.arc.aid or video_info.arc.aid
+    cid = (
+        video_info.activity_season.pages[0].page.cid
+        if video_info.activity_season.pages
+        else video_info.pages[0].page.cid
+    )
+    bvid = video_info.activity_season.bvid or video_info.bvid
+    title = video_info.activity_season.arc.title or video_info.arc.title
+
+    return aid, cid, bvid, title, video_info

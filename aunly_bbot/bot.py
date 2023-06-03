@@ -39,7 +39,7 @@ except httpx.TimeoutException:
 logger.success("字体下载完成！")
 
 host = BotConfig.Mirai.mirai_host
-if cache.get("skip_verfiy"):
+if cache.get("skip_verify"):
     if verify_mirai(host, BotConfig.Mirai.account, BotConfig.Mirai.verify_key):
         logger.success("Mirai HTTP API 验证成功！")
     else:

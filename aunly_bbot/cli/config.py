@@ -38,7 +38,6 @@ class CliConfig:
         self.mirai_verify_key()
         self.debug()
         self.use_browser()
-        self.bilibili_mobile_style()
         self.bilibili_concurrent()
         self.openai_summary()
         self.bilibili_username()
@@ -55,7 +54,7 @@ class CliConfig:
         self.max_subscriptions()
         self.update_check()
 
-        if data.get("session", None):
+        if data.get("session"):
             httpx.post(
                 f"{self.config['Mirai']['mirai_host']}/release",
                 json={
@@ -111,6 +110,12 @@ class CliConfig:
                     )
                 self.config["Mirai"]["mirai_host"] = mirai_host
                 return
+            except KeyError:
+                click.secho(
+                    "你输入的地址可能不是 Mirai HTTP API 的地址或 Mirai HTTP API 运行异常，请检查后重试！",
+                    fg="bright_red",
+                    bold=True,
+                )
             except httpx.HTTPError:
                 click.secho("无法连接到 Mirai HTTP API，请检查地址是否正确！", fg="bright_red", bold=True)
                 continue
@@ -225,6 +230,8 @@ class CliConfig:
                 annotation="使用键盘的 ↑ 和 ↓ 来选择, 按回车确认",
             ).prompt()
             self.config["Bilibili"]["use_browser"] = browser.name == "是（开启）"
+            self.bilibili_mobile_style()
+            self.allow_fallback()
         else:
             self.config["Bilibili"]["use_browser"] = False
 
@@ -240,6 +247,15 @@ class CliConfig:
         else:
             self.config["Bilibili"]["mobile_style"] = False
 
+    def allow_fallback(self):
+        allow_fallback = ListPrompt(
+            "是否允许使用备用动态图片渲染（在浏览器截图失败时尝试使用）？",
+            [Choice("是（开启）"), Choice("否（关闭）")],
+            allow_filter=False,
+            annotation="使用键盘的 ↑ 和 ↓ 来选择, 按回车确认",
+        ).prompt()
+        self.config["Bilibili"]["allow_fallback"] = allow_fallback.name == "是（开启）"
+
     def openai_summary(self):
         openai_summary = ListPrompt(
             "是否使用 OpenAI 进行视频和专栏内容摘要提取？",
@@ -251,6 +267,8 @@ class CliConfig:
             self.config["Bilibili"]["openai_summarization"] = True
             self.openai_api_token()
             self.openai_model()
+        else:
+            self.config["Bilibili"]["openai_summarization"] = False
 
     def openai_api_token(self):
         openai_token = InputPrompt("请输入 OpenAI Token: ").prompt()

@@ -10,8 +10,8 @@ from bilireq.grpc.protos.bilibili.app.view.v1.view_pb2 import ViewReq, ViewReply
 from bilireq.grpc.protos.bilibili.community.service.dm.v1.dm_pb2_grpc import DMStub
 from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2_grpc import DynamicStub
 from bilireq.grpc.protos.bilibili.app.playurl.v1.playurl_pb2_grpc import PlayURLStub
-from bilireq.grpc.protos.bilibili.community.service.dm.v1.dm_pb2 import DmViewReq, DmViewReply
 from bilireq.grpc.protos.bilibili.app.playurl.v1.playurl_pb2 import PlayViewReq, PlayViewReply
+from bilireq.grpc.protos.bilibili.community.service.dm.v1.dm_pb2 import DmViewReq, DmViewReply
 from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2 import (
     DynamicType,
     DynDetailsReq,
@@ -20,7 +20,14 @@ from bilireq.grpc.protos.bilibili.app.dynamic.v2.dynamic_pb2 import (
 
 from ..core import Bili_Auth
 
-hc = httpx.AsyncClient()
+hc = httpx.AsyncClient(
+    headers={
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+            "(KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.39"
+        )
+    }
+)
 
 
 async def relation_modify(uid: Union[str, int], act: int):
