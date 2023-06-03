@@ -66,7 +66,10 @@ async def screenshot(dynid: str, browser_context: BrowserContext, log=True):
                 page, clip = await get_mobile_screenshot(page, dynid)
             else:
                 page, clip = await get_pc_screenshot(page, dynid)
+            clip["height"] = min(clip["height"], 32766)  # 限制高度
             return await page.screenshot(clip=clip, full_page=True, type="jpeg", quality=98)
+        except TimeoutError:
+            logger.error(f"[BiliBili推送] {dynid} 动态截图超时，正在重试：")
         except Notfound:
             logger.error(f"[Bilibili推送] {dynid} 动态不存在")
         except AssertionError:
@@ -86,12 +89,15 @@ async def screenshot(dynid: str, browser_context: BrowserContext, log=True):
             else:
                 capture_exception()
                 logger.exception(f"[BiliBili推送] {dynid} 动态截图失败，正在重试：")
-                await page.screenshot(
-                    path=f"{error_path}/{dynid}_{i}_{st}.jpg",
-                    full_page=True,
-                    type="jpeg",
-                    quality=80,
-                )
+                try:
+                    await page.screenshot(
+                        path=f"{error_path}/{dynid}_{i}_{st}.jpg",
+                        full_page=True,
+                        type="jpeg",
+                        quality=80,
+                    )
+                except Exception:
+                    logger.exception(f"[BiliBili推送] {dynid} 动态截图失败：")
         finally:
             with contextlib.suppress():
                 await page.close()

@@ -271,7 +271,7 @@ async def video_info_get(vid_id: str):
 async def extract_video_info(bili_number: str):
     try:
         if (video_info := await video_info_get(bili_number)) is None:
-            raise ExecutionStop
+            raise AbortError(f"无法获取视频 {bili_number}。")
         elif video_info.ecode == 1:
             raise AbortError(f"未找到视频 {bili_number}，可能已被 UP 主删除。")
     except (AioRpcError, GrpcError) as e:

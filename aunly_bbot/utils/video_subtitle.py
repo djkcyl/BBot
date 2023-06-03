@@ -3,6 +3,7 @@ import asyncio
 
 from loguru import logger
 from typing import Optional
+from httpx import TimeoutException
 from sentry_sdk import capture_exception
 
 from ..core.bot_config import BotConfig
@@ -71,6 +72,9 @@ async def get_subtitle(aid: int, cid: int) -> list[str]:
         audio = audio_resp.content
         try:
             asr = await get_bcut_asr(audio)
+        except TimeoutException as e:
+            logger.error("BCut-ASR 连接超时")
+            raise AbortError("BCut-ASR 连接超时") from e
         except Exception as e:
             logger.exception("BCut-ASR 识别失败")
             capture_exception()

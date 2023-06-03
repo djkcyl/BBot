@@ -35,6 +35,7 @@ async def main(app: Ariadne):
 
     if is_full and BotConfig.Bilibili.use_browser:
         from graiax.playwright.interface import PlaywrightContext
+
         try:
             logger.info("[Playwright] 正在获取浏览器版本")
             browser_context = app.launch_manager.get_interface(PlaywrightContext)
@@ -71,6 +72,8 @@ async def main(app: Ariadne):
     else:
         logger.error("[BiliBili推送] 获取首页 Cookie 失败，已达最大重试次数")
         sys.exit(1)
+
+    logger.info(f"[BiliBili推送] 获取首页 Cookie 成功，{hc.cookies}")
 
     logger.info("Graia 成功启动")
     group_list = await app.get_group_list()

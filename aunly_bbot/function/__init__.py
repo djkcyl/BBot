@@ -37,9 +37,8 @@ import aunly_bbot.function.event.prem_change
 import aunly_bbot.function.pusher.init
 import aunly_bbot.function.pusher.dynamic
 import aunly_bbot.function.pusher.live
-import aunly_bbot.function.scheduler.version_update  # noqa
-
-# import function.scheduler.refresh_token  # noqa
+import aunly_bbot.function.scheduler.version_update
+import aunly_bbot.function.scheduler.refresh_token  # noqa
 
 from loguru import logger
 

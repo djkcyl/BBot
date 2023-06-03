@@ -29,10 +29,19 @@ def in_screen():
     return psutil.Process().pid == 1
 
 
-if in_screen() or is_package:
-    logger.info("检测到当前运行在各类容器中，或运行为打包（nuitka、pyinstaller）版本，已禁用 richuru")
+if in_screen() or is_package or not BotConfig.use_richuru:
+    logger.info("检测到当前运行在各类容器中、运行为打包（nuitka、pyinstaller）版本或未在配置文件中启用，已禁用 richuru")
     logger.remove(0)
-    logger.add(sys.stderr, level=log_level, backtrace=True, diagnose=True)
+    logger.add(
+        sys.stderr,
+        level=log_level,
+        backtrace=True,
+        diagnose=True,
+        filter=lambda record: (
+            "sentry_patched_callhandlers" not in record["function"]
+            or "HTTP Request" not in record["message"]
+        ),
+    )
 else:
     richuru.install(level=log_level)
 
@@ -43,7 +52,7 @@ logger.add(
     backtrace=True,
     diagnose=True,
     rotation="00:00",
-    retention="1 years",
+    retention="1 week",
     compression="tar.xz",
     level="INFO",
 )
@@ -55,7 +64,7 @@ logger.add(
     backtrace=True,
     diagnose=True,
     rotation="00:00",
-    retention="15 days",
+    retention="3 days",
     compression="tar.xz",
     level="DEBUG",
 )
@@ -67,7 +76,7 @@ logger.add(
     backtrace=True,
     diagnose=True,
     rotation="00:00",
-    retention="15 days",
+    retention="3 days",
     compression="tar.xz",
     level="WARNING",
 )

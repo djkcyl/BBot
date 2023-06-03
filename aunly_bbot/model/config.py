@@ -50,6 +50,7 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
     password: Optional[str]
     use_login: bool = False
     use_browser: bool = True
+    allow_fallback: bool = True
     mobile_style: bool = True
     concurrency: int = 5
     dynamic_font: str = "HarmonyOS_Sans_SC_Medium.ttf"
@@ -152,6 +153,7 @@ class _BotConfig(BaseModel, extra=Extra.ignore):
     max_subsubscribe: int = 4
     access_control: bool = True
     update_check: bool = True
+    use_richuru: bool = True
 
     # 验证 admins 列表
     @validator("admins")

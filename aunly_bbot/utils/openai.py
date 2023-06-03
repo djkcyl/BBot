@@ -6,6 +6,7 @@ import tiktoken_async
 from loguru import logger
 from typing import Optional
 from collections import OrderedDict
+from httpx import HTTPError, Response
 
 from ..core.bot_config import BotConfig
 from ..model.openai import OpenAI, TokenUsage
@@ -131,7 +132,12 @@ async def openai_req(
         }
         if temperature:
             data["temperature"] = temperature
-        req = await client.post("https://api.openai.com/v1/chat/completions", json=data)
+        try:
+            req: Response = await client.post(
+                "https://api.openai.com/v1/chat/completions", json=data
+            )
+        except HTTPError as e:
+            return OpenAI(error=True, message=f"OpenAI 请求失败 {type(e)} {e}")
         if req.status_code != 200:
             return OpenAI(error=True, message=req.text, raw=req.json())
         logger.info(f"[OpenAI] Response:\n{req.json()['choices'][0]['message']['content']}")

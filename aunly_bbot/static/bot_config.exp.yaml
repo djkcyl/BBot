@@ -12,7 +12,9 @@ Debug:
     - 123456789
 Bilibili:
   mobile_style: true                      # 是否采用手机的 Web 样式进行截图
-  use_login: false                        # 是否使用登录的 BiliBili 账号进行动态监听（不要开）
+  use_login: false                        # 是否使用登录的 BiliBili 账号进行动态监听（没事不建议开）
+  use_browser: true                       # 是否使用浏览器进行动态截图
+  allow_fallback: true                    # 是否允许使用截图失败后的备用方案（PIL）渲染动态
   username:                               # BiliBili 账号，若填写则会在启动后自动登录，并且用于部分功能，如 AI 字幕
   password:                               # BiliBili 密码
   concurrency: 5                          # 未登录时发送 gRPC 请求的并发数量(1 ~ 50)
@@ -45,6 +47,7 @@ admins:                                   # 可以填入 bot 管理员的 qq 号
   - 123456789
 max_subsubscribe: 4                       # 非 vip 群聊最大可订阅数量
 update_check: true                        # 是否检查更新
+use_richuru: true                         # 是否使用 Richuru Log
 
 # 警告: 在 bot 第一次成功运行后配置文件将会被规范化, 此文件中的注释均会被清除, 
 # 并且配置项顺序可能会出现变动, 若需要查看配置项的详细信息可参考配置文档

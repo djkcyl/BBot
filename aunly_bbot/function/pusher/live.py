@@ -118,7 +118,7 @@ async def main(app: Ariadne):
                             )
                             msg = [
                                 f"{nick}在 {room_area} 区开播啦 ！\n标题：{title}\n",
-                                cover_img,
+                                cover_img or "",
                                 "\n" if cover_img else "",
                                 await get_b23_url(f"https://live.bilibili.com/{room_id}"),
                             ]
