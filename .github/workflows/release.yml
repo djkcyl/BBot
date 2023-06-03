@@ -109,7 +109,7 @@ jobs:
       - name: Replease Playwright Path
         if: ${{ matrix.group == 'full' }}
         run: |
-          pdm run pip install --upgrade setuptools distribute
+          apt-get install --reinstall python3-pkg-resources
           pdm run python release.py --replace-playwright-path
 
       - name: Build Nuitka Binary
