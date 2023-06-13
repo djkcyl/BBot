@@ -179,6 +179,7 @@ async def get_mobile_screenshot(page: Page, dynid: str):
                 await page.wait_for_timeout(100)
             await page.click("text=确认")
             await page.wait_for_timeout(5000)
+            captcha_image_body = b""
 
     if "bilibili.com/404" in page.url:
         logger.warning(f"[Bilibili推送] {dynid} 动态不存在")
