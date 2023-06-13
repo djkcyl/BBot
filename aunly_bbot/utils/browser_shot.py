@@ -154,6 +154,9 @@ async def get_mobile_screenshot(page: Page, dynid: str):
     need_wait = ["imageComplete", "fontsLoaded"]
     await asyncio.gather(*[page.wait_for_function(f"{i}()") for i in need_wait])
 
+    # captcha_box = await page.query_selector(".captcha-box")
+    await page.wait_for_timeout(1000000)
+
     card = await page.query_selector(".opus-modules" if "opus" in page.url else ".dyn-card")
     assert card
     clip = await card.bounding_box()
