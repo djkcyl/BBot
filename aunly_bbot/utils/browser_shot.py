@@ -11,9 +11,10 @@ from graia.ariadne import Ariadne
 from sentry_sdk import capture_exception
 from playwright._impl._api_types import TimeoutError
 from graiax.playwright.interface import PlaywrightContext
-from playwright.async_api._generated import Request, Page, BrowserContext, Route
+from playwright.async_api._generated import Request, Page, BrowserContext, Route, Response
 
 from ..core.bot_config import BotConfig
+from ..model.captcha import CaptchaResponse
 
 from .fonts_provider import get_font
 
@@ -130,11 +131,51 @@ def network_requestfailed(request: Request):
 
 async def get_mobile_screenshot(page: Page, dynid: str):
     url = f"https://m.bilibili.com/dynamic/{dynid}"
+    captcha_image_body = ""
+
+    async def captcha_image_url_callback(response: Response):
+        nonlocal captcha_image_body
+        logger.debug(f"获取到验证码图片：{response.url}")
+        print(len(await response.body()))
+        captcha_image_body = await response.body()
 
     await page.set_viewport_size({"width": 460, "height": 720})
 
+    page.on(
+        "response",
+        lambda response: captcha_image_url_callback(response)
+        if response.url.startswith("https://static.geetest.com/captcha_v3/")
+        else None,
+    )
+
     with contextlib.suppress(TimeoutError):
         await page.goto(url, wait_until="networkidle", timeout=20000)
+
+    while captcha_image_body:
+        captcha_image = await page.query_selector(".geetest_item_img")
+        assert captcha_image
+        captcha_size = await captcha_image.bounding_box()
+        assert captcha_size
+        print(captcha_size)
+        origin_image_size = 344, 384
+
+        async with httpx.AsyncClient() as client:
+            captcha_req = await client.post(
+                "http://10.0.0.106:8660/captcha/select/bytes",
+                timeout=10,
+                files={"img_file": captcha_image_body},
+            )
+            captcha_req = CaptchaResponse(**captcha_req.json())
+            print(captcha_req)
+        if captcha_req.data:
+            click_points: list[list[int]] = captcha_req.data.points
+            # 根据原图大小和截图大小计算缩放比例，然后计算出正确的需要点击的位置
+            for point in click_points:
+                real_click_points = {
+                    "x": point[0] * captcha_size["width"] / origin_image_size[0],
+                    "y": point[1] * captcha_size["height"] / origin_image_size[1],
+                }
+                await captcha_image.click(position=real_click_points)
 
     if "bilibili.com/404" in page.url:
         logger.warning(f"[Bilibili推送] {dynid} 动态不存在")
@@ -154,7 +195,6 @@ async def get_mobile_screenshot(page: Page, dynid: str):
     need_wait = ["imageComplete", "fontsLoaded"]
     await asyncio.gather(*[page.wait_for_function(f"{i}()") for i in need_wait])
 
-    # captcha_box = await page.query_selector(".captcha-box")
     await page.wait_for_timeout(1000000)
 
     card = await page.query_selector(".opus-modules" if "opus" in page.url else ".dyn-card")

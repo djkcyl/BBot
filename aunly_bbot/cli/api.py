@@ -39,7 +39,7 @@ async def init_playwright():
             "Mozilla/5.0 (Linux; Android 10; RMX1911) AppleWebKit/537.36 "
             "(KHTML, like Gecko) Chrome/100.0.4896.127 Mobile Safari/537.36"
         ),
-        headless=False,
+        # headless=False,
     )
     PLAYWRIGIT = ff
     logger.info("[Playwright] 正在获取浏览器版本")
