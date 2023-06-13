@@ -265,13 +265,13 @@ async def push(app: Ariadne, dyn: DynamicItem):
                     )
                     insert_dyn_push_to_group(dynid, data.group)
                     await asyncio.sleep(5)
-                except UnknownTarget:
+                except (UnknownTarget, ValueError):
                     logger.warning(
                         f"[BiliBili推送] {dynid} | {up_name}({up_id}) 推送失败，找不到该群 {data.group}，正在取消订阅"
                     )
                     delete = await delete_group(data.group)
                     logger.warning(f"[BiliBili推送] 已删除群 {data.group} 订阅的 {len(delete)} 个 UP")
-                    with contextlib.suppress(UnknownTarget):
+                    with contextlib.suppress(UnknownTarget, ValueError):
                         await app.quit_group(int(data.group))
                 except AccountMuted:
                     group = await app.get_group(int(data.group))

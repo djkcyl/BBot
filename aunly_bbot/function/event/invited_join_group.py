@@ -33,7 +33,7 @@ async def main(app: Ariadne, event: BotInvitedJoinGroupRequestEvent):
                         "已自动同意加入",
                     ),
                 )
-            except UnknownTarget:
+            except (UnknownTarget, ValueError):
                 logger.warning(f"由于未添加 {admin} 为好友，无法发送通知")
     else:
         await event.reject()
@@ -47,5 +47,5 @@ async def main(app: Ariadne, event: BotInvitedJoinGroupRequestEvent):
                     ),
                 )
                 await app.send_friend_message(event.supplicant, MessageChain("该群不在白名单中，已拒绝加入"))
-            except UnknownTarget:
+            except (UnknownTarget, ValueError):
                 logger.warning(f"由于未添加 {admin} 为好友，无法发送通知")

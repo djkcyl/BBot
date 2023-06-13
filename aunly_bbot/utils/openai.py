@@ -136,7 +136,7 @@ async def openai_req(
             req: Response = await client.post(
                 "https://api.openai.com/v1/chat/completions", json=data
             )
-        except HTTPError as e:
+        except Exception as e:
             return OpenAI(error=True, message=f"OpenAI 请求失败 {type(e)} {e}")
         if req.status_code != 200:
             return OpenAI(error=True, message=req.text, raw=req.json())

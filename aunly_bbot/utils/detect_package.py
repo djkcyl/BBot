@@ -1,4 +1,5 @@
 import sys
+import contextlib
 
 
 def detect_package():
@@ -13,8 +14,6 @@ def detect_package():
         )
     return False
 
-
-import contextlib
 
 is_package = detect_package()
 
