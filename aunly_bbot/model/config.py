@@ -46,7 +46,7 @@ class _Debug(BaseModel, extra=Extra.ignore):
 
 
 class _Bilibili(BaseModel, extra=Extra.ignore):
-    username: Optional[int]
+    username: Optional[str]
     password: Optional[str]
     use_login: bool = False
     use_browser: bool = True
