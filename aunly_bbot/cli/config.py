@@ -110,9 +110,9 @@ class CliConfig:
                     )
                 self.config["Mirai"]["mirai_host"] = mirai_host
                 return
-            except KeyError:
+            except (KeyError, JSONDecodeError) as e:
                 click.secho(
-                    "你输入的地址可能不是 Mirai HTTP API 的地址或 Mirai HTTP API 运行异常，请检查后重试！",
+                    f"{type(e)}\n你输入的地址可能不是 Mirai HTTP API 的地址或 Mirai HTTP API 运行异常，请检查后重试！",
                     fg="bright_red",
                     bold=True,
                 )
@@ -171,8 +171,12 @@ class CliConfig:
             except httpx.HTTPError:
                 click.secho("无法连接到 Mirai HTTP API，请检查地址是否正确！", fg="bright_red", bold=True)
                 self.mirai_mirai_host()
-            except JSONDecodeError:
-                click.secho("输入的地址不为 Mirai HTTP API 的地址！", fg="bright_red", bold=True)
+            except (KeyError, JSONDecodeError) as e:
+                click.secho(
+                    f"{type(e)}\n你输入的地址可能不是 Mirai HTTP API 的地址或 Mirai HTTP API 运行异常，请检查后重试！",
+                    fg="bright_red",
+                    bold=True,
+                )
                 self.mirai_mirai_host()
 
     def debug(self):

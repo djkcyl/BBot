@@ -61,6 +61,10 @@ async def main(
                 quote=source,
             )
 
+            if info_message.id < 0:
+                logger.warning(f"发送视频信息图片失败，可能是 Bot 被风控：{aid}")
+                return
+
             if BotConfig.Bilibili.openai_summarization or BotConfig.Bilibili.use_wordcloud:
                 try:
                     if archive_data.content:
