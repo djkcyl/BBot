@@ -10,7 +10,7 @@ from playwright.async_api._generated import BrowserContext
 from graiax.playwright.installer import install_playwright
 
 from ..utils.browser_shot import screenshot
-from ..utils.fonts_provider import get_font
+from ..utils.fonts_provider import font_init
 from ..utils.detect_package import is_package
 
 
@@ -27,7 +27,7 @@ app = FastAPI(title="BBot Playwright API", version="0.1.0")
 async def init_playwright():
     global PLAYWRIGIT
     logger.info("正在下载字体...")
-    await get_font()
+    font_init()
     logger.success("字体下载完成！")
 
     await install_playwright(browser_type="firefox")

@@ -451,12 +451,11 @@ class CliConfig:
             ListPrompt(
                 "请选择日志等级",
                 [
-                    Choice("DEBUG"),
                     Choice("INFO"),
+                    Choice("DEBUG"),
                     Choice("WARNING"),
                 ],
                 allow_filter=False,
-                default_select=1,
                 annotation="使用键盘的 ↑ 和 ↓ 来选择, 按回车确认",
             )
             .prompt()
