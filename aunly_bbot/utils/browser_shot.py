@@ -1,5 +1,6 @@
 import re
 import time
+import httpx
 import asyncio
 import contextlib
 
@@ -44,6 +45,10 @@ async def fill_font(route: Route, request: Request):
     except Exception:
         logger.error(f"找不到字体 {url.query['name']}")
         await route.fallback()
+
+
+async def resolve_select_captcha(page: Page):
+    pass
 
 
 async def browser_dynamic(dynid: str):
