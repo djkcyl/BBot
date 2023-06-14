@@ -4,16 +4,18 @@ import asyncio
 import tiktoken_async
 
 from loguru import logger
+from httpx import Response
 from typing import Optional
 from collections import OrderedDict
-from httpx import HTTPError, Response
 
 from ..core.bot_config import BotConfig
 from ..model.openai import OpenAI, TokenUsage
 
-LIMIT_COUNT = {"gpt-3.5-turbo-0301": 3500, "gpt-4-0314": 7600, "gpt-4-32k-0314": 32200}.get(
-    BotConfig.Bilibili.openai_model or "gpt-3.5-turbo-0301", 3500
-)
+LIMIT_COUNT = {
+    "gpt-3.5-turbo-0613": 3500,
+    "gpt-3.5-turbo-16k-0613": 15000,
+    "gpt-4-0613": 7600,
+}.get(BotConfig.Bilibili.openai_model or "gpt-3.5-turbo-0613", 3500)
 
 if BotConfig.Bilibili.openai_summarization:
     logger.info("正在加载 OpenAI Token 计算模型")
@@ -59,10 +61,10 @@ def get_summarise_prompt(title: str, transcript: str) -> list[dict[str, str]]:
 def count_tokens(prompts: list[dict[str, str]]):
     """根据内容计算 token 数"""
 
-    if BotConfig.Bilibili.openai_model == "gpt-3.5-turbo-0301":
+    if BotConfig.Bilibili.openai_model.startswith("gpt-3.5-turbo"):
         tokens_per_message = 4
         tokens_per_name = -1
-    elif BotConfig.Bilibili.openai_model == "gpt-4":
+    elif BotConfig.Bilibili.openai_model.startswith("gpt-4"):
         tokens_per_message = 3
         tokens_per_name = 1
     else:

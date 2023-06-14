@@ -46,7 +46,7 @@ class _Debug(BaseModel, extra=Extra.ignore):
 
 
 class _Bilibili(BaseModel, extra=Extra.ignore):
-    username: Optional[int]
+    username: Optional[str]
     password: Optional[str]
     use_login: bool = False
     use_browser: bool = True
@@ -57,7 +57,7 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
     dynamic_font_source: Literal["local", "remote"] = "local"
     openai_summarization: bool = False
     openai_api_token: Optional[str] = None
-    openai_model: str = "gpt-3.5-turbo"
+    openai_model: str = "gpt-3.5-turbo-0301"
     openai_proxy: Optional[AnyHttpUrl] = None
     openai_cooldown: int = 60
     openai_whitelist_users: Optional[list[int]] = None
@@ -65,6 +65,7 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
     use_wordcloud: bool = False
     use_bcut_asr: bool = False
     asr_length_threshold: int = 60
+    captcha_address: Optional[AnyHttpUrl] = None
 
     # 验证是否可以登录
     @validator("use_login", always=True)

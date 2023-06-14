@@ -288,7 +288,7 @@ class CliConfig:
     def openai_model(self):
         openai_model = ListPrompt(
             "请选择 OpenAI 模型",
-            [Choice("gpt-3.5-turbo-0301"), Choice("gpt-4-0314"), Choice("gpt-4-32k-0314")],
+            [Choice("gpt-3.5-turbo-0613"), Choice("gpt-3.5-turbo-16k-0613"), Choice("gpt-4-0613")],
             allow_filter=False,
             annotation="使用键盘的 ↑ 和 ↓ 来选择, 按回车确认",
         ).prompt()
@@ -306,13 +306,14 @@ class CliConfig:
 
     def bilibili_username(self):
         username = InputPrompt("请输入 Bilibili 用户名: （可用于 AI 总结时获取 Bilibili 的 AI 字幕）").prompt()
-        if not username:
-            click.secho("用户名不能为空！", fg="bright_red", bold=True)
-            self.bilibili_username()
+        if not username or username == "":
+            self.config["Bilibili"]["username"] = username
+            return click.secho("用户名为空，已关闭对应功能！", fg="bright_red", bold=True)
         elif not username.isdigit():
             click.secho("用户名不合法！", fg="bright_red", bold=True)
             self.bilibili_username()
         self.config["Bilibili"]["username"] = username
+        self.bilibili_password()
 
     def bilibili_password(self):
         password = InputPrompt("请输入 Bilibili 密码: ", is_password=True).prompt()
@@ -450,12 +451,11 @@ class CliConfig:
             ListPrompt(
                 "请选择日志等级",
                 [
-                    Choice("DEBUG"),
                     Choice("INFO"),
+                    Choice("DEBUG"),
                     Choice("WARNING"),
                 ],
                 allow_filter=False,
-                default_select=1,
                 annotation="使用键盘的 ↑ 和 ↓ 来选择, 按回车确认",
             )
             .prompt()

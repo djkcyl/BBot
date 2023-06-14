@@ -10,7 +10,7 @@ from playwright.async_api._generated import BrowserContext
 from graiax.playwright.installer import install_playwright
 
 from ..utils.browser_shot import screenshot
-from ..utils.fonts_provider import get_font
+from ..utils.fonts_provider import font_init
 from ..utils.detect_package import is_package
 
 
@@ -27,7 +27,7 @@ app = FastAPI(title="BBot Playwright API", version="0.1.0")
 async def init_playwright():
     global PLAYWRIGIT
     logger.info("正在下载字体...")
-    await get_font()
+    font_init()
     logger.success("字体下载完成！")
 
     await install_playwright(browser_type="firefox")
@@ -39,10 +39,14 @@ async def init_playwright():
             "Mozilla/5.0 (Linux; Android 10; RMX1911) AppleWebKit/537.36 "
             "(KHTML, like Gecko) Chrome/100.0.4896.127 Mobile Safari/537.36"
         ),
+        # headless=False,
     )
     PLAYWRIGIT = ff
     logger.info("[Playwright] 正在获取浏览器版本")
-    page = await PLAYWRIGIT.new_page()
+    if len(PLAYWRIGIT.pages) > 0:
+        page = PLAYWRIGIT.pages[0]
+    else:
+        page = await PLAYWRIGIT.new_page()
     version = await page.evaluate("navigator.appVersion")
     logger.info(f"[BiliBili推送] 浏览器启动完成，当前版本 {version}")
     logger.debug(await PLAYWRIGIT.cookies())

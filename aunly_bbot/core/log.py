@@ -82,6 +82,7 @@ logger.add(
 )
 
 logger.success(f"成功重载 logger，当前日志等级为 {log_level}")
+logger.info(f"日志文件将会保存在 {LOGPATH} 中")
 
 # logger.trace("TRACE 等级将会输出至控制台")
 # logger.debug("DEBUG 等级将会输出至控制台")

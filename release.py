@@ -1,7 +1,7 @@
 import pathlib
 import platform
 import argparse
-import pkg_resources
+import importlib.resources as res
 
 project_version = (
     pathlib.Path("pyproject.toml")
@@ -42,12 +42,17 @@ elif p.name:
 elif p.buildname:
     print(build_name)
 elif p.replace_playwright_path:
-    playwright_package_path = pkg_resources.resource_filename("playwright", "driver")
-    path = list(
-        pathlib.Path(playwright_package_path, "package", ".local-browsers").glob(
-            "firefox-*/firefox*"
+    import playwright
+
+    with res.path(playwright, "driver") as playwright_package_path:
+        path = list(
+            playwright_package_path.joinpath("package", ".local-browsers").glob(
+                "firefox-*/firefox*"
+            )
+        )[0]
+        chrome_relative_path = path.relative_to(pathlib.Path(playwright_package_path).parent)
+        print(chrome_relative_path)
+        yml_path = pathlib.Path("nuitka-full.yml")
+        yml_path.write_text(
+            yml_path.read_text().replace("$PLAYWRIGHT", str(chrome_relative_path))
         )
-    )[0]
-    chrome_relative_path = path.relative_to(pathlib.Path(playwright_package_path).parent)
-    yml_path = pathlib.Path("nuitka-full.yml")
-    yml_path.write_text(yml_path.read_text().replace("$PLAYWRIGHT", str(chrome_relative_path)))
