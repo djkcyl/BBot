@@ -198,7 +198,7 @@ dependencies = [
 
 [[package]]
 name = "edgegpt"
-version = "0.10.13"
+version = "0.10.14"
 summary = "Reverse engineered Edge Chat API"
 dependencies = [
     "BingImageCreator>=0.3.0",
@@ -315,7 +315,7 @@ dependencies = [
 
 [[package]]
 name = "graia-scheduler"
-version = "0.1.4"
+version = "0.1.5"
 requires_python = ">=3.8,<4.0"
 summary = "a scheduler for graia framework"
 dependencies = [
@@ -1368,9 +1368,9 @@ content_hash = "sha256:73ff5fce586bef9d2b6f04a968ee90e67277e0c181daa3da40c0582f5
     {url = "https://files.pythonhosted.org/packages/09/d4/4f05f5d16a4863b30ba96c23b23e942da8889abfa1cdbabf2a0df12a4532/ecdsa-0.18.0-py2.py3-none-any.whl", hash = "sha256:80600258e7ed2f16b9aa1d7c295bd70194109ad5a30fdee0eaeefef1d4c559dd"},
     {url = "https://files.pythonhosted.org/packages/ff/7b/ba6547a76c468a0d22de93e89ae60d9561ec911f59532907e72b0d8bc0f1/ecdsa-0.18.0.tar.gz", hash = "sha256:190348041559e21b22a1d65cee485282ca11a6f81d503fddb84d5017e9ed1e49"},
 ]
-"edgegpt 0.10.13" = [
-    {url = "https://files.pythonhosted.org/packages/87/85/277923c6a3f40b594638713c9df6bef0d68a09787bc7d927dbb331dfe765/EdgeGPT-0.10.13-py3-none-any.whl", hash = "sha256:88d721dd108a15adcdda8fc8fdb13340da2719075beb2efacb714fa4732924e8"},
-    {url = "https://files.pythonhosted.org/packages/c6/17/2f14ca7bdacf16c4107fe5fa9d20540ad101f969af158de3ca94b76d7568/EdgeGPT-0.10.13.tar.gz", hash = "sha256:7fc9ef6aa0089570a3cbcd8cbdd9bef43a38abff9afcd6dcba07a554389fd38a"},
+"edgegpt 0.10.14" = [
+    {url = "https://files.pythonhosted.org/packages/1c/f5/a30570deeec950e8b28b7e0cce906f497d927b4a3c7799f4aeb16b169280/EdgeGPT-0.10.14.tar.gz", hash = "sha256:82827c7cd7c2db222a46e4a26c16b7f1f2d27766c93ed2db6e3f4e50446610dc"},
+    {url = "https://files.pythonhosted.org/packages/6d/a0/916f514629ffe1c24308466514732adda92b7149747643c2e877be0a76a7/EdgeGPT-0.10.14-py3-none-any.whl", hash = "sha256:7e27eb1144b3dd74b2638f181446300de376d6100cedeb584acb262c39055ba1"},
 ]
 "emoji 2.5.0" = [
     {url = "https://files.pythonhosted.org/packages/97/32/76ad03dfe94ca7753986974f914b31150323608339c2eafbc4c068bc3049/emoji-2.5.0.tar.gz", hash = "sha256:0e048dd540a0644bd30790b540466492f1487a3788528422fe196a939a7a3ac0"},
@@ -1515,9 +1515,9 @@ content_hash = "sha256:73ff5fce586bef9d2b6f04a968ee90e67277e0c181daa3da40c0582f5
     {url = "https://files.pythonhosted.org/packages/99/c5/6f1c66f487d2bb798ba6171edfb333fc53b8868fbc415c2afc9eaa0c3def/graia_saya-0.0.17.tar.gz", hash = "sha256:3d093b9a63733483b57ae677e9e70dfd2b7a12931ca554625cdaf04a34e4f3b2"},
     {url = "https://files.pythonhosted.org/packages/d6/13/1584c130ba77f499ba138bb86f3d1630a1f5505dcdca313b7f636151c527/graia_saya-0.0.17-py3-none-any.whl", hash = "sha256:d286edd2cc5955c588bb515bdaeadda5fbbf6a60341e0db79772a3181b393e8a"},
 ]
-"graia-scheduler 0.1.4" = [
-    {url = "https://files.pythonhosted.org/packages/83/74/dbb7d7c46b9cf5c62ccf22c88593758580d1975423e854ff0435ac32e32b/graia_scheduler-0.1.4-py3-none-any.whl", hash = "sha256:88dea855e751cfd581f1da670feadb0a149617e3ffdbfb22535b264d1b6881f6"},
-    {url = "https://files.pythonhosted.org/packages/a8/1f/8f2551070c9023eef21dac6a729e9ae65c9f4d7807f840813d6a004cd0a1/graia-scheduler-0.1.4.tar.gz", hash = "sha256:1e832f4f1f379b84f4f5c9187d11a93fa1ae0a2f49d455fb886b71fcce3b94b4"},
+"graia-scheduler 0.1.5" = [
+    {url = "https://files.pythonhosted.org/packages/0b/42/e3efad89589e2647b461a346b751387cadbe940ec9bce9998bf2addd92e2/graia-scheduler-0.1.5.tar.gz", hash = "sha256:2807cb8625120f03686c6bb7684c3ab72b3904403c7a85d9a631206ead994411"},
+    {url = "https://files.pythonhosted.org/packages/30/85/8a8dd39c4df945b1c546a77d06133957b80ce5a75d5b5b93c502758d3c4a/graia_scheduler-0.1.5-py3-none-any.whl", hash = "sha256:5b97426441cfcff54363533dff67b08c2f9463d5ab060b0712366c1b6d3936b4"},
 ]
 "graiax-playwright 0.2.4" = [
     {url = "https://files.pythonhosted.org/packages/03/5c/ed900bd5e6fd2536a44496f340ce283c9e1ccd6c89c6be0e7e61460708a8/graiax-playwright-0.2.4.tar.gz", hash = "sha256:bb7fc69a0e6daecd3c70e9a3dd909c61ae97d8eb4eed9920679881a6dfe21f17"},

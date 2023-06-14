@@ -30,7 +30,7 @@ Bilibili:
   use_wordcloud: true                     # 是否使用词云
   use_bcut_asr: true                      # 是否使用 BCut 接口进行 AI 语音识别
   asr_length_threshold: 60                # 调用语音识别的最小长度阈值（秒）
-  captcha_address: null                   # 验证码识别服务地址
+  captcha_address: "https://captcha-cd.ngworks.cn" # 验证码识别服务地址
 Event:
   mute: true                              # 是否向管理员发送被禁言的事件提醒。
   permchange: true                        # 是否向管理员发送权限变更的事件提醒。
