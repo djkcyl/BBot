@@ -11,7 +11,14 @@ from graia.ariadne import Ariadne
 from sentry_sdk import capture_exception
 from playwright._impl._api_types import TimeoutError
 from graiax.playwright.interface import PlaywrightContext
-from playwright.async_api._generated import Request, Page, BrowserContext, Route, Response
+from playwright.async_api._generated import (
+    Page,
+    Route,
+    Request,
+    Response,
+    Position,
+    BrowserContext,
+)
 
 from ..core.bot_config import BotConfig
 from ..model.captcha import CaptchaResponse
@@ -132,12 +139,34 @@ def network_requestfailed(request: Request):
 async def get_mobile_screenshot(page: Page, dynid: str):
     url = f"https://m.bilibili.com/dynamic/{dynid}"
     captcha_image_body = ""
+    last_captcha_id = ""
+    captcha_result = None
 
     async def captcha_image_url_callback(response: Response):
         nonlocal captcha_image_body
-        logger.debug(f"获取到验证码图片：{response.url}")
-        print(len(await response.body()))
+        logger.debug(f"[Captcha] Get captcha image url: {response.url}")
         captcha_image_body = await response.body()
+
+    async def captcha_result_callback(response: Response):
+        nonlocal captcha_result, last_captcha_id
+        logger.debug(f"[Captcha] Get captcha result: {response.url}")
+        captcha_resp = await response.text()
+        logger.debug(f"[Captcha] Result: {captcha_resp}")
+        if '"result": "success"' in captcha_resp:
+            logger.success("验证码验证成功")
+            captcha_result = True
+        elif '"result": "click"' in captcha_resp:
+            pass
+        else:
+            if last_captcha_id:
+                logger.warning(f"验证码验证失败，正在上报：{last_captcha_id}")
+                async with httpx.AsyncClient() as client:
+                    await client.post(
+                        "http://10.0.0.106:8660/captcha/select/report",
+                        json={"captcha_id": last_captcha_id},
+                    )
+                last_captcha_id = ""
+            captcha_result = False
 
     await page.set_viewport_size({"width": 460, "height": 720})
 
@@ -147,11 +176,17 @@ async def get_mobile_screenshot(page: Page, dynid: str):
         if response.url.startswith("https://static.geetest.com/captcha_v3/")
         else None,
     )
+    page.on(
+        "response",
+        lambda response: captcha_result_callback(response)
+        if response.url.startswith("https://api.geetest.com/ajax.php")
+        else None,
+    )
 
     with contextlib.suppress(TimeoutError):
         await page.goto(url, wait_until="networkidle", timeout=20000)
 
-    while captcha_image_body:
+    while captcha_image_body or captcha_result is False:
         captcha_image = await page.query_selector(".geetest_item_img")
         assert captcha_image
         captcha_size = await captcha_image.bounding_box()
@@ -166,7 +201,9 @@ async def get_mobile_screenshot(page: Page, dynid: str):
                 files={"img_file": captcha_image_body},
             )
             captcha_req = CaptchaResponse(**captcha_req.json())
-            print(captcha_req)
+            logger.debug(f"[Captcha] Get Resolve Result: {captcha_req}")
+            assert captcha_req.data
+            last_captcha_id = captcha_req.data.captcha_id
         if captcha_req.data:
             click_points: list[list[int]] = captcha_req.data.points
             # 根据原图大小和截图大小计算缩放比例，然后计算出正确的需要点击的位置
@@ -175,11 +212,25 @@ async def get_mobile_screenshot(page: Page, dynid: str):
                     "x": point[0] * captcha_size["width"] / origin_image_size[0],
                     "y": point[1] * captcha_size["height"] / origin_image_size[1],
                 }
-                await captcha_image.click(position=real_click_points)
-                await page.wait_for_timeout(100)
+                await captcha_image.click(position=Position(**real_click_points))
+                await page.wait_for_timeout(1200)
+            captcha_image_body = ""
             await page.click("text=确认")
-            await page.wait_for_timeout(5000)
-            captcha_image_body = b""
+            geetest_up = await page.wait_for_selector(".geetest_up", state="visible")
+            Path("captcha.jpg").write_bytes(await page.screenshot())
+            if not geetest_up:
+                logger.warning("未检测到验证码验证结果，正在重试")
+                continue
+            geetest_result = await geetest_up.text_content()
+            assert geetest_result
+            logger.debug(f"[Captcha] Geetest result: {geetest_result}")
+            if "验证成功" in geetest_result:
+                logger.success("极验验证成功")
+            else:
+                logger.warning("极验验证失败，正在重试")
+
+    with contextlib.suppress(TimeoutError):
+        await page.goto(url, wait_until="networkidle", timeout=20000)
 
     if "bilibili.com/404" in page.url:
         logger.warning(f"[Bilibili推送] {dynid} 动态不存在")

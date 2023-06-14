@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 
 class CaptchaData(BaseModel):
+    captcha_id: str
     points: list[list[int]]
     rectangles: list[list[int]]
     yolo_data: list[list[int]]

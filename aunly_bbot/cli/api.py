@@ -49,6 +49,7 @@ async def init_playwright():
         page = await PLAYWRIGIT.new_page()
     version = await page.evaluate("navigator.appVersion")
     logger.info(f"[BiliBili推送] 浏览器启动完成，当前版本 {version}")
+    await PLAYWRIGIT.clear_cookies()
     logger.debug(await PLAYWRIGIT.cookies())
 
 
