@@ -288,7 +288,7 @@ class CliConfig:
     def openai_model(self):
         openai_model = ListPrompt(
             "请选择 OpenAI 模型",
-            [Choice("gpt-3.5-turbo-0301"), Choice("gpt-4-0314"), Choice("gpt-4-32k-0314")],
+            [Choice("gpt-3.5-turbo-0613"), Choice("gpt-3.5-turbo-16k-0613"), Choice("gpt-4-0613")],
             allow_filter=False,
             annotation="使用键盘的 ↑ 和 ↓ 来选择, 按回车确认",
         ).prompt()

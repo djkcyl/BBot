@@ -39,7 +39,7 @@ async def init_playwright():
             "Mozilla/5.0 (Linux; Android 10; RMX1911) AppleWebKit/537.36 "
             "(KHTML, like Gecko) Chrome/100.0.4896.127 Mobile Safari/537.36"
         ),
-        headless=False,
+        # headless=False,
     )
     PLAYWRIGIT = ff
     logger.info("[Playwright] 正在获取浏览器版本")
@@ -49,7 +49,6 @@ async def init_playwright():
         page = await PLAYWRIGIT.new_page()
     version = await page.evaluate("navigator.appVersion")
     logger.info(f"[BiliBili推送] 浏览器启动完成，当前版本 {version}")
-    await PLAYWRIGIT.clear_cookies()
     logger.debug(await PLAYWRIGIT.cookies())
 
 
