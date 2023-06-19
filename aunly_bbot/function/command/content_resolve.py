@@ -22,7 +22,7 @@ from ...core.data import ContentResolveData
 from ...core.control import Interval, Permission
 from ...utils.video_subtitle import get_subtitle
 from ...utils.bilibili_parse import extract_bilibili_info
-from ...utils.draw_bili_image import binfo_image_create
+from ...utils.draw_bili_image import BiliVideoImage
 from ...utils.text2image import rich_text2image, browser_text2image
 from ...utils.bilibili_request import get_b23_url, grpc_get_view_info
 from ...utils.content_summarise import column_summarise, subtitle_summarise
@@ -51,7 +51,8 @@ async def main(
         try:
             logger.info(f"开始生成视频信息图片：{aid}")
             b23_url = await get_b23_url(f"https://www.bilibili.com/video/{bvid}")
-            image = await binfo_image_create(video_info, b23_url)
+
+            image = await (await BiliVideoImage.from_view_rely(video_info, b23_url)).render()
             info_message = await app.send_group_message(
                 group,
                 MessageChain(
