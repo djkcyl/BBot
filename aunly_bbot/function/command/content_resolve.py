@@ -52,7 +52,7 @@ async def main(
             logger.info(f"开始生成视频信息图片：{aid}")
             b23_url = await get_b23_url(f"https://www.bilibili.com/video/{bvid}")
 
-            image = await (await BiliVideoImage.from_view_rely(video_info, b23_url)).render()
+            image = await (await BiliVideoImage.from_view_rely(video_info, b23_url)).render(BotConfig.Bilibili.render_style)
             info_message = await app.send_group_message(
                 group,
                 MessageChain(
