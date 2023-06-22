@@ -1,5 +1,6 @@
 import asyncio
 import base64
+import re
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
@@ -375,6 +376,8 @@ class BiliVideoImage:
         from graia.ariadne.app import Ariadne
         from graiax.playwright.interface import PlaywrightContext
 
+        from .browser_shot import fill_font
+
         app = Ariadne.current()
         browser_context = app.launch_manager.get_interface(PlaywrightContext).context
 
@@ -437,6 +440,7 @@ class BiliVideoImage:
         )
 
         async with await browser_context.new_page() as page:
+            await page.route(re.compile("^https://fonts.bbot/(.+)$"), fill_font)
             await page.goto(template_path)
             await page.set_content(html, wait_until="networkidle")
             await page.wait_for_timeout(5)

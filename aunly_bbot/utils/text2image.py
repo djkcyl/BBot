@@ -1,13 +1,13 @@
 import asyncio
-
+import re
 from io import BytesIO
 from pathlib import Path
+
 from graia.ariadne.app import Ariadne
-from PIL import Image, ImageFont, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
-from .strings import get_cut_str
 from .fonts_provider import get_font_sync
-
+from .strings import get_cut_str
 
 data_path = Path("data", "render")
 data_path.mkdir(parents=True, exist_ok=True)
@@ -37,9 +37,10 @@ def _create_image(text: str, cut: int) -> bytes:
 
 async def rich_text2image(data: str):
     from io import BytesIO
+
+    from dynamicadaptor.Content import RichTextDetail, Text
     from minidynamicrender.DynConfig import ConfigInit
     from minidynamicrender.DynText import DynTextRender
-    from dynamicadaptor.Content import Text, RichTextDetail
 
     from .fonts_provider import get_font
 
@@ -73,18 +74,40 @@ async def rich_text2image(data: str):
 
 
 async def browser_text2image(data: str):
-    from graiax.text2img.playwright import convert_md
+    import jinja2
     from graiax.playwright.interface import PlaywrightContext
-    from graiax.text2img.playwright.renderer import BuiltinCSS
+
+    from .browser_shot import fill_font
 
     app = Ariadne.current()
     browser_context = app.launch_manager.get_interface(PlaywrightContext).context
-    page = await browser_context.new_page()
-    await page.set_viewport_size({"width": 400, "height": 100})
-    md = convert_md(data)
-    css = "\n".join(BuiltinCSS.github.value)
-    await page.set_content(
-        '<html><head><meta name="viewport" content="width=device-width,initial-scale=1.0">'
-        f"<style>{css}</style></head><body>{md}<body></html>"
+
+    src = "openai"
+    data = r"\n".join(data.splitlines())
+
+    summary = Path(__file__).parent.parent.joinpath("static", "summary")
+    template_env = jinja2.Environment(
+        loader=jinja2.FileSystemLoader(summary),
+        enable_async=True,
     )
-    return await page.screenshot(full_page=True, type="jpeg", quality=95)
+    template_path = f"file:///{summary.joinpath('index.html').absolute()}".replace(
+        "////", "///"
+    )
+    template = template_env.get_template("index.html")
+    html = await template.render_async(
+        **{
+            "data": data,
+            "src": src,
+        }
+    )
+
+    async with await browser_context.new_page() as page:
+        await page.route(re.compile("^https://fonts.bbot/(.+)$"), fill_font)
+        await page.set_viewport_size({"width": 800, "height": 2000})
+        await page.goto(template_path)
+        await page.set_content(html, wait_until="networkidle")
+        await page.wait_for_timeout(5)
+        img_raw = await page.get_by_alt_text("main").screenshot(
+            type="png",
+        )
+    return img_raw
