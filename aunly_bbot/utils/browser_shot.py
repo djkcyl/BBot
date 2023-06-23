@@ -28,6 +28,8 @@ from .fonts_provider import get_font
 
 error_path = Path("data").joinpath("error")
 error_path.mkdir(parents=True, exist_ok=True)
+captcha_path = Path("data").joinpath("captcha")
+captcha_path.mkdir(parents=True, exist_ok=True)
 mobile_style_js = Path(__file__).parent.parent.joinpath("static", "mobile_style.js")
 font_mime_map = {
     "collection": "font/collection",
@@ -221,7 +223,7 @@ async def get_mobile_screenshot(page: Page, dynid: str):
                 captcha_image_body = ""
                 await page.click("text=确认")
                 geetest_up = await page.wait_for_selector(".geetest_up", state="visible")
-                Path("captcha.jpg").write_bytes(await page.screenshot())
+                await page.screenshot(path=captcha_path.joinpath(f"{last_captcha_id}.jpg"))
                 if not geetest_up:
                     logger.warning("[Captcha] 未检测到验证码验证结果，正在重试")
                     continue
