@@ -52,6 +52,7 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
     use_browser: bool = True
     allow_fallback: bool = True
     mobile_style: bool = True
+    render_style: Literal["bbot_default", "style_blue"] = "bbot_default"
     concurrency: int = 5
     dynamic_font: str = "HarmonyOS_Sans_SC_Medium.ttf"
     dynamic_font_source: Literal["local", "remote"] = "local"
@@ -128,6 +129,18 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
             return 1
         else:
             return concurrency
+
+    @validator("render_style")
+    def can_use_style(cls, render_style):
+        if render_style == "bbot_default":
+            return render_style
+        try:
+            import playwright  # noqa  # type: ignore
+
+            return render_style
+        except ImportError:
+            click.secho("未安装 playwright，如需使用非默认的渲染样式，请安装 graiax-playwright", fg="bright_red")
+            sys.exit()
 
 
 class _Event(BaseModel, extra=Extra.ignore):

@@ -235,6 +235,7 @@ class CliConfig:
             ).prompt()
             self.config["Bilibili"]["use_browser"] = browser.name == "是（开启）"
             self.bilibili_mobile_style()
+            self.render_style()
             self.allow_fallback()
         else:
             self.config["Bilibili"]["use_browser"] = False
@@ -250,6 +251,18 @@ class CliConfig:
             self.config["Bilibili"]["mobile_style"] = mobile_style.name == "是（开启）"
         else:
             self.config["Bilibili"]["mobile_style"] = False
+
+    def render_style(self):
+        if is_full:
+            mobile_style = ListPrompt(
+                "请选择使用的视频信息渲染模板？（bbot_default无需浏览器，其他均需求浏览器）",
+                [Choice("bbot_default"), Choice("style_blue")],
+                allow_filter=False,
+                annotation="使用键盘的 ↑ 和 ↓ 来选择, 按回车确认",
+            ).prompt()
+            self.config["Bilibili"]["render_style"] = mobile_style.name
+        else:
+            self.config["Bilibili"]["render_style"] = "bbot_default"
 
     def allow_fallback(self):
         allow_fallback = ListPrompt(
@@ -288,7 +301,11 @@ class CliConfig:
     def openai_model(self):
         openai_model = ListPrompt(
             "请选择 OpenAI 模型",
-            [Choice("gpt-3.5-turbo-0613"), Choice("gpt-3.5-turbo-16k-0613"), Choice("gpt-4-0613")],
+            [
+                Choice("gpt-3.5-turbo-0613"),
+                Choice("gpt-3.5-turbo-16k-0613"),
+                Choice("gpt-4-0613"),
+            ],
             allow_filter=False,
             annotation="使用键盘的 ↑ 和 ↓ 来选择, 按回车确认",
         ).prompt()
@@ -308,10 +325,11 @@ class CliConfig:
         username = InputPrompt("请输入 Bilibili 用户名: （可用于 AI 总结时获取 Bilibili 的 AI 字幕）").prompt()
         if not username or username == "":
             self.config["Bilibili"]["username"] = username
-            return click.secho("用户名为空，已关闭对应功能！", fg="bright_red", bold=True)
+            click.secho("用户名为空，已关闭对应功能！", fg="bright_red", bold=True)
+            return 
         elif not username.isdigit():
             click.secho("用户名不合法！", fg="bright_red", bold=True)
-            self.bilibili_username()
+            return self.bilibili_username()
         self.config["Bilibili"]["username"] = username
         self.bilibili_password()
 

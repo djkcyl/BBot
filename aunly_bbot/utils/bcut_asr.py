@@ -1,16 +1,18 @@
-import time
-import httpx
+from __future__ import annotations
 
+import time
 from os import PathLike
 from pathlib import Path
-from loguru import logger
 from typing import Literal, Optional
 
+import httpx
+from loguru import logger
+
 from ..model.bcut_asr import (
+    ResourceCompleteRspSchema,
+    ResourceCreateRspSchema,
     ResultRspSchema,
     TaskCreateRspSchema,
-    ResourceCreateRspSchema,
-    ResourceCompleteRspSchema,
 )
 
 __version__ = "0.0.2"
