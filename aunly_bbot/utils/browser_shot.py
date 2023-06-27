@@ -28,6 +28,8 @@ from .fonts_provider import get_font
 
 error_path = Path("data").joinpath("error")
 error_path.mkdir(parents=True, exist_ok=True)
+captcha_path = Path("data").joinpath("captcha")
+captcha_path.mkdir(parents=True, exist_ok=True)
 mobile_style_js = Path(__file__).parent.parent.joinpath("static", "mobile_style.js")
 font_mime_map = {
     "collection": "font/collection",
@@ -188,7 +190,7 @@ async def get_mobile_screenshot(page: Page, dynid: str):
         await page.goto(url, wait_until="networkidle", timeout=20000)
 
     if captcha_address:
-        captcha_baseurl = f"{captcha_address.scheme}://{captcha_address.host}:{captcha_address.port}/captcha/select"
+        captcha_baseurl = f"{captcha_address}/captcha/select"
         while captcha_image_body or captcha_result is False:
             logger.warning("[Captcha] 需要人机验证，正在尝试自动解决验证码")
             captcha_image = await page.query_selector(".geetest_item_img")
@@ -221,7 +223,7 @@ async def get_mobile_screenshot(page: Page, dynid: str):
                 captcha_image_body = ""
                 await page.click("text=确认")
                 geetest_up = await page.wait_for_selector(".geetest_up", state="visible")
-                Path("captcha.jpg").write_bytes(await page.screenshot())
+                await page.screenshot(path=captcha_path.joinpath(f"{last_captcha_id}.jpg"))
                 if not geetest_up:
                     logger.warning("[Captcha] 未检测到验证码验证结果，正在重试")
                     continue
@@ -241,7 +243,10 @@ async def get_mobile_screenshot(page: Page, dynid: str):
         raise Notfound
 
     await page.wait_for_load_state(state="domcontentloaded", timeout=20000)
-    await page.wait_for_selector(".opus-module-author", state="visible")
+    if "opus" in page.url:
+        await page.wait_for_selector(".opus-module-author", state="visible")
+    else:
+        await page.wait_for_selector(".dyn-header__author__face", state="visible")
 
     await page.add_script_tag(path=mobile_style_js)
     await page.wait_for_function("getMobileStyle()")
