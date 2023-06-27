@@ -66,7 +66,7 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
     use_bcut_asr: bool = False
     asr_length_threshold: int = 60
     captcha_address: Optional[AnyHttpUrl] = AnyHttpUrl(
-        "https://bbot-captcha:6082", scheme="https"
+        "https://captcha-cd.ngworks.cn", scheme="https"
     )
 
     # 验证是否可以登录
