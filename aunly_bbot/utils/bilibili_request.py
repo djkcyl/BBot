@@ -94,9 +94,9 @@ async def search_user(keyword: str):
     """
     url = "https://api.bilibili.com/x/web-interface/search/type"
     data = {"keyword": keyword, "search_type": "bili_user"}
-    resp = (await hc.get(url, params=data)).json()
+    resp = await get(url, params=data)
     logger.debug(resp)
-    return resp["data"]
+    return resp
 
 
 async def get_user_space_info(uid: int):
