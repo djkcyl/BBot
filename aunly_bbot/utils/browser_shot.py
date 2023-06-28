@@ -220,7 +220,6 @@ async def get_mobile_screenshot(page: Page, dynid: str):
                     }
                     await captcha_image.click(position=Position(**real_click_points))
                     await page.wait_for_timeout(800)
-                captcha_image_body = ""
                 await page.click("text=确认")
                 geetest_up = await page.wait_for_selector(".geetest_up", state="visible")
                 await page.screenshot(path=captcha_path.joinpath(f"{last_captcha_id}.jpg"))
@@ -232,6 +231,7 @@ async def get_mobile_screenshot(page: Page, dynid: str):
                 logger.debug(f"[Captcha] Geetest result: {geetest_result}")
                 if "验证成功" in geetest_result:
                     logger.success("[Captcha] 极验网页 Tip 验证成功")
+                    captcha_image_body = ""
                 else:
                     logger.warning("[Captcha] 极验验证失败，正在重试")
 
