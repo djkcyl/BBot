@@ -43,7 +43,7 @@ jobs:
         if: ${{ matrix.group == 'full' }}
         env:
           PLAYWRIGHT_BROWSERS_PATH: "0"
-        run: pdm run playwright install firefox
+        run: pdm run playwright install chromium
 
       - name: Install Pyinstaller
         run: pdm add pyinstaller
@@ -104,7 +104,7 @@ jobs:
         if: ${{ matrix.group == 'full' }}
         env:
           PLAYWRIGHT_BROWSERS_PATH: "0"
-        run: pdm run playwright install firefox
+        run: pdm run playwright install chromium
 
       - name: Replease Playwright Path
         if: ${{ matrix.group == 'full' }}

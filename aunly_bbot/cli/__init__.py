@@ -49,7 +49,7 @@ def install_deps():
     import sys
     from playwright.__main__ import main as pw_main
 
-    sys.argv.append("firefox")
+    sys.argv.append("chromium")
     pw_main()
 
 
