@@ -53,7 +53,8 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
     allow_fallback: bool = True
     mobile_style: bool = True
     render_style: Literal["bbot_default", "style_blue"] = "bbot_default"
-    concurrency: int = 5
+    concurrency: int = 1
+    dynamic_interval: int = 30
     dynamic_font: str = "HarmonyOS_Sans_SC_Medium.ttf"
     dynamic_font_source: Literal["local", "remote"] = "local"
     openai_summarization: bool = False
@@ -121,8 +122,8 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
     # 验证 Bilibili gRPC 并发数
     @validator("concurrency")
     def limit_concurrency(cls, concurrency):
-        if concurrency > 50:
-            click.secho("gRPC 并发数超过 50，已自动调整为 50", fg="bright_yellow")
+        if concurrency > 5:
+            click.secho("gRPC 并发数超过 5，已自动调整为 5", fg="bright_yellow")
             return 50
         elif concurrency < 1:
             click.secho("gRPC 并发数小于 1，已自动调整为 1", fg="bright_yellow")

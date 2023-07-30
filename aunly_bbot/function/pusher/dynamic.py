@@ -48,7 +48,7 @@ from ...core.data import (
 channel = Channel.current()
 
 
-@channel.use(SchedulerSchema(every_custom_seconds(3)))
+@channel.use(SchedulerSchema(every_custom_seconds(BotConfig.Bilibili.dynamic_interval)))
 async def main(app: Ariadne):
     logger.debug("[Dynamic Pusher] Dynamic Pusher running now...")
     subid_list = get_all_uid()
@@ -140,7 +140,7 @@ async def main(app: Ariadne):
     BOT_Status.last_finish = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     BOT_Status.set_status(Status.DYNAMIC_IDLE, True)
     logger.debug("[Dynamic] Updating finished")
-    await asyncio.sleep(0.5)
+    await asyncio.sleep(3)
 
 
 async def push(app: Ariadne, dyn: DynamicItem):
