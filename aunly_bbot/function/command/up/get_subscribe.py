@@ -43,8 +43,13 @@ async def sub_list(app: Ariadne, group: Group, at: ElementResult):
     else:
         msg = [f"本群共订阅 {sublist_count} 个 UP\n注：带*号的表示该 UP 已被设定自定义昵称"]
         for i, sub in enumerate(sublist, 1):
-            if sub.uid in BOT_Status.living:
-                live = f" - 正在直播: {calc_time_total(time.time() - BOT_Status.living[sub.uid])}"
+            live_time = BOT_Status.living.get(str(sub.uid), -1)
+            if live_time > 100000:
+                live = f" 🔴直播中: {calc_time_total(time.time() - live_time)}"
+            elif live_time >= 0:
+                live = " 🔴直播中"
+            else:
+                live = ""
             msg.append(f"\n{i}. {f'*{sub.nick}' if sub.nick else sub.uname}（{sub.uid}）{live}")
 
         await app.send_group_message(group, MessageChain(msg))
