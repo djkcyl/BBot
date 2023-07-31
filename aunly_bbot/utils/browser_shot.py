@@ -21,10 +21,10 @@ from playwright.async_api._generated import (
 )
 
 from ..core.bot_config import BotConfig
+from ..core import Bili_Auth
 from ..model.captcha import CaptchaResponse
 
 from .fonts_provider import get_font
-
 
 error_path = Path("data").joinpath("error")
 error_path.mkdir(parents=True, exist_ok=True)
@@ -72,6 +72,10 @@ async def screenshot(dynid: str, browser_context: BrowserContext, log=True):
     st = int(time.time())
     for i in range(3):
         page = await browser_context.new_page()
+        if Bili_Auth and (cookies := Bili_Auth.get("cookies")):
+            await page.context.add_cookies(
+                [{"name": cookie, "value": cookies[cookie]} for cookie in cookies]
+            )
         await page.route(re.compile("^https://fonts.bbot/(.+)$"), fill_font)
         try:
             if log:
