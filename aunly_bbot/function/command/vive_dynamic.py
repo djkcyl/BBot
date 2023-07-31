@@ -45,11 +45,11 @@ async def main(
     up: RegexResult,
     offset: RegexResult,
 ):
-
-    if not (uid := await uid_extract(up.result.display, group.id)):
+    uid = await uid_extract(text=up.result.display, groupid=group.id, show_error=True)
+    if not uid or not uid.isdigit():
         return await app.send_group_message(
             group,
-            MessageChain("未找到该 UP，请输入正确的 UP 群内昵称、UP 名、UP UID或 UP 首页链接"),
+            MessageChain(uid or "未找到该 UP，请输入正确的 UP 群内昵称、UP 名、UP UID或 UP 首页链接"),
             quote=source,
         )
 

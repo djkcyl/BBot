@@ -1,15 +1,29 @@
 import re
+from typing import Optional, Union
 
 from loguru import logger
-from typing import Union, Optional
+from pydantic import BaseModel, Extra
 
-
-from .b23_extract import b23_extract
 from ..core.data import get_sub_by_group
+from .b23_extract import b23_extract
 from .bilibili_request import search_user
 
 
-async def uid_extract(text: str, groupid: Optional[Union[int, str]] = None):
+class SearchUp(BaseModel, extra=Extra.ignore):
+    title: str
+    mid: int
+
+    def __str__(self) -> str:
+        return f"{self.title}({self.mid})"
+
+
+class SearchResult(BaseModel, extra=Extra.ignore):
+    items: list[SearchUp] = []
+
+
+async def uid_extract(
+    text: str, groupid: Optional[Union[int, str]] = None, show_error: bool = False
+):
     logger.debug(f"[UID Extract] Original Text: {text}")
     if up_list := get_sub_by_group(groupid or 0):
         logger.debug(f"[UID Extract] Group {groupid} has {len(up_list)} Subscribers")
@@ -50,9 +64,16 @@ async def uid_extract(text: str, groupid: Optional[Union[int, str]] = None):
         logger.debug(f"[UID Extract] Searching UID in BiliBili: {text_u}")
         resp = await search_user(text_u)
         logger.debug(f"[UID Extract] Search result: {resp}")
-        if resp and resp["numResults"]:
-            for result in resp["result"]:
-                if result["uname"] == text_u:
-                    logger.debug(f"[UID Extract] Found User: {result}")
-                    return str(result["mid"])
+        result = SearchResult(**resp)
+        if result.items:
+            for up in result.items:
+                if up.title == text_u:
+                    return str(up.mid)
+                logger.debug("[UID Extract] No User found")
+                return (
+                    ("未找到该 UP，你可能在找：\n" + "\n".join([str(up) for up in result.items]))
+                    if show_error
+                    else None
+                )
         logger.debug("[UID Extract] No User found")
+        return "未找到该 UP，请输入正确的 UP 群内昵称、UP 名、UP UID或 UP 首页链接" if show_error else None
