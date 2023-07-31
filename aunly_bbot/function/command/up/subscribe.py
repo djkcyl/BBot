@@ -47,8 +47,8 @@ async def main(app: Ariadne, group: Group, at: ElementResult, anything: RegexRes
                 MessageChain("正在初始化，请稍后..."),
             )
         message = anything.result.display  # type: ignore
-        uid = await uid_extract(message)
-        if uid:
+        uid = await uid_extract(message, show_error=True)
+        if uid and uid.isdigit():
             if not BOT_Status.check_status(Status.DYNAMIC_IDLE):
                 await app.send_group_message(
                     group,
@@ -67,5 +67,5 @@ async def main(app: Ariadne, group: Group, at: ElementResult, anything: RegexRes
         else:
             await app.send_group_message(
                 group,
-                MessageChain("未找到该 UP，请输入正确的 UP 群内昵称、UP 名、UP UID或 UP 首页链接"),
+                MessageChain(uid or "未找到该 UP，请输入正确的 UP 群内昵称、UP 名、UP UID或 UP 首页链接"),
             )

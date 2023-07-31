@@ -59,7 +59,7 @@ if BotConfig.Bilibili.use_browser:
 
     app.launch_manager.add_service(
         PlaywrightService(
-            browser_type="firefox",
+            browser_type="chromium",
             user_data_dir=Path("data").joinpath("browser"),
             device_scale_factor=1.5 if BotConfig.Bilibili.mobile_style else 1.25,
             user_agent=(

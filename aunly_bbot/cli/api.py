@@ -30,9 +30,9 @@ async def init_playwright():
     font_init()
     logger.success("字体下载完成！")
 
-    await install_playwright(browser_type="firefox")
+    await install_playwright(browser_type="chromium")
     pw = await async_playwright().start()
-    ff = await pw.firefox.launch_persistent_context(
+    chrome = await pw.chromium.launch_persistent_context(
         Path("data").joinpath("browser"),
         device_scale_factor=1.5,
         user_agent=(
@@ -41,7 +41,7 @@ async def init_playwright():
         ),
         # headless=False,
     )
-    PLAYWRIGIT = ff
+    PLAYWRIGIT = chrome
     logger.info("[Playwright] 正在获取浏览器版本")
     if len(PLAYWRIGIT.pages) > 0:
         page = PLAYWRIGIT.pages[0]

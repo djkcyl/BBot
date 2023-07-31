@@ -2,10 +2,10 @@
  * @Author: KBD
  * @Date: 2022-12-26 13:45:30
  * @LastEditors: KBD
- * @LastEditTime: 2023-01-13 01:35:34
+ * @LastEditTime: 2023-06-28 10:55:31
  * @Description: 用于初始化手机动态页面的样式以及图片大小
  */
-async function getMobileStyle() {
+async function getMobileStyle(useImageBig = true) {
     // 删除 dom 的对象, 可以自行添加 ( className 需要增加 '.' 为前缀, id 需要增加 '#' 为前缀)
     const deleteDoms = {
         // 关注 dom
@@ -51,7 +51,7 @@ async function getMobileStyle() {
 
     // 获取图片容器的所有 dom 数组
     const imageItemDoms = Array.from(document.querySelectorAll(".bm-pics-block__item"));
-
+    
     // 获取图片长宽比例
     const getImageRatio = (url) => {
         return new Promise((resolve, reject) => {
@@ -85,7 +85,7 @@ async function getMobileStyle() {
         const isAllOneLength = ratioList.filter(item => item >= 0.9 && item <= 1.1).length;
         const isAllOne = ratioList.length === 9 ? isAllOneLength > ratioList.length / 2 : isAllOneLength > 0 && isAllOneLength % 3 === 0 && ratioList.length > 3;
         // 说明可能为组装的拼图, 如果不是则放大为大图
-        if (!isAllOne) {
+        if (!isAllOne && useImageBig) {
             // 找到图标容器dom
             const containerDom = document.querySelector(".bm-pics-block__container");
             if (containerDom) {
@@ -138,7 +138,7 @@ async function getMobileStyle() {
                 item.firstChild.src = ratio > 3 ? imgSrc.slice(0, imgSrcAtIndex + 1) + "260w_260h_!header.webp" : imgSrc.slice(0, imgSrcAtIndex + 1) + "260w_260h_1e_1c.webp";
             });
         }
-    })
+    })   
 }
 
 

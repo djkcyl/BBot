@@ -27,7 +27,7 @@ from ...core.data import insert_live_push, get_all_uid, get_sub_by_uid, update_c
 channel = Channel.current()
 
 
-@channel.use(SchedulerSchema(every_custom_seconds(3)))
+@channel.use(SchedulerSchema(every_custom_seconds(BotConfig.Bilibili.dynamic_interval)))
 async def main(app: Ariadne):
     if (
         not BOT_Status.is_all_statuses_true(

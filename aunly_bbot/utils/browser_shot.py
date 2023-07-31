@@ -1,31 +1,25 @@
-import re
-import time
-import httpx
 import asyncio
 import contextlib
-
-from yarl import URL
+import re
+import time
 from pathlib import Path
-from loguru import logger
+import json
+
+import httpx
 from graia.ariadne import Ariadne
-from sentry_sdk import capture_exception
-from playwright._impl._api_types import TimeoutError
 from graiax.playwright.interface import PlaywrightContext
+from loguru import logger
 from playwright._impl._api_structures import Position
-from playwright.async_api._generated import (
-    Page,
-    Route,
-    Request,
-    Response,
-    BrowserContext,
-)
+from playwright._impl._api_types import TimeoutError
+from playwright.async_api._generated import BrowserContext, Page, Request, Response, Route
+from sentry_sdk import capture_exception
+from yarl import URL
 
 from ..core.bot_config import BotConfig
 from ..model.captcha import CaptchaResponse
-
 from .fonts_provider import get_font
 
-
+browser_cookies_file = Path("data").joinpath("browser_cookies.json")
 error_path = Path("data").joinpath("error")
 error_path.mkdir(parents=True, exist_ok=True)
 captcha_path = Path("data").joinpath("captcha")
@@ -64,7 +58,28 @@ async def resolve_select_captcha(page: Page):
 async def browser_dynamic(dynid: str):
     app = Ariadne.current()
     browser_context = app.launch_manager.get_interface(PlaywrightContext).context
+    # add cookies
+    if browser_cookies_file.exists() and browser_cookies_file.is_file():
+        if browser_cookies := json.loads(browser_cookies_file.read_bytes()):
+            logger.debug(f"正在为浏览器添加cookies")
+            await browser_context.add_cookies(
+                [
+                    {
+                        "domain": cookie["domain"],
+                        "name": cookie["name"],
+                        "path": cookie["path"],
+                        "value": cookie["value"],
+                    }
+                    for cookie in browser_cookies
+                ]
+            )
     return await screenshot(dynid, browser_context)
+
+
+async def refresh_cookies(browser_context: BrowserContext):
+    storage_state = await browser_context.storage_state()
+    if cookies := storage_state.get("cookies"):
+        browser_cookies_file.write_text(json.dumps(cookies))
 
 
 async def screenshot(dynid: str, browser_context: BrowserContext, log=True):
@@ -82,11 +97,16 @@ async def screenshot(dynid: str, browser_context: BrowserContext, log=True):
             else:
                 page, clip = await get_pc_screenshot(page, dynid)
             clip["height"] = min(clip["height"], 32766)  # 限制高度
-            return await page.screenshot(clip=clip, full_page=True, type="jpeg", quality=98)
+            if picture := await page.screenshot(
+                clip=clip, full_page=True, type="jpeg", quality=98
+            ):
+                await refresh_cookies(browser_context)
+                return picture
         except TimeoutError:
             logger.error(f"[BiliBili推送] {dynid} 动态截图超时，正在重试：")
         except Notfound:
-            logger.error(f"[Bilibili推送] {dynid} 动态不存在")
+            logger.error(f"[Bilibili推送] {dynid} 动态不存在，等待 3 秒后重试...")
+            await asyncio.sleep(3)
         except AssertionError:
             logger.exception(f"[BiliBili推送] {dynid} 动态截图失败，正在重试：")
             await page.screenshot(
@@ -98,6 +118,7 @@ async def screenshot(dynid: str, browser_context: BrowserContext, log=True):
         except Exception as e:  # noqa
             if "bilibili.com/404" in page.url:
                 logger.error(f"[Bilibili推送] {dynid} 动态不存在")
+                await refresh_cookies(browser_context)
                 break
             elif "waiting until" in str(e):
                 logger.error(f"[BiliBili推送] {dynid} 动态截图超时，正在重试：")
@@ -220,7 +241,6 @@ async def get_mobile_screenshot(page: Page, dynid: str):
                     }
                     await captcha_image.click(position=Position(**real_click_points))
                     await page.wait_for_timeout(800)
-                captcha_image_body = ""
                 await page.click("text=确认")
                 geetest_up = await page.wait_for_selector(".geetest_up", state="visible")
                 await page.screenshot(path=captcha_path.joinpath(f"{last_captcha_id}.jpg"))
@@ -232,6 +252,7 @@ async def get_mobile_screenshot(page: Page, dynid: str):
                 logger.debug(f"[Captcha] Geetest result: {geetest_result}")
                 if "验证成功" in geetest_result:
                     logger.success("[Captcha] 极验网页 Tip 验证成功")
+                    captcha_image_body = ""
                 else:
                     logger.warning("[Captcha] 极验验证失败，正在重试")
 
