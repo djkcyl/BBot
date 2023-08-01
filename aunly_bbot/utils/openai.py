@@ -118,6 +118,7 @@ async def openai_req(
     temperature: Optional[float] = None,
 ) -> OpenAI:
     if not token:
+        logger.warning("未配置 OpenAI API Token，无法总结")
         return OpenAI(error=True, message="未配置 OpenAI API Token")
     async with httpx.AsyncClient(
         proxies=BotConfig.Bilibili.openai_proxy,
@@ -139,6 +140,7 @@ async def openai_req(
                 "https://api.openai.com/v1/chat/completions", json=data
             )
         except Exception as e:
+            logger.exception(e)
             return OpenAI(error=True, message=f"OpenAI 请求失败 {type(e)} {e}")
         if req.status_code != 200:
             return OpenAI(error=True, message=req.text, raw=req.json())

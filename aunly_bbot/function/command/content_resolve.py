@@ -52,7 +52,9 @@ async def main(
             logger.info(f"开始生成视频信息图片：{aid}")
             b23_url = await get_b23_url(f"https://www.bilibili.com/video/{bvid}")
 
-            image = await (await BiliVideoImage.from_view_rely(video_info, b23_url)).render(BotConfig.Bilibili.render_style)
+            image = await (await BiliVideoImage.from_view_rely(video_info, b23_url)).render(
+                BotConfig.Bilibili.render_style
+            )
             info_message = await app.send_group_message(
                 group,
                 MessageChain(
@@ -108,7 +110,7 @@ async def main(
                                     summarise = ai_summary.response
                                     archive_data.openai = summarise
                                 else:
-                                    logger.warning(f"视频 {aid} 总结失败：{ai_summary.raw}")
+                                    logger.warning(f"视频 {aid} 总结失败：{ai_summary.raw or '总结内容为空'}")
                                     return
 
                             if "no meaning" in summarise.lower() or len(summarise) < 20:
@@ -167,6 +169,7 @@ async def main(
                         )
 
                 except AbortError as e:
+                    logger.exception(e)
                     logger.warning(f"视频 {aid} 总结失败：{e.message}")
                     return
                 archive_data.save()

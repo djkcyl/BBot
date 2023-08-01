@@ -41,8 +41,9 @@ class _Debug(BaseModel, extra=Extra.ignore):
             if values["groups"]:
                 return enable
             raise KeyError
-        except KeyError as key_err:
-            raise ValueError("已启用 Debug 但未填入合法的群号") from key_err
+        except KeyError:
+            click.secho("已启用 Debug 但未填入合法的群号", fg="bright_red")
+            sys.exit()
 
 
 class _Bilibili(BaseModel, extra=Extra.ignore):
@@ -80,8 +81,9 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
         try:
             if isinstance(values["username"], int) and isinstance(values["password"], str):
                 return use_login
-        except KeyError as key_err:
-            raise ValueError("已启用登录但未填入合法的用户名与密码") from key_err
+        except KeyError:
+            click.secho("已启用登录但未填入合法的用户名与密码", fg="bright_red")
+            sys.exit()
 
     # 验证是否可以使用浏览器
     @validator("use_browser")
@@ -105,18 +107,28 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
         click.secho("已检测到开启词云", fg="bright_yellow")
         try:
             import wordcloud  # noqa  # type: ignore
+            import jieba  # noqa  # type: ignore
 
             return use_wordcloud
         except ImportError:
             click.secho("未安装 wordcloud，如需使用词云，请安装 wordcloud", fg="bright_red")
             sys.exit()
 
+    # 验证是否可以启用 openai
+    @validator("openai_api_token", always=True)
+    def valid_openai_api(cls, openai_api_token: str, values: dict):
+        if values.get("openai_summarization"):
+            if not openai_api_token or not openai_api_token.startswith("sk-"):
+                click.secho("openai_api_token 未填写的情况下无法开启 AI 视频总结", fg="bright_red")
+                sys.exit()
+        return openai_api_token
+
     # 验证 openai promt version
     @validator("openai_promot_version")
     def valid_openai_promot_version(cls, openai_promot_version):
         if openai_promot_version in [1, 2]:
             return openai_promot_version
-        click.secho("openai_promot_version 只能为 1 或 2", fg="bright_yellow")
+        click.secho("openai_promot_version 只能为 1 或 2", fg="bright_red")
         sys.exit()
 
     # 验证 Bilibili gRPC 并发数
