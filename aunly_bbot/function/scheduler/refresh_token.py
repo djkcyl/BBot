@@ -25,7 +25,7 @@ async def main(app: Ariadne):
     if BotConfig.Bilibili.username and BotConfig.Bilibili.password and Bili_Auth.tokens:
         BOT_Status.set_status(Status.INITIALIZED, False)
 
-        while BOT_Status.check_status(Status.LIVE_IDLE) or BOT_Status.check_status(
+        while not BOT_Status.check_status(Status.LIVE_IDLE) or not BOT_Status.check_status(
             Status.DYNAMIC_IDLE
         ):
             await asyncio.sleep(0.1)

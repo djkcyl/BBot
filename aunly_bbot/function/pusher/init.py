@@ -114,17 +114,13 @@ async def init(app: Ariadne):
                     data = await bilibili_login.send_sms(BotConfig.Bilibili.username)
                     await app.send_friend_message(
                         BotConfig.master,
-                        MessageChain(
-                            f"[Bilibili推送] 用户名密码登录失败：{e.msg}\n正在使用验证码登录，请在 120 秒内发送验证码到此处"
-                        ),
+                        MessageChain(f"[Bilibili推送] 用户名密码登录失败：{e.msg}\n正在使用验证码登录，请在 120 秒内发送验证码到此处"),
                     )
                     try:
                         code = await asyncio.wait_for(inc.wait(CodeWaiter()), timeout=120)
                         auth_data = await bilibili_login.sms_login(code)
                         logger.success("[BiliBili推送] 验证码登录完成")
-                        await app.send_friend_message(
-                            BotConfig.master, MessageChain("[BiliBili推送] 验证码登录完成")
-                        )
+                        await app.send_friend_message(BotConfig.master, MessageChain("[BiliBili推送] 验证码登录完成"))
                         break
                     except asyncio.TimeoutError:
                         logger.warning("[BiliBili推送] 等待输入验证码超时，如需重新登陆，请重启机器人")
@@ -159,18 +155,14 @@ async def init(app: Ariadne):
                         logger.error(f"[BiliBili推送] 二维码登录失败：{e.code}，{e.msg}，如需重新登陆，请重启机器人")
                         await app.send_friend_message(
                             BotConfig.master,
-                            MessageChain(
-                                f"[BiliBili推送] 二维码登录失败：{e.code}，{e.msg}，如需重新登陆，请重启机器人"
-                            ),
+                            MessageChain(f"[BiliBili推送] 二维码登录失败：{e.code}，{e.msg}，如需重新登陆，请重启机器人"),
                         )
                         sys.exit(1)
 
         if auth_data:
             Bili_Auth.update(auth_data)
             logger.debug(await Bili_Auth.get_info())
-            login_cache_file.write_text(
-                json.dumps(dict(Bili_Auth), indent=2, ensure_ascii=False)
-            )
+            login_cache_file.write_text(json.dumps(dict(Bili_Auth), indent=2, ensure_ascii=False))
             logger.info("[Bilibili推送] 登录完成")
         else:
             logger.critical("[Bilibili推送] 登录状态异常，正在退出")
@@ -195,12 +187,8 @@ async def init(app: Ariadne):
         followed_list = resp.items
 
         if Path("data").joinpath(".lock").exists():
-            if Path("data").joinpath(".lock").read_text(encoding="utf-8") != str(
-                BotConfig.Bilibili.username
-            ):
-                logger.critical(
-                    "[Bilibili推送] 检测到上次登录的账号与当前账号不一致，如需继续使用，请先手动删除数据库（data/data.db）和 data/.lock 文件"
-                )
+            if Path("data").joinpath(".lock").read_text(encoding="utf-8") != str(BotConfig.Bilibili.username):
+                logger.critical("[Bilibili推送] 检测到上次登录的账号与当前账号不一致，如需继续使用，请先手动删除数据库（data/data.db）和 data/.lock 文件")
                 sys.exit(1)
 
         elif (f := len(followed_list)) != 0:
@@ -208,9 +196,7 @@ async def init(app: Ariadne):
                 logger.warning(f"[Bilibili推送] 该账号已关注 {f} 个用户，正在尝试自动处理")
                 Path("data").joinpath(".lock").write_text(str(BotConfig.Bilibili.username))
             else:
-                logger.critical(
-                    f"[Bilibili推送] 该账号已关注 {f} 个用户，为避免产生问题，已停止运行，请先手动取消关注或添加启动参数 --ignore-sub，这将取关所有已关注的用户"
-                )
+                logger.critical(f"[Bilibili推送] 该账号已关注 {f} 个用户，为避免产生问题，已停止运行，请先手动取消关注或添加启动参数 --ignore-sub，这将取关所有已关注的用户")
                 sys.exit(1)
         else:
             Path("data").joinpath(".lock").write_text(str(BotConfig.Bilibili.username))
@@ -219,23 +205,17 @@ async def init(app: Ariadne):
         if followed_list:
             for uid in followed_list:
                 if str(uid.uid) not in subid_list:
-                    logger.warning(
-                        f"[BiliBili推送] {uid.name}（{uid.uid}）在 BliBili 关注列表中，但不在数据库中，正在从 BliBili 取消关注"
-                    )
+                    logger.warning(f"[BiliBili推送] {uid.name}（{uid.uid}）在 BliBili 关注列表中，但不在数据库中，正在从 BliBili 取消关注")
                     resp = await delete_uid(uid.uid)
                     if resp:
                         await app.send_friend_message(
                             BotConfig.master,
-                            MessageChain(
-                                f"[BiliBili推送] {uid.name}（{uid.uid}）在 BliBili 关注列表中，但不在数据库中，正在从 BliBili 取消关注"
-                            ),
+                            MessageChain(f"[BiliBili推送] {uid.name}（{uid.uid}）在 BliBili 关注列表中，但不在数据库中，正在从 BliBili 取消关注"),
                         )
                         await asyncio.sleep(1)
                         continue
                     else:
-                        logger.error(
-                            f"[BiliBili推送] {uid.name}（{uid.uid}）从 BliBili 取消关注失败，请检查后重启 Bot"
-                        )
+                        logger.error(f"[BiliBili推送] {uid.name}（{uid.uid}）从 BliBili 取消关注失败，请检查后重启 Bot")
                         sys.exit(1)
 
                 # 顺便检测直播状态

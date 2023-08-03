@@ -44,7 +44,7 @@ async def main(app: Ariadne, group: Group, at: ElementResult, anything: RegexRes
         if not BOT_Status.check_status(Status.INITIALIZED):
             return await app.send_group_message(
                 group,
-                MessageChain("正在初始化，请稍后..."),
+                MessageChain("正在初始化，请稍后再试..."),
             )
         message = anything.result.display  # type: ignore
         uid = await uid_extract(message, show_error=True)
