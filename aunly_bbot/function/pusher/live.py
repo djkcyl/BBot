@@ -29,19 +29,17 @@ channel = Channel.current()
 
 @channel.use(SchedulerSchema(every_custom_seconds(BotConfig.Bilibili.dynamic_interval)))
 async def main(app: Ariadne):
+    sub_list = get_all_uid()
+    sub_sum = len(sub_list)
+
     if (
         not BOT_Status.is_all_statuses_true(
             Status.INITIALIZED, Status.ACCOUNT_CONNECTED, Status.STARTED, Status.SUBSCRIBE_IDLE
         )
-        or BOT_Status.is_all_statuses_true(
-            Status.INITIALIZED, Status.ACCOUNT_CONNECTED, Status.STARTED, Status.SUBSCRIBE_IDLE
-        )
-        and len(get_all_uid()) == 0
+        or sub_sum == 0
     ):
         await asyncio.sleep(5)
         return
-    sub_list = get_all_uid()
-
     BOT_Status.set_status(Status.LIVE_IDLE, False)
 
     for up in BOT_Status.living.copy():
@@ -73,9 +71,7 @@ async def main(app: Ariadne):
             # 检测订阅配置里是否有该 up
             if up_id in sub_list:
                 # 如果存在直播信息则为已开播
-                logger.debug(
-                    f"[Live] {up_name}({up_id}) live_status: {live_data['live_status']}"
-                )
+                logger.debug(f"[Live] {up_name}({up_id}) live_status: {live_data['live_status']}")
                 if live_data["live_status"] == 1:
                     # 判断是否在正在直播列表中
                     if up_id in BOT_Status.living:
@@ -104,18 +100,11 @@ async def main(app: Ariadne):
 
                     # 发送推送消息
                     for data in get_sub_by_uid(up_id):
-                        if (  # 判断是否处于 DEBUG 模式
-                            BotConfig.Debug.enable
-                            and int(data.group) not in BotConfig.Debug.groups
-                        ):
+                        if BotConfig.Debug.enable and int(data.group) not in BotConfig.Debug.groups:  # 判断是否处于 DEBUG 模式
                             continue
                         if data.live:  # 判断该群是否开启直播推送
                             group = await app.get_group(int(data.group))
-                            nick = (
-                                f"*{up_nick} "
-                                if (up_nick := data.nick)
-                                else f"UP {up_name}（{up_id}）"
-                            )
+                            nick = f"*{up_nick} " if (up_nick := data.nick) else f"UP {up_name}（{up_id}）"
                             msg = [
                                 f"{nick}在 {room_area} 区开播啦 ！\n标题：{title}\n",
                                 cover_img or "",
@@ -139,17 +128,13 @@ async def main(app: Ariadne):
                                 )
                             except UnknownTarget:
                                 delete = await delete_group(data.group)
-                                logger.info(
-                                    f"[BiliBili推送] 推送失败，找不到该群 {data.group}，已删除该群订阅的 {len(delete)} 个 UP"
-                                )
+                                logger.info(f"[BiliBili推送] 推送失败，找不到该群 {data.group}，已删除该群订阅的 {len(delete)} 个 UP")
                             except AccountMuted:
                                 group = f"{group.name}（{group.id}）" if group else data.group
                                 logger.warning(f"[BiliBili推送] 推送失败，账号在 {group} 被禁言")
                             await asyncio.sleep(5)
 
-                    insert_live_push(
-                        up_id, True, len(get_sub_by_uid(up_id)), title, area_parent, area
-                    )
+                    insert_live_push(up_id, True, len(get_sub_by_uid(up_id)), title, area_parent, area)
                 elif up_id in BOT_Status.living:
                     logger.debug(f"[Live] {up} live_data: {live_data}")
                     live_time = (
@@ -161,27 +146,18 @@ async def main(app: Ariadne):
                     set_name(up_id, up_name)
                     logger.info(f"[BiliBili推送] {up_name} 已下播{live_time}")
                     for data in get_sub_by_uid(up_id):
-                        if (
-                            BotConfig.Debug.enable
-                            and int(data.group) not in BotConfig.Debug.groups
-                        ):
+                        if BotConfig.Debug.enable and int(data.group) not in BotConfig.Debug.groups:
                             continue
                         if data.live:
                             try:
-                                nick = (
-                                    f"*{up_nick} "
-                                    if (up_nick := data.nick)
-                                    else f"UP {up_name}（{up_id}）"
-                                )
+                                nick = f"*{up_nick} " if (up_nick := data.nick) else f"UP {up_name}（{up_id}）"
                                 await app.send_group_message(
                                     int(data.group),
                                     MessageChain(f"{nick}已下播{live_time}"),
                                 )
                             except UnknownTarget:
                                 delete = await delete_group(data.group)
-                                logger.info(
-                                    f"[BiliBili推送] 推送失败，找不到该群 {data.group}，已删除该群订阅的 {len(delete)} 个 UP"
-                                )
+                                logger.info(f"[BiliBili推送] 推送失败，找不到该群 {data.group}，已删除该群订阅的 {len(delete)} 个 UP")
                             except AccountMuted:
                                 group = await app.get_group(int(data.group))
                                 group = f"{group.name}（{group.id}）" if group else data.group
@@ -191,9 +167,7 @@ async def main(app: Ariadne):
                                     logger.error("[BiliBili推送] 推送失败，Bot 被限制发送群聊消息")
                                     await app.send_friend_message(
                                         BotConfig.master,
-                                        MessageChain(
-                                            "Bot 被限制发送群聊消息（46 代码），请尽快处理后发送 /init 重新开启推送进程"
-                                        ),
+                                        MessageChain("Bot 被限制发送群聊消息（46 代码），请尽快处理后发送 /init 重新开启推送进程"),
                                     )
                                     BOT_Status.set_status(Status.LIVE_IDLE, True)
                                     BOT_Status.set_status(Status.INITIALIZED, True)
