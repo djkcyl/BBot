@@ -1,6 +1,6 @@
 [project]
 name = "aunly-bbot"
-version = "1.6.0"
+version = "1.6.1"
 description = "一个用于 QQ 群内高效推送哔哩哔哩 UP 动态及直播的机器人"
 readme = "readme.md"
 keywords = ["graia", "graiax", "bilibili", "qqbot", "grpc", "playwright", "fastapi", "bot", "openai", "chatgpt"]
@@ -13,7 +13,7 @@ dependencies = [
     "graia-ariadne[standard]>=0.11.5",
     "peewee>=3.16.2",
     "pyyaml>=6.0",
-    "bilireq>=0.2.6",
+    "bilireq>=0.2.11",
     "psutil>=5.9.5",
     "uvicorn>=0.22.0",
     "sentry-sdk>=1.25.1",

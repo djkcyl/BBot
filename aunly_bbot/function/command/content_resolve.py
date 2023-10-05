@@ -31,9 +31,10 @@ channel = Channel.current()
 
 
 @channel.use(ListenerSchema(listening_events=[GroupMessage], decorators=[Permission.require()]))
-async def main(
-    app: Ariadne, group: Group, member: Member, message: MessageChain, source: Source
-):
+async def main(app: Ariadne, group: Group, member: Member, message: MessageChain, source: Source):
+    if member.id not in BotConfig.admins and not BotConfig.Bilibili.content_resolve:
+        return
+
     bili_number = await extract_bilibili_info(message)
     if not bili_number:
         return
@@ -76,10 +77,7 @@ async def main(
                         subtitle = await get_subtitle(aid, cid)
                         archive_data.content = json.dumps(subtitle, ensure_ascii=False)
 
-                    if (
-                        len(subtitle) < 10
-                        or video_info.arc.duration < BotConfig.Bilibili.asr_length_threshold
-                    ):
+                    if len(subtitle) < 10 or video_info.arc.duration < BotConfig.Bilibili.asr_length_threshold:
                         raise AbortError("字幕内容过少且视频时长过短，跳过总结请求")
 
                     chatgpt_thinks = True
@@ -95,12 +93,9 @@ async def main(
                                 try:
                                     if (
                                         BotConfig.Bilibili.openai_whitelist_users
-                                        and member.id
-                                        not in BotConfig.Bilibili.openai_whitelist_users
+                                        and member.id not in BotConfig.Bilibili.openai_whitelist_users
                                     ):
-                                        await Interval.manual(
-                                            member, BotConfig.Bilibili.openai_cooldown
-                                        )
+                                        await Interval.manual(member, BotConfig.Bilibili.openai_cooldown)
                                 except ExecutionStop:
                                     msg = f"{member.id} 在 10 分钟内已经请求过总结，跳过本次请求"
                                     logger.info(msg)
@@ -141,12 +136,8 @@ async def main(
                                 word_frequencies = dict(json.loads(archive_data.jieba))
                             else:
                                 logger.info(f"{aid} 分词不存在，正在尝试分词......")
-                                word_frequencies = await asyncio.to_thread(
-                                    get_frequencies, subtitle
-                                )
-                                archive_data.jieba = json.dumps(
-                                    word_frequencies, ensure_ascii=False
-                                )
+                                word_frequencies = await asyncio.to_thread(get_frequencies, subtitle)
+                                archive_data.jieba = json.dumps(word_frequencies, ensure_ascii=False)
 
                             wordcloud = await get_worldcloud_image(word_frequencies)
                             if wordcloud:
@@ -176,15 +167,11 @@ async def main(
 
         except TimeoutException:
             logger.exception(f"视频 {aid} 信息生成超时")
-            await app.send_group_message(
-                group, MessageChain(f"{bili_number} 视频信息生成超时，请稍后再试。"), quote=source
-            )
+            await app.send_group_message(group, MessageChain(f"{bili_number} 视频信息生成超时，请稍后再试。"), quote=source)
         except Exception as e:
             capture_exception()
             logger.exception("视频解析 API 调用出错")
-            await app.send_group_message(
-                group, MessageChain(f"视频解析 API 调用出错：{e}"), quote=source
-            )
+            await app.send_group_message(group, MessageChain(f"视频解析 API 调用出错：{e}"), quote=source)
 
     elif bili_number[:2] == "cv":
         if BotConfig.Bilibili.openai_summarization or BotConfig.Bilibili.use_wordcloud:
@@ -216,9 +203,7 @@ async def main(
                         else:
                             image = await rich_text2image(summarise)
                         if image:
-                            await app.send_group_message(
-                                group, MessageChain(Image(data_bytes=image)), quote=source
-                            )
+                            await app.send_group_message(group, MessageChain(Image(data_bytes=image)), quote=source)
                     except AbortError as e:
                         logger.warning(f"专栏 {column_id} 总结被终止：{e}")
                     except Exception:
@@ -232,18 +217,12 @@ async def main(
                         if archive_data.jieba:
                             word_frequencies = dict(json.loads(archive_data.jieba))
                         else:
-                            word_frequencies = await asyncio.to_thread(
-                                get_frequencies, [cv_title, cv_text]
-                            )
-                            archive_data.jieba = json.dumps(
-                                word_frequencies, ensure_ascii=False
-                            )
+                            word_frequencies = await asyncio.to_thread(get_frequencies, [cv_title, cv_text])
+                            archive_data.jieba = json.dumps(word_frequencies, ensure_ascii=False)
 
                         wordcloud = await get_worldcloud_image(word_frequencies)
                         if wordcloud:
-                            await app.send_group_message(
-                                group, MessageChain(Image(data_bytes=wordcloud)), quote=source
-                            )
+                            await app.send_group_message(group, MessageChain(Image(data_bytes=wordcloud)), quote=source)
                     except Exception:
                         capture_exception()
                         logger.exception(f"专栏 {column_id} 词云出错")

@@ -1,3 +1,4 @@
+import sys
 import httpx
 import random
 import asyncio
@@ -19,9 +20,11 @@ LIMIT_COUNT = {
 
 if BotConfig.Bilibili.openai_summarization:
     logger.info("正在加载 OpenAI Token 计算模型")
-    tiktoken_enc = asyncio.run(
-        tiktoken_async.encoding_for_model(BotConfig.Bilibili.openai_model)
-    )
+    try:
+        tiktoken_enc = asyncio.run(tiktoken_async.encoding_for_model(BotConfig.Bilibili.openai_model))
+    except Exception as e:
+        logger.warning(f"加载 OpenAI Token 计算模型失败，请重新启动，{e}")
+        sys.exit(1)
     logger.info(f"{tiktoken_enc.name} 加载成功")
 
 
@@ -41,9 +44,7 @@ def get_summarise_prompt(title: str, transcript: str) -> list[dict[str, str]]:
             "Or if there is very little content that cannot be well summarized, "
             "then you can simply output the two words 'no meaning'. Remember, not to output anything else."
         )
-        return get_full_prompt(
-            f'Title: "{title}"\nTranscript: "{transcript}"', sys_prompt, language
-        )
+        return get_full_prompt(f'Title: "{title}"\nTranscript: "{transcript}"', sys_prompt, language)
     return get_full_prompt(
         prompt=(
             "使用以下Markdown模板为我总结视频字幕数据，除非字幕中的内容无意义，或者内容较少无法总结，或者未提供字幕数据，或者无有效内容，你就不使用模板回复，只回复“无意义”："
@@ -88,9 +89,7 @@ def get_small_size_transcripts(text_data: list[str], token_limit: int = LIMIT_CO
     return " ".join(unique_texts)
 
 
-def get_full_prompt(
-    prompt: Optional[str] = None, system: Optional[str] = None, language: Optional[str] = None
-):
+def get_full_prompt(prompt: Optional[str] = None, system: Optional[str] = None, language: Optional[str] = None):
     plist: list[dict[str, str]] = []
     if system:
         plist.append({"role": "system", "content": system})
@@ -136,9 +135,7 @@ async def openai_req(
         if temperature:
             data["temperature"] = temperature
         try:
-            req: Response = await client.post(
-                "https://api.openai.com/v1/chat/completions", json=data
-            )
+            req: Response = await client.post("https://api.openai.com/v1/chat/completions", json=data)
         except Exception as e:
             logger.exception(e)
             return OpenAI(error=True, message=f"OpenAI 请求失败 {type(e)} {e}")
