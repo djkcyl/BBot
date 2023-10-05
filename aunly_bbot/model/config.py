@@ -68,9 +68,8 @@ class _Bilibili(BaseModel, extra=Extra.ignore):
     use_wordcloud: bool = False
     use_bcut_asr: bool = False
     asr_length_threshold: int = 60
-    captcha_address: Optional[AnyHttpUrl] = AnyHttpUrl(
-        "https://captcha-cd.ngworks.cn", scheme="https"
-    )
+    captcha_address: Optional[AnyHttpUrl] = AnyHttpUrl("https://captcha-cd.ngworks.cn", scheme="https")
+    content_resolve: bool = True
 
     # 验证是否可以登录
     @validator("use_login", always=True)
@@ -178,7 +177,7 @@ class _BotConfig(BaseModel, extra=Extra.ignore):
     log_level: str = "INFO"
     name: str = "BBot"
     master: int = 123
-    admins: Optional[list[int]]
+    admins: list[int] = []
     max_subsubscribe: int = 4
     access_control: bool = True
     update_check: bool = True
@@ -187,10 +186,10 @@ class _BotConfig(BaseModel, extra=Extra.ignore):
     # 验证 admins 列表
     @validator("admins")
     def verify_admins(cls, admins, values):
-        if type(admins) == int:
+        if isinstance(admins, int):
             click.secho("admins 格式为 int, 已重置为 list[admins]", fg="bright_yellow")
             admins = [admins]
-        elif type(admins) != list or not admins:
+        elif not isinstance(admins, list) or not admins:
             if "master" not in values:
                 raise ValueError("未查询到合法的 master")
             click.secho("admins 为空或格式不为 list, 已重置为 list[master]", fg="bright_yellow")
@@ -222,9 +221,7 @@ class _BotConfig(BaseModel, extra=Extra.ignore):
     # ValueError解析
     @staticmethod
     def valueerror_parser(e: ValidationError):
-        return {
-            ".".join([str(x) for x in err["loc"]]): err["msg"] for err in json.loads(e.json())
-        }
+        return {".".join([str(x) for x in err["loc"]]): err["msg"] for err in json.loads(e.json())}
 
     # 从配置文件中加载配置
     @classmethod

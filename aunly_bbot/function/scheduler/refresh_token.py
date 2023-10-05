@@ -25,24 +25,18 @@ async def main(app: Ariadne):
     if BotConfig.Bilibili.username and BotConfig.Bilibili.password and Bili_Auth.tokens:
         BOT_Status.set_status(Status.INITIALIZED, False)
 
-        while not BOT_Status.check_status(Status.LIVE_IDLE) or not BOT_Status.check_status(
-            Status.DYNAMIC_IDLE
-        ):
+        while not BOT_Status.is_all_statuses_true(Status.LIVE_IDLE, Status.DYNAMIC_IDLE):
             await asyncio.sleep(0.1)
 
         try:
             resp = await refresh_token(auth=Bili_Auth)
             Bili_Auth.update(resp)
             logger.debug(await Bili_Auth.get_info())
-            login_cache_file.write_text(
-                json.dumps(dict(Bili_Auth), indent=2, ensure_ascii=False)
-            )
+            login_cache_file.write_text(json.dumps(dict(Bili_Auth), indent=2, ensure_ascii=False))
             logger.success(f"[BiliBili推送] 刷新 token 成功，token：{resp['token_info']}")
             await app.send_friend_message(
                 BotConfig.master,
-                MessageChain(
-                    f"[BiliBili推送] 刷新 token 成功\n{json.dumps(resp['token_info'], indent=2)}"
-                ),
+                MessageChain(f"[BiliBili推送] 刷新 token 成功\n{json.dumps(resp['token_info'], indent=2)}"),
             )
         except ResponseCodeError as e:
             logger.error(f"[BiliBili推送] 刷新 token 失败，{e}")
